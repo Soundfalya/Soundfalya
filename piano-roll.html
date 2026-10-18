@@ -1,0 +1,907 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Piano Roll Soundfalya</title>
+<style>
+/*  Noche pixel de Soundfalya: el lienzo manda, el panel es una ventana oscura con acentos ámbar y cian.  */
+:root{
+  --night:#0b0a18; --night2:#15122a; --line:#3a3366; --text:#e9e4ff; --muted:#a59fcf; --amber:#ffb347; --amberl:#ffd9a0; --cyan:#3ee8ff; --mag:#ff4fc8;
+  color-scheme:dark;
+}
+@font-face{ font-family:'SoundfalyaPixel'; src:url(data:font/ttf;base64,AAEAAAAKAIAAAwAgT1MvMmYu7QgAAAEoAAAAYGNtYXDNktEFAAACwAAAAdBnbHlmSmkb5gAABcQAAD/saGVhZC8eje4AAACsAAAANmhoZWEGEAJbAAAA5AAAACRobXR4BRQAAAAAAYgAAAE2bG9jYdE64NUAAASQAAABNG1heHAArABKAAABCAAAACBuYW1lDg99SQAARbAAAAB4cG9zdFBGVIoAAEYoAAAGDAABAAAAAQAA1EOJF18PPPUAAQMgAAAAAObxpVsAAAAA5vGlWwAA/zgCJgPoAAAAAwACAAAAAAAAAAEAAAPo/zgAAAK8AAAAZAImAAEAAAAAAAAAAAAAAAAAAAACAAEAAACZAEgAEgAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAwK7AZAABQAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAHAAAgYAAAAAAAAAAAPz8/PwAAACAn6QPo/zgAAAPoAMgAAAAAAAAAAAAAAAAAAAAgAAACWAAAArwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAwAAABQAAwABAAAAFAAEAbwAAABIAEAABQAIAC8AOQBAAFoAYAB6AH4AogCrALcAuwDBAMQAyQDNANMA1wDaANwA4gDkAO8A9AD2APwBMSAUIBkgHSAmIZIiEiJIJbgn6f//AAAAIAAwADoAQQBbAGEAewChAKsAtwC7AL8AxADHAM0A0QDWANkA3ADgAOQA5wDxAPYA+QExIBMgGCAcICYhkiISIkgluCfo//8AAAAGAAD/wAAA/7oAAAAA/8f/pf+4AAD/0AAA/64AAAAAAAD/swAA/6wAAAAA/5sAAP8EAADgVuBQ4Dve0N5O3hvarNiIAAEASAAAAGQAAABuAAAAdgB8AAAAAAAAAHgAAAB6AAAAfACAAIIAAACCAAAAhACUAAAAmAAAAJwAAAAAAAAAAAAAAAAAAAAAAAAAmABEAEkAVQBlAFYAVwBIAEwATQBUAFIAQQBKAEAAUABCAEMAWQBTAFoARgBYAE4AUQBPAGcASwBoAGoAaQBrAFsARQBmAEcAgwB5AJcAhAB6AI0AhQB8AJUAXQCGAH0AfgB0AIcAlgB/AHUAiACSAIAAdgCJAJMAjACBAHcAigCCAHgAiwCOAF8AXgAAAA0AWQChANIBHQFPAYABwgITAkQCegLKAvsDWwO2BAEEPQSTBOAFEwVDBZMF4gZBBo8Gzgb+BygHaAeNB80H9wgnCGgIrQjWCRAJVQmDCcoKAgo1CnYKtQrjCwgLOAt2C64L9QwtDG4Mkwy2DQcNNQ1qDZsN1A4KDkYOdQ67DvcPAg8TDyUPPQ9mD5APvw/uEAUQIRAtEDkQaBCYEMkQ+xErEVoRfhGQEb0R8RI1EoQS0BLyExQTLxM7E3MTfxOLE5cTrBPPE+8UIBRcFJAUshTEFPMVIxVSFW4VihWhFbgV2hX8Fh4WQBZ4Fq8W3hcfF2kXwhf/GDwYlRjyGSgZXhmMGcsaFRpuGqsbBBthG54b2xwPHFUcpRzwHVwdpR4AHjYedR6rHtkfMR+IH7kf9h/2AAEAMgAAAiYCvAADAAAzESERMgH0Arz9RAAADAAAAAACJgK8AAMABwALAA8AEwAXABsAHwAjACcAKwAvAAARNTMVMzUzFQE1MxUzNTMVJTUhFQE1IRUBNTMVMzUzFQE1MxUzNTMVATUzFTM1MxWW+pb92pb6lv3aAib+PgFe/j6W+pb92pb6lv3alvqWAfRkZGRk/tRkZGRkZGRkASxkZP2oZGRkZAGQZGRkZP7UZGRkZAALAAAAAAImArwAAwAHAAsADwATABcAGwAfACMAJwArAAARNTMVMzUzFQE1MxUzNTMVATUhFQE1IRUBNSEVJTUzFTM1MxUBNTMVMzUzFZb6lv3alvqW/doBwv4+AcL+PgHC/j6W+pb92pb6lgGQZGRkZP7UZGRkZAH0ZGT9qGRkASxkZMhkZGRk/tRkZGRkAAAHAAAAAAImArwAAwAHAAsADwATABcAGwAAETUzFSc1IRUBNTMVJzUzFQM1IRUBNTMVAzUzFZYyAcL92paWljIBwv3alpaWAfRkZGRkZP5wZGRkZGT+1GRkAZBkZP7UZGQAAAwAAAAAAiYCvAADAAcACwAPABMAFwAbAB8AIwAnACsALwAAETUzFTM1MxUBNTMVMzUzFSU1MxUzNTMVATUhFQU1MxUzNTMVATUhFSU1MxUzNTMVlvqW/dqW+pb92pb6lv3aAcL+Ppb6lv3aAcL+Ppb6lgH0ZGRkZP7UZGRkZGRkZGRkASxkZMhkZGRk/nBkZGRkZGRkAAcAAAAAAiYCvAADAAcACwAPABMAFwAbAAARNTMVJzUhFQE1MxUnNSEVATUhFQE1MxUDNTMVlpYCJv3alpYBwv4+Aib92paWlgH0ZGRkZGT+cGRkZGRk/tRkZAGQZGT+1GRkAAAHAAAAAAImArwAAwAHAAsADwATABcAGwAAETUzFSc1IRUBNTMVJzUhFQE1MxUDNTMVAzUzFZaWAib92paWAcL+PpaWlpaWAfRkZGRkZP5wZGRkZGT+1GRkAZBkZP7UZGQAAAoAAAAAAiYCvAADAAcACwAPABMAFwAbAB8AIwAnAAARNTMVAzUzFTM1MxUBNSEVATUzFTM1MxUBNSEVATUzFQM1MxUzNTMVlpaW+pb+PgHC/dqWlvr+PgHC/dqWlpb6lgH0ZGT+1GRkZGQBkGRk/tRkZGRk/tRkZAGQZGT+1GRkZGQAAA0AAAAAAiYCvAADAAcACwAPABMAFwAbAB8AIwAnACsALwAzAAARNTMVMzUzFQE1MxUzNTMVATUzFTM1MxUBNSEVATUzFTM1MxUBNTMVMzUzFQE1MxUzNTMVlvqW/dqW+pb92pb6lv3aAib92pb6lv3alvqW/dqW+pYB9GRkZGT+1GRkZGQBkGRkZGT+1GRk/tRkZGRkAZBkZGRk/tRkZGRkAAcAAAAAAiYCvAADAAcACwAPABMAFwAbAAA3NTMVATUhFQU1MxUnNTMVATUhFQE1MxUHNTMVyJb+ogIm/qKWlpb+ogIm/qKWlpbIZGQBkGRkyGRkZGRk/gxkZAEsZGTIZGQACAAAAAACJgK8AAMABwALAA8AEwAXABsAHwAAEzUhFQM1MxUDNTMVBzUzFQE1MxUlNTMVMzUzFQM1MxXIAV76lpaWlpb+ovr+opaWlpaWAlhkZP5wZGQBLGRkyGRk/tRkZGRkZGRkASxkZAAADQAAAAACJgK8AAMABwALAA8AEwAXABsAHwAjACcAKwAvADMAABE1MxUzNTMVATUzFTM1MxUBNTMVMzUzFQE1MxUDNTMVMzUzFQE1MxUzNTMVATUzFTM1MxWWlpb+PpYylv6ilvqW/dr6+pb6lv3aljKW/qKWlpYB9GRkZGT+1GRkZGQBkGRkZGT+1GRk/tRkZGRkAZBkZGRk/tRkZGRkAAcAAAAAAiYCvAADAAcACwAPABMAFwAbAAARNTMVAzUzFQM1MxUDNTMVAzUhFQE1MxUDNTMVlpaWlpaWlpYCJv3alpaWAfRkZP7UZGQBkGRk/tRkZP7UZGQBkGRk/tRkZAAAEAAAAAACJgK8AAMABwALAA8AEwAXABsAHwAjACcAKwAvADMANwA7AD8AABE1MxUzNTMVATUzFTM1MxUBNTMVMzUzFQE1MxUzNTMVMzUzFQE1MxUzNTMVATUzFTM1MxUzNTMVATUzFTM1MxX6Mvr92pb6lv3alvqW/dqWMpYylv3alvqW/dqWMpYylv3alvqWAfRkZGRk/tRkZGRkAZBkZGRk/tRkZGRkZGT+1GRkZGQBkGRkZGRkZP7UZGRkZAAADwAAAAACJgK8AAMABwALAA8AEwAXABsAHwAjACcAKwAvADMANwA7AAARNTMVMzUzFQE1MxUzNTMVATUzFTM1MxUBNTMVMzUzFQE1MxUzNTMVATUzFTM1MxUzNTMVATUzFTM1MxX6lpb92pb6lv3alvqW/dqWlvr92pb6lv3aljKWMpb92pb6lgH0ZGRkZP7UZGRkZAGQZGRkZP7UZGRkZP7UZGRkZAGQZGRkZGRk/tRkZGRkAAAMAAAAAAImArwAAwAHAAsADwATABcAGwAfACMAJwArAC8AABE1MxUzNTMVATUzFTM1MxUlNTMVMzUzFQE1IRUFNTMVMzUzFQE1MxUzNTMVBTUhFZb6lv3alvqW/dqW+pb+PgFe/j6W+pb92pb6lv4+AV4B9GRkZGT+1GRkZGRkZGRkZAEsZGTIZGRkZP7UZGRkZGRkZAAJAAAAAAImArwAAwAHAAsADwATABcAGwAfACMAABE1MxUzNTMVATUzFQM1IRUBNSEVJTUzFTM1MxUBNTMVJzUzFZb6lv3alpYBwv4+AcL+Ppb6lv3alpaWAfRkZGRk/tRkZAGQZGT+1GRkZGRkZGT+cGRkZGRkAAAOAAAAAAImArwAAwAHAAsADwATABcAGwAfACMAJwArAC8AMwA3AAARNTMVMzUzFQE1MxUzNTMVMzUzFSU1MxUzNTMVATUhFQE1MxUzNTMVATUzFTM1MxUBNTMVMzUzFZb6lv3aljKWMpb92pb6lv4+AV7+ovoylv3alvqW/dqWlpYB9GRkZGT+1GRkZGRkZGRkZGRkASxkZP2oZGRkZAGQZGRkZP7UZGRkZAAADAAAAAACJgK8AAMABwALAA8AEwAXABsAHwAjACcAKwAvAAARNTMVMzUzFQE1MxUzNTMVATUhFQE1IRUBNTMVMzUzFQE1MxUzNTMVATUzFTM1MxWW+pb92pYylv6iAcL+PgHC/j6W+pb92pb6lv3alpaWAfRkZGRk/tRkZGRkAZBkZP7UZGT+1GRkZGQBkGRkZGT+1GRkZGQAAAcAAAAAAiYCvAADAAcACwAPABMAFwAbAAARNTMVEzUzFQE1IRUBNSEVATUhFQE1MxUTNTMVlvqW/j4Bwv4+AV7+PgHC/j6W+pYB9GRk/tRkZAGQZGT+1GRk/tRkZAGQZGT+1GRkAAcAAAAAAiYCvAADAAcACwAPABMAFwAbAAA3NTMVATUhFQU1MxUHNTMVAzUzFQM1MxUDNTMVyJb+ogIm/qKWlpaWlpaWlpbIZGQBkGRkZGRkyGRk/tRkZAGQZGT+1GRkAA0AAAAAAiYCvAADAAcACwAPABMAFwAbAB8AIwAnACsALwAzAAARNTMVMzUzFQE1MxUzNTMVATUzFTM1MxUBNTMVMzUzFSU1MxUzNTMVATUzFTM1MxUFNSEVlvqW/dqW+pb92pb6lv3alvqW/dqW+pb92pb6lv4+AV4B9GRkZGT+1GRkZGQBkGRkZGT+1GRkZGRkZGRkZP7UZGRkZGRkZAANAAAAAAImArwAAwAHAAsADwATABcAGwAfACMAJwArAC8AMwAAETUzFTM1MxUlNTMVMzUzFQE1MxUzNTMVJTUzFTM1MxUFNTMVMzUzFQE1MxUzNTMVATUzFZb6lv3alvqW/j6WMpb+Ppb6lv4+ljKW/j6W+pb+opYB9GRkZGRkZGRkZP5wZGRkZGRkZGRkyGRkZGQBLGRkZGT+cGRkABAAAAAAAiYCvAADAAcACwAPABMAFwAbAB8AIwAnACsALwAzADcAOwA/AAARNTMVMzUzFQE1MxUzNTMVMzUzFQE1MxUzNTMVATUzFTM1MxUzNTMVBTUzFTM1MxUFNTMVMzUzFQE1MxUzNTMVlvqW/dqWMpYylv3alvqW/dqWMpYylv3a+jL6/dqW+pb92pb6lgH0ZGRkZP7UZGRkZGRkAZBkZGRk/tRkZGRkZGTIZGRkZGRkZGRkAZBkZGRkAAANAAAAAAImArwAAwAHAAsADwATABcAGwAfACMAJwArAC8AMwAAETUzFTM1MxUlNTMVMzUzFQU1MxUzNTMVBTUzFTM1MxUFNTMVMzUzFQE1MxUFNTMVMzUzFZb6lv3alvqW/j6WMpb+opYylv4+lvqW/qKW/qKW+pYB9GRkZGRkZGRkZMhkZGRkyGRkZGTIZGRkZAEsZGTIZGRkZAAKAAAAAAImArwAAwAHAAsADwATABcAGwAfACMAJwAAETUzFTM1MxUBNTMVJzUzFTM1MxUlNTMVMzUzFQE1MxUDNTMVJzUzFZb6lv6ilvqWMpb+Ppb6lv6ilpaWlpYB9GRkZGT+1GRkyGRkZGTIZGRkZP7UZGT+1GRkZGRkAAAHAAAAAAImArwAAwAHAAsADwATABcAGwAAETUhFQE1IRUlNTMVJzUzFQU1MxUTNTMVJzUzFQIm/doCJv4+ljKW/qKWlpYylgJYZGT9qGRkyGRkZGRkyGRkASxkZGRkZAAGAAAAAAImAfQAAwAHAAsADwATABcAADc1IRUlNSEVBzUzFQE1IRUlNTMVMzUzFWQBwv4+AV4ylv4+AcL92pb6lshkZMhkZGRkZP7UZGRkZGRkZAAKAAAAAAImArwAAwAHAAsADwATABcAGwAfACMAJwAAETUzFQM1MxUzNTMVJTUhFSU1MxUDNTMVMzUzFQE1IRUlNTMVMzUzFZaWlvqW/doBwv4+lpaW+pb92gHC/j6W+pYB9GRk/tRkZGRkyGRkyGRk/tRkZGRk/tRkZGRkZGRkAAUAAAAAAiYB9AADAAcACwAPABMAABM1IRUFNTMVBzUhFQE1MxUHNTMVZAHC/dqWMgHC/dqWlpYBkGRkyGRkyGRkASxkZMhkZAAACgAAAAACJgK8AAMABwALAA8AEwAXABsAHwAjACcAADU1MxUzNTMVAzUzFQU1IRUFNTMVMzUzFQE1IRUlNTMVMzUzFQM1MxWW+paWlv4+AcL92pb6lv4+AcL92pb6lpaWyGRkZGQBkGRkyGRkZGRkZGT+1GRkZGRkZGQBkGRkAAAGAAAAAAImAfQAAwAHAAsADwATABcAADU1IRUlNSEVBTUzFTM1MxUBNSEVJTUzFQIm/j4BXv4+lvqW/j4Bwv3alshkZMhkZGRkZGRk/tRkZGRkZAAHAAAAAAHCArwAAwAHAAsADwATABcAGwAAETUhFQE1MxUDNTMVJzUzFQE1MxUHNTMVAzUzFQHC/qKWlpYy+v6ilpaWlpYBkGRk/tRkZAGQZGRkZGT+cGRkyGRkASxkZAAKAAD/OAImAfQAAwAHAAsADwATABcAGwAfACMAJwAANTUzFTM1MxUBNSEVATUhFQU1MxUzNTMVATUhFSU1MxUzNTMVBzUzFZb6lv4+AV7+ogHC/dqW+pb+PgHC/dqW+paWlshkZGRk/nBkZAJYZGRkZGRkZP7UZGRkZGRkZMhkZAAACwAAAAACJgK8AAMABwALAA8AEwAXABsAHwAjACcAKwAAETUzFQM1MxUzNTMVJTUhFSU1MxUDNTMVMzUzFQE1MxUzNTMVJTUzFTM1MxWWlpb6lv3aAcL+PpaWlvqW/dqW+pb92pb6lgH0ZGT+1GRkZGTIZGTIZGT+1GRkZGT+1GRkZGRkZGRkZAAABgBkAAABwgK8AAMABwALAA8AEwAXAAA3NTMVJzUzFSc1MxUDNTMVAzUhFSc1MxXIlvr6lpaWlvoBXvqWyGRkyGRkyGRk/tRkZP7UZGRkZGQAAAkAAP84AcICvAADAAcACwAPABMAFwAbAB8AIwAAFTUzFTM1MxUDNTMVBzUzFQE1MxUDNTMVAzUzFQM1MxUnNTMVlpaW+vqWlv6i+jKWlpaWlpaWZGRkZGQB9GRkyGRk/nBkZAMgZGT+1GRk/tRkZGRkZAAACwAAAAABwgK8AAMABwALAA8AEwAXABsAHwAjACcAKwAAETUzFQM1MxUDNTMVAzUzFTM1MxUBNTMVMzUzFQE1MxUzNTMVATUzFTM1MxWWlvr6lpaWMpb+opaWlv4+lpaW/j6WMpYB9GRk/tRkZAGQZGT+1GRkZGT+1GRkZGQBkGRkZGT+1GRkZGQABwBkAAABwgK8AAMABwALAA8AEwAXABsAADc1MxUnNTMVJzUzFSc1MxUDNTMVAzUhFSc1MxXIlpaWlpb6+paW+gFe+pbIZGTIZGRkZGRkZGT+1GRk/tRkZGRkZAAMAAAAAAImAfQAAwAHAAsADwATABcAGwAfACMAJwArAC8AADU1MxUzNTMVMzUzFSU1MxUzNTMVBTUzFTM1MxUzNTMVATUzFTM1MxUlNTMVMzUzFZYyljKW/dr6Mpb+PpYyljKW/dqW+pb92pb6lshkZGRkZGTIZGRkZGRkZGRkZGT+1GRkZGRkZGRkZAAACQAAAAACJgH0AAMABwALAA8AEwAXABsAHwAjAAA1NTMVMzUzFSU1IRUFNTMVMzUzFQE1MxUzNTMVJTUzFTM1MxWW+pb92gHC/j6W+pb92pb6lv3alvqWyGRkZGTIZGRkZGRkZP7UZGRkZGRkZGRkAAgAAAAAAiYB9AADAAcACwAPABMAFwAbAB8AADU1MxUzNTMVJTUhFQU1MxUzNTMVBTUzFTM1MxUFNSEVlvqW/j4BXv4+lvqW/dqW+pb+PgFeyGRkZGTIZGRkZGRkZMhkZGRkZGRkAAoAAP84AiYB9AADAAcACwAPABMAFwAbAB8AIwAnAAA1NTMVMzUzFQE1MxUDNSEVBTUzFTM1MxUBNSEVJTUzFTM1MxUBNTMVlvqW/dqWlgHC/j6W+pb92gHC/j6W+pb92pbIZGRkZP7UZGQB9GRkZGRkZGT+1GRkZGRkZGT+1GRkAAAKAAD/OAImAfQAAwAHAAsADwATABcAGwAfACMAJwAANTUzFTM1MxUlNSEVBTUzFTM1MxUBNSEVJTUzFTM1MxUDNTMVJzUzFZb6lv4+AcL92pb6lv4+AcL92pb6lpaWlpbIZGRkZMhkZGRkZGRk/tRkZGRkZGRk/tRkZGRkZAAHAAAAAAImAfQAAwAHAAsADwATABcAGwAANTUzFSc1MxUzNTMVATUzFQM1MxUzNTMVATUzFZaW+paW/dqWlpYy+v4+lshkZGRkZGRk/tRkZAGQZGRkZP7UZGQAAAUAAAAAAiYB9AADAAcACwAPABMAADc1IRUlNSEVBTUzFQM1IRUnNTMVZAFe/qIBwv3alpYBwjKWyGRkyGRkZGRk/tRkZGRkZAAABwAAAAACJgJYAAMABwALAA8AEwAXABsAABE1IRUBNTMVMzUzFQE1MxUDNTMVBzUzFQE1MxUBwv6ilpaW/j6WlpYy+v6ilgGQZGT+1GRkZGQBkGRk/tRkZMhkZAEsZGQACgAAAAACJgH0AAMABwALAA8AEwAXABsAHwAjACcAADU1MxUzNTMVJTUzFTM1MxUBNTMVMzUzFQE1MxUzNTMVATUzFTM1MxWW+pb92pb6lv4++jKW/dqW+pb92paW+shkZGRkZGRkZGT+1GRkZGQBkGRkZGT+1GRkZGQAAAkAAAAAAiYB9AADAAcACwAPABMAFwAbAB8AIwAANTUzFTM1MxUFNTMVMzUzFSU1MxUzNTMVJTUzFTM1MxUBNTMVlvqW/j6WMpb+Ppb6lv3alvqW/qKWyGRkZGRkZGRkZMhkZGRkZGRkZGT+cGRkAAAMAAAAAAImAfQAAwAHAAsADwATABcAGwAfACMAJwArAC8AADU1MxUzNTMVMzUzFSU1MxUzNTMVJTUzFTM1MxUBNTMVMzUzFTM1MxUFNTMVMzUzFZYyljKW/dqW+pb92pb6lv3aljKWMpb+PpYylshkZGRkZGRkZGRkZGRkZGRk/tRkZGRkZGRkZGRkZAAACQAAAAACJgH0AAMABwALAA8AEwAXABsAHwAjAAA3NTMVBzUzFTM1MxUFNTMVMzUzFQE1MxUzNTMVBTUzFTM1MxXIlvqWMpb+Ppb6lv3alvqW/j6WMpbIZGRkZGRkZGRkZGRkAZBkZGRkZGRkZGQAAAoAAP84AiYB9AADAAcACwAPABMAFwAbAB8AIwAnAAA1NTMVMzUzFQE1IRUBNSEVJTUzFTM1MxUDNTMVATUzFTM1MxUDNTMVlvqW/j4BXv6iAcL92pb6lpaW/dqW+paWlshkZGRk/nBkZAEsZGTIZGRkZP7UZGQBkGRkZGT+DGRkAAAFAAAAAAImAfQAAwAHAAsADwATAAA3NTMVJTUhFQE1MxUHNSEVAzUzFciW/qICJv4+lvoCJvqWyGRkyGRk/tRkZGRkZAEsZGQAAAUAZAAAAcIB9AADAAcACwAPABMAADc1MxUnNTMVBzUzFQM1IRUnNTMVyJb6+paW+gFe+pbIZGTIZGRkZGT+1GRkZGRkAAANAAAAAAImArwAAwAHAAsADwATABcAGwAfACMAJwArAC8AMwAAETUzFTM1MxUzNTMVJTUzFTM1MxUBNTMVMzUzFQE1IRUBNSEVATUzFTM1MxUBNTMVMzUzFZYyljKW/dqWlvr92pb6lv4+AV7+ogFe/j6W+pb92vqWlgEsZGRkZGRkZGRkZGT+1GRkZGQB9GRk/ahkZAH0ZGRkZP7UZGRkZAAHAGQAAAHCArwAAwAHAAsADwATABcAGwAANzUzFSc1MxUnNTMVJzUzFQM1MxUDNSEVJzUzFciWlpb6+paWlpb6AV76lshkZMhkZGRkZGRkZP7UZGT+1GRkZGRkAAgAAAAAAiYCvAADAAcACwAPABMAFwAbAB8AABE1MxUzNTMVATUzFQc1MxUHNSEVATUhFQc1MxUHNTMVlvqW/qKW+pb6Aib+PgFeMpb6lgH0ZGRkZP7UZGRkZGRkZGQCWGRkyGRkZGRkAAAHAAAAAAImArwAAwAHAAsADwATABcAGwAAJTUzFQE1IRUHNTMVBzUzFQU1IRUBNSEVJzUzFQGQlv3aAcIylpaW/j4BXv4+AcIylshkZAGQZGRkZGRkZGRkZGT+1GRkZGRkAAkAAAAAAiYCvAADAAcACwAPABMAFwAbAB8AIwAANTUhFSU1MxUzNTMVJzUzFQU1MxUzNTMVAzUzFQM1MxUnNTMVAib+PpYylvr6/j6WlpaWlpaWlpbIZGTIZGRkZGRkZMhkZGRkASxkZP2oZGRkZGQAAAgAAAAAAiYCvAADAAcACwAPABMAFwAbAB8AABE1MxUTNTMVJTUhFSU1IRUDNTMVBTUzFTM1MxUFNSEVlvqW/doBwv4+AiaWlv3alvqW/j4BXgH0ZGT+1GRkyGRkyGRk/tRkZMhkZGRkZGRkAAkAAAAAAiYCvAADAAcACwAPABMAFwAbAB8AIwAAETUzFQM1MxUzNTMVJTUhFQE1IRUFNTMVAzUzFTM1MxUFNSEVlpaW+pb92gHC/qIBXv4+lpaW+pb+PgFeAfRkZP7UZGRkZGRkZAEsZGTIZGT+1GRkZGRkZGQAAAcAAAAAAiYCvAADAAcACwAPABMAFwAbAAARNSEVATUzFSc1MxUnNTMVAzUzFRM1MxUnNTMVAib+PpaWljKW+pYyljKWAlhkZP4MZGRkZGRkZGT+1GRkAZBkZGRkZAALAAAAAAImArwAAwAHAAsADwATABcAGwAfACMAJwArAAARNTMVMzUzFQE1MxUzNTMVATUhFQU1MxUzNTMVBTUhFQU1MxUzNTMVBTUhFZb6lv3alvqW/j4BXv4+lvqW/j4BXv4+lvqW/j4BXgH0ZGRkZP7UZGRkZAGQZGTIZGRkZGRkZMhkZGRkZGRkAAkAAAAAAiYCvAADAAcACwAPABMAFwAbAB8AIwAAETUzFTM1MxUDNTMVJTUhFQE1IRUFNTMVMzUzFQM1MxUFNSEVlvqWlpb+PgHC/j4BXv4+lvqWlpb+PgFeAfRkZGRk/tRkZGRkZAEsZGTIZGRkZP7UZGRkZGQAAAEAyAAAAV4AZAADAAAzNTMVyJZkZAACAGT/nAFeAGQAAwAHAAAXNTMVJzUzFWSWMpZkZGRkZGQAAgDIAAABXgGQAAMABwAAEzUzFQM1MxXIlpaWASxkZP7UZGQAAwBk/5wBXgGQAAMABwALAAATNTMVAzUzFSc1MxXIlvqWMpYBLGRk/nBkZGRkZAAABgDIAAABXgK8AAMABwALAA8AEwAXAAA3NTMVAzUzFSc1MxUDNTMVAzUzFQM1MxXIlpaWlpaWlpaWlpbIZGQBLGRkZGRk/tRkZP7UZGQBkGRkAAYAyAAAAV4CvAADAAcACwAPABMAFwAANzUzFQM1MxUDNTMVAzUzFQM1MxUDNTMVyJaWlpaWlpaWlpaWyGRkAZBkZP7UZGT+1GRkAZBkZP7UZGQAAAcAAAAAAiYCvAADAAcACwAPABMAFwAbAAARNTMVMzUzFQE1MxUDNSEVBzUzFQc1MxUDNTMVlvqW/qKW+gFeMpb6lvqWAfRkZGRk/tRkZAGQZGTIZGRkZGT+1GRkAAAHAAAAAAImArwAAwAHAAsADwATABcAGwAANTUzFTc1MxUnNTMVATUzFTM1MxUFNSEVATUzFZYylpaW/qKW+pb+PgFe/qKWyGRkyGRkyGRk/gxkZGRkZGRkASxkZAAAAwBkAZABXgK8AAMABwALAAATNTMVJzUzFQc1MxVkljKWlpYBkGRkyGRkZGRkAAQAZAH0AcICvAADAAcACwAPAAATNTMVMzUzFQU1MxUzNTMVZJYylv6iljKWAlhkZGRkZGRkZGQAAQBkAMgBwgEsAAMAADc1IRVkAV7IZGQAAQAA/5wCJgAAAAMAABU1IRUCJmRkZAAABwBkAAABwgK8AAMABwALAA8AEwAXABsAABM1MxUnNTMVAzUzFRM1MxUDNTMVJzUzFSc1MxVkljKW+pYylpaW+pb6lgGQZGRkZGT+1GRkAZBkZP2oZGRkZGTIZGQAAAcAZAAAAcICvAADAAcACwAPABMAFwAbAAATNTMVAzUzFSc1MxUBNTMVAzUzFRM1MxUDNTMVyJYylpaW/qKWlpYylvqWAfRkZP7UZGRkZGQBLGRk/ahkZAGQZGT+1GRkAAcAZAAAAcICvAADAAcACwAPABMAFwAbAAATNTMVAzUzFQM1MxUnNSEVATUzFQc1IRUBNTMVZJaWlpaWlgFe/qKWlgFe/qKWAZBkZP7UZGQBkGRkZGRk/nBkZMhkZAEsZGQABwBkAAABwgK8AAMABwALAA8AEwAXABsAACU1MxUDNTMVJTUhFQM1MxUBNSEVAzUzFQM1MxUBLJaWlv6iAV6Wlv6iAV6WlpaWyGRkASxkZGRkZP7UZGT+1GRkAZBkZP7UZGQAAAcAAAAAAiYCvAADAAcACwAPABMAFwAbAAABNTMVATUzFQc1MxUTNTMVBTUzFRM1MxUnNTMVAZCW/j6W+pYylv6ilpaWMpYCWGRk/nBkZMhkZAEsZGTIZGQBLGRkZGRkAAcAAAAAAiYCvAADAAcACwAPABMAFwAbAAARNTMVBzUzFRc1MxUBNTMVEzUzFQE1MxUXNTMVljKWMpb+Ppb6lv6iljKWAfRkZGRkZMhkZAGQZGT9qGRkASxkZMhkZAAFAAAAAAImAfQAAwAHAAsADwATAAA1NSEVJTUzFQM1MxUDNTMVAzUzFQIm/qKWlpaWlpaWyGRkZGRk/tRkZAGQZGT+1GRkAAACAAAAZAImAZAAAwAHAAA1NSEVJTUhFQIm/doCJmRkZMhkZAAHAGQAAAHCAfQAAwAHAAsADwATABcAGwAANzUhFSU1MxUzNTMVBzUzFQM1MxUzNTMVJzUzFWQBXv6iljKW+pb6ljKW+pbIZGTIZGRkZGRkZP7UZGRkZGRkZAAIAAAAZAImAlgAAwAHAAsADwATABcAGwAfAAA1NSEVJTUhFQE1MxUzNTMVATUzFTM1MxUFNTMVMzUzFQIm/doCJv4+ljKW/qKWMpb+opYylshkZMhkZP7UZGRkZAGQZGRkZMhkZGRkAAsAAAAAAiYCvAADAAcACwAPABMAFwAbAB8AIwAnACsAABE1MxUzNTMVJTUzFTM1MxUBNTMVMzUzFSU1MxUnNTMVBTUzFTM1MxUDNTMV+paW/dr6lpb92paW+v4+ljKW/qKWlvr6lgH0ZGRkZGRkZGRk/ahkZGRkyGRkZGRkyGRkZGQBLGRkAAANAAAAAAImArwAAwAHAAsADwATABcAGwAfACMAJwArAC8AMwAAETUzFTM1MxUBNTMVMzUzFTM1MxUFNTMVMzUzFQE1MxUDNTMVJTUzFTM1MxUBNTMVMzUzFZaWlv4+ljKWMpb+Pvoylv4++vr6/qKWlpb+PpaWlgH0ZGRkZP7UZGRkZGRkyGRkZGQCWGRk/tRkZGRkZGRk/tRkZGRkAAwAAAAAAiYCvAADAAcACwAPABMAFwAbAB8AIwAnACsALwAANTUzFTM1IRUlNTMVMzUzFTM1MxUlNTMVMzUhFQE1MxUDNSEVATUhFQE1MxUzNTMVljIBXv3aljKWMpb92pYyAV792pYyAV7+ogFe/j6W+pbIZGRkZGRkZGRkZGRkZGRkZP7UZGQB9GRk/ahkZAH0ZGRkZAAABQBkAGQBwgJYAAMABwALAA8AEwAANzUzFQM1MxUHNTMVBzUzFRc1MxXIljKW+pb6ljKWyGRkASxkZGRkZGRkZMhkZAAFAGQAZAHCAlgAAwAHAAsADwATAAA3NTMVBzUzFQM1MxUXNTMVJzUzFciW+paWljKW+pbIZGRkZGQBkGRkyGRkZGRkAAQAAADIAiYBkAADAAcACwAPAAA1NTMVMzUzFSU1MxUzNTMVljL6/qKWlpbIZGRkZGRkZGRkAAEAyADIAV4BLAADAAA3NTMVyJbIZGQAAAkAAAAAAiYB9AADAAcACwAPABMAFwAbAB8AIwAANzUzFQc1MxUzNTMVBTUzFTM1MxUBNTMVMzUzFQU1MxUzNTMVyJb6ljKW/j6W+pb92pb6lv4+ljKWyGRkZGRkZGRkZGRkZAGQZGRkZGRkZGRkAAABAAAAyAImASwAAwAANTUhFQImyGRkAAABAGQAyAHCASwAAwAANzUhFWQBXshkZAABAAAAyAHCASwAAwAANTUhFQHCyGRkAAADAAAAAAImAGQAAwAHAAsAADE1MxUzNTMVMzUzFZYyljKWZGRkZGRkAAAFAAAAAAImAfQAAwAHAAsADwATAAA1NSEVJzUzFQM1MxUDNTMVAzUzFQIm+pb6lpaWMpbIZGRkZGT+1GRkAZBkZP7UZGQABQAAAMgCJgGQAAMABwALAA8AEwAANTUzFTM1MxUzNTMVJTUzFTM1MxWWMpYylv4+ljKWyGRkZGRkZGRkZGRkAAcAAAAAAcICvAADAAcACwAPABMAFwAbAAARNTMVAzUhFSU1IRUlNTMVAzUzFSc1IRUBNTMV+voBXv6iAV7+opaW+voBwv4+lgH0ZGT+1GRkyGRkyGRk/gxkZMhkZP7UZGQACQAAAAACJgK8AAMABwALAA8AEwAXABsAHwAjAAA3NTMVMzUzFQE1IRUBNSEVAzUzFQM1IRUlNTMVMzUzFQM1MxXIljKW/j4Bwv3aAcL6lvoBXv4+ljKWlpbIZGRkZAEsZGT+cGRkAfRkZP7UZGRkZGRkZP5wZGQACAAAAAACJgJYAAMABwALAA8AEwAXABsAHwAANTUzFTM1MxUnNSEVJTUzFQM1IRUlNTMVMzUzFQM1MxWWMpb6AcL+opb6AcL92pYylpaWyGRkZGTIZGRkZGT+cGRkyGRkZGT+1GRkAAAFAAABkAImArwAAwAHAAsADwATAAATNTMVMzUzFSc1MxUFNTMVMzUzFWSWMpb6lv6ilvqWAfRkZGRkZGRkyGRkZGQAAAIAZAH0AV4CvAADAAcAABM1MxUHNTMVZJYylgJYZGRkZGQAAAcAyAAAAV4CvAADAAcACwAPABMAFwAbAAA3NTMVAzUzFSc1MxUDNTMVAzUzFQM1MxUDNTMVyJaWlpaWlpaWlpaWlpbIZGQBLGRkZGRk/tRkZP7UZGQBkGRk/tRkZAAHAAAAAAHCArwAAwAHAAsADwATABcAGwAAEzUzFQM1MxUDNTMVBzUzFRM1MxUBNTMVBzUzFWSWlpaWlvqWMvr+opYy+gGQZGT+1GRkAZBkZMhkZAEsZGT+cGRkyGRkAAAHAGQAAAImArwAAwAHAAsADwATABcAGwAAJTUzFSc1MxUnNTMVJTUzFQM1MxUDNTMVAzUzFQEsljKW+pb+ovr6+jKWlpbIZGRkZGTIZGRkZGT9qGRkAZBkZP7UZGQABABkAfQBwgK8AAMABwALAA8AABM1MxUzNTMVBTUzFTM1MxVkljKW/qKWMpYCWGRkZGRkZGRkZAAEAGQB9AHCArwAAwAHAAsADwAAEzUzFTM1MxUFNTMVMzUzFWSWMpb+opYylgJYZGRkZGRkZGRkAAMAZAGQAV4CvAADAAcACwAAEzUzFSc1MxUHNTMVZJYylpaWAZBkZMhkZGRkZAADAGQBkAFeArwAAwAHAAsAABM1MxUnNTMVBzUzFWSWMpaWlgGQZGTIZGRkZGQABQBkAGQBwgJYAAMABwALAA8AEwAANzUzFQM1MxUHNTMVBzUzFRc1MxXIljKW+pb6ljKWyGRkASxkZGRkZGRkZMhkZAAFAGQAZAHCAlgAAwAHAAsADwATAAA3NTMVBzUzFQM1MxUXNTMVJzUzFciW+paWljKW+pbIZGRkZGQBkGRkyGRkZGRkAAUAZABkAcICWAADAAcACwAPABMAADc1MxUDNTMVBzUzFQc1MxUXNTMVyJYylvqW+pYylshkZAEsZGRkZGRkZGTIZGQABQBkAGQBwgJYAAMABwALAA8AEwAANzUzFQc1MxUDNTMVFzUzFSc1MxXIlvqWlpYylvqWyGRkZGRkAZBkZMhkZGRkZAAIAAAAAAImAyAAAwAHAAsADwATABcAGwAfAAA3NSEVJTUhFQM1MxUDNTMVATUhFQE1MxUBNTMVMzUzFWQBwv4+AV6WljKW/j4Bwv6ilv6ilvqWyGRkyGRkASxkZP5wZGT+1GRkAlhkZP4MZGRkZAAACAAAAAACJgMgAAMABwALAA8AEwAXABsAHwAANTUhFSU1IRUFNTMVMzUzFQM1MxUBNSEVATUzFQE1MxUCJv4+AV7+Ppb6lvqW/qIBwv6ilv6ilshkZMhkZGRkZGRkAZBkZP1EZGQCWGRk/gxkZAAHAGQAAAHCAyAAAwAHAAsADwATABcAGwAANzUzFSc1MxUDNTMVBzUzFQM1MxUDNSEVJzUzFciW+voylvqWlpb6AV76lshkZMhkZAEsZGRkZGT+1GRk/tRkZGRkZAAACgAAAAACJgMgAAMABwALAA8AEwAXABsAHwAjACcAADU1MxUzNTMVJTUhFQM1MxUBNTMVMzUzFQE1MxUBNTMVMzUzFQU1IRWW+pb+PgFelpb+Ppb6lv6ilv6ilvqW/j4BXshkZGRkyGRkASxkZP5wZGRkZAEsZGT+DGRkZGRkZGQAAAwAAAAAAiYDIAADAAcACwAPABMAFwAbAB8AIwAnACsALwAANTUzFTM1MxUDNTMVATUzFTM1MxUBNTMVMzUzFQE1MxUFNTMVMzUzFQE1MxUzNTMVlvqW+pb+Ppb6lv4++jKW/qKW/qKW+pb92paW+shkZGRkAfRkZP5wZGRkZP7UZGRkZAJYZGTIZGRkZP7UZGRkZAAOAAAAAAImA+gAAwAHAAsADwATABcAGwAfACMAJwArAC8AMwA3AAARNTMVMzUzFQE1MxUBNTMVMzUzFSU1IRUBNTMVMzUzFQE1MxUzNTMVATUzFTM1MxUBNSEVAzUzFZb6lv6ilv6ilvqW/doCJv3alvqW/dqW+pb92pb6lv4+AV6WlgH0ZGRkZAEsZGT9qGRkZGRkZGT+1GRkZGQBkGRkZGT+1GRkZGQB9GRkASxkZAAACQAAAAACJgPoAAMABwALAA8AEwAXABsAHwAjAAARNTMVEzUzFQU1IRUBNTMVBzUhFQE1MxUDNTMVJzUhFQM1MxWWMpb+ogIm/dqWlgIm/dqWlpaWAcKWlgH0ZGQBLGRkyGRk/nBkZMhkZAGQZGT+1GRkyGRkAlhkZAAJAAAAAAImA+gAAwAHAAsADwATABcAGwAfACMAABM1MxUDNTMVATUhFQU1MxUnNTMVATUhFQM1MxUDNTMVBzUzFciWlpb+ogIm/qKWlpb+ogIm+pb6lpaWAyBkZP2oZGQBkGRkyGRkZGRk/gxkZAOEZGT9qGRkyGRkAA4AAAAAAiYD6AADAAcACwAPABMAFwAbAB8AIwAnACsALwAzADcAABE1MxUzNTMVATUzFTM1MxUBNTMVATUzFTM1MxUBNSEVAzUzFQE1MxUzNTMVATUzFTM1MxUFNSEVlvqW/dqW+pb+opb+opb6lv4+AV6Wlv4+lvqW/dqW+pb+PgFeAfRkZGRk/tRkZGRkAlhkZP4MZGRkZAEsZGQBLGRk/gxkZGRk/tRkZGRkZGRkAAAPAAAAAAImA+gAAwAHAAsADwATABcAGwAfACMAJwArAC8AMwA3ADsAABE1MxUzNTMVATUzFTM1MxUBNTMVBTUzFTM1MxUBNTMVMzUzFQM1MxUBNTMVMzUzFQE1MxUzNTMVBTUhFZb6lv3alvqW/qKW/qKW+pb92pb6lvqW/j6W+pb92pb6lv4+AV4B9GRkZGT+1GRkZGQCWGRkyGRkZGT+1GRkZGQCWGRk/gxkZGRk/tRkZGRkZGRkAAAIAAAAAAImAyAAAwAHAAsADwATABcAGwAfAAA3NSEVJTUhFQc1MxUBNSEVATUzFSc1MxUDNTMVMzUzFWQBwv4+AV4ylv4+AcL+opb6lvqW+pbIZGTIZGRkZGT+1GRkAlhkZGRkZP2oZGRkZAAIAAAAAAImAyAAAwAHAAsADwATABcAGwAfAAA1NSEVJTUhFQU1MxUzNTMVATUhFQE1MxUnNTMVAzUzFQIm/j4BXv4+lvqW/j4Bwv6ilvqW+pbIZGTIZGRkZGRkZP7UZGQCWGRkZGRk/ahkZAAHAGQAAAHCAyAAAwAHAAsADwATABcAGwAANzUzFSc1MxUnNTMVJzUzFQM1MxUDNSEVJzUzFciW+vqWlvqWMpb6AV76lshkZMhkZMhkZGRkZP5wZGT+1GRkZGRkAAoAAAAAAiYDIAADAAcACwAPABMAFwAbAB8AIwAnAAA1NTMVMzUzFSU1IRUFNTMVMzUzFQE1MxUnNTMVAzUzFTM1MxUFNSEVlvqW/j4BXv4+lvqW/qKW+pb6lvqW/j4BXshkZGRkyGRkZGRkZGQBLGRkZGRk/ahkZGRkZGRkAAwAAAAAAiYDIAADAAcACwAPABMAFwAbAB8AIwAnACsALwAANTUzFTM1MxUlNTMVMzUzFQE1MxUzNTMVATUzFQU1MxUzNTMVATUzFQM1MxUzNTMVlvqW/dqW+pb+Pvoylv6ilv6ilvqW/j6W+paW+shkZGRkZGRkZGT+1GRkZGQCWGRkyGRkZGQBLGRk/ahkZGRkAAAOAAAAAAImA+gAAwAHAAsADwATABcAGwAfACMAJwArAC8AMwA3AAARNTMVMzUzFQE1MxUBNTMVMzUzFSU1IRUBNTMVMzUzFQE1MxUzNTMVATUzFQM1MxUzNTMVATUhFZb6lv6ilv6ilvqW/doCJv3alvqW/dqW+pb+Ppb6lvqW/j4BXgH0ZGRkZAEsZGT9qGRkZGRkZGT+1GRkZGQBkGRkZGQB9GRk/OBkZGRkAfRkZAAACQAAAAACJgPoAAMABwALAA8AEwAXABsAHwAjAAARNTMVEzUzFQU1IRUBNTMVBzUhFQE1MxUDNTMVAzUzFSc1IRWWMpb+ogIm/dqWlgIm/dqWMpb6lpYBwgH0ZGQBLGRkyGRk/nBkZMhkZAGQZGQB9GRk/OBkZMhkZAAOAAAAAAImA+gAAwAHAAsADwATABcAGwAfACMAJwArAC8AMwA3AAARNTMVMzUzFQE1MxUzNTMVATUzFQE1MxUzNTMVATUhFQU1MxUzNTMVATUzFTM1MxUFNSEVATUzFZb6lv3alvqW/qKW/qKW+pb+PgFe/j6W+pb92pb6lv4+AV7+opYB9GRkZGT+1GRkZGQCWGRk/gxkZGRkASxkZMhkZGRk/tRkZGRkZGRkA4RkZAAADwAAAAACJgPoAAMABwALAA8AEwAXABsAHwAjACcAKwAvADMANwA7AAARNTMVMzUzFQE1MxUzNTMVATUzFQU1MxUzNTMVATUzFTM1MxUlNTMVMzUzFQE1MxUzNTMVBTUhFQE1MxWW+pb92pb6lv6ilv6ilvqW/dqW+pb92pb6lv3alvqW/j4BXv6ilgH0ZGRkZP7UZGRkZAJYZGTIZGRkZP7UZGRkZGRkZGRk/tRkZGRkZGRkA4RkZAAACQAAAAACJgMgAAMABwALAA8AEwAXABsAHwAjAAA3NSEVATUzFQM1IRUHNTMVATUhFQE1MxUzNTMVATUzFTM1MxVkAcL+opb6AV4ylv4+AcL+PpYylv4+lvqWyGRkAfRkZP7UZGRkZGT+1GRkAlhkZGRk/gxkZGRkAAAJAAAAAAImAyAAAwAHAAsADwATABcAGwAfACMAADU1IRUBNTMVAzUhFQU1MxUzNTMVATUhFQE1MxUzNTMVATUzFQIm/qKW+gFe/j6W+pb+PgHC/j6WMpb+PpbIZGQB9GRk/tRkZGRkZGRk/tRkZAJYZGRkZP4MZGQAAAgAZAAAAcIDIAADAAcACwAPABMAFwAbAB8AABM1MxUDNTMVJzUzFSc1MxUzNTMVAzUzFQM1IRUnNTMVyJaWlvr6+pYylvqW+gFe+pYCvGRk/gxkZMhkZMhkZGRk/tRkZP7UZGRkZGQACwAAAAACJgMgAAMABwALAA8AEwAXABsAHwAjACcAKwAANTUzFTM1MxUBNTMVAzUhFQU1MxUzNTMVATUzFTM1MxUBNTMVMzUzFQU1IRWW+pb+opb6AV7+Ppb6lv4+ljKW/j6W+pb+PgFeyGRkZGQB9GRk/tRkZGRkZGRkASxkZGRk/gxkZGRkZGRkAAANAAAAAAImAyAAAwAHAAsADwATABcAGwAfACMAJwArAC8AMwAANTUzFTM1MxUBNTMVATUzFTM1MxUBNTMVMzUzFQE1MxUzNTMVJTUzFTM1MxUBNTMVMzUzFZb6lv6ilv6ilvqW/j76Mpb92pb6lv4+ljKW/j6WlvrIZGRkZAH0ZGT+cGRkZGT+1GRkZGQBkGRkZGTIZGRkZP4MZGRkZAAADAAAAAACJgMgAAMABwALAA8AEwAXABsAHwAjACcAKwAvAAA1NTMVMzUzFQE1MxUBNSEVBTUzFTM1MxUBNTMVMzUzFQE1MxUzNTMVATUzFTM1MxWW+pb+opb+ogHC/j6W+pb92pb6lv4+ljKW/j6W+pbIZGRkZAH0ZGT+1GRkZGRkZGT+1GRkZGQCWGRkZGT+DGRkZGQAEgAAAAACJgPoAAMABwALAA8AEwAXABsAHwAjACcAKwAvADMANwA7AD8AQwBHAAARNTMVMzUzFSU1MxUzNTMVATUzFTM1MxUBNTMVMzUzFQE1MxUzNTMVATUzFTM1MxUBNTMVMzUzFTM1MxUBNTMVMzUzFQE1MxX6lpb92pb6lv3alvqW/j6WMpb+PpaW+v3alvqW/dqWMpYylv3alvqW/qKWAfRkZGRkZGRkZGT+cGRkZGQCWGRkZGT+DGRkZGT+1GRkZGQBkGRkZGRkZP7UZGRkZAMgZGQADAAAAAACJgK8AAMABwALAA8AEwAXABsAHwAjACcAKwAvAAA1NTMVMzUzFSU1MxUzNTMVATUzFTM1MxUBNTMVMzUzFSU1MxUzNTMVATUzFTM1MxWW+pb92pb6lv4++jKW/dqW+pb+PpYylv4+lpb6yGRkZGRkZGRkZP7UZGRkZAGQZGRkZMhkZGRk/gxkZGRkAAAPAAAAAAImA4QAAwAHAAsADwATABcAGwAfACMAJwArAC8AMwA3ADsAABE1MxUzNTMVATUzFTM1MxUBNTMVMzUzFSU1MxUzNTMVATUzFTM1MxUlNTMVMzUzFQE1MxUzNTMVBTUhFZb6lv3alvqW/dqW+pb+PpYylv4+lvqW/dqW+pb92pb6lv4+AV4B9GRkZGT+1GRkZGQBkGRkZGTIZGRkZP4MZGRkZGRkZGRk/tRkZGRkZGRkAAgAAAAAAiYCvAADAAcACwAPABMAFwAbAB8AADc1IRUlNSEVBzUzFQE1IRUBNTMVMzUzFQE1MxUzNTMVZAHC/j4BXjKW/j4Bwv4+ljKW/j6W+pbIZGTIZGRkZGT+1GRkAlhkZGRk/gxkZGRkAAoAAAAAAiYCvAADAAcACwAPABMAFwAbAB8AIwAnAAA1NTMVMzUzFSU1IRUFNTMVMzUzFQE1MxUzNTMVATUzFTM1MxUFNSEVlvqW/j4BXv4+lvqW/j6WMpb+Ppb6lv4+AV7IZGRkZMhkZGRkZGRkASxkZGRk/gxkZGRkZGRkAAgAAAAAAiYCvAADAAcACwAPABMAFwAbAB8AADU1IRUlNSEVBTUzFTM1MxUBNSEVATUzFTM1MxUBNTMVAib+PgFe/j6W+pb+PgHC/j6WMpb+PpbIZGTIZGRkZGRkZP7UZGQCWGRkZGT+DGRkAAcAZAAAAcICvAADAAcACwAPABMAFwAbAAA3NTMVJzUzFSc1MxUzNTMVAzUzFQM1IRUnNTMVyJb6+vqWMpb6lvoBXvqWyGRkyGRkyGRkZGT+1GRk/tRkZGRkZAAADgAAAAACJgOEAAMABwALAA8AEwAXABsAHwAjACcAKwAvADMANwAAETUzFTM1MxUBNTMVMzUzFQE1MxUzNTMVATUhFQE1MxUzNTMVATUzFTM1MxUBNTMVMzUzFQE1IRWW+pb92pb6lv4+ljKW/j4CJv3alvqW/dqW+pb92pb6lv4+AV4B9GRkZGT+1GRkZGQCWGRkZGT+DGRk/tRkZGRkAZBkZGRk/tRkZGRkAfRkZAAOAAAAAAImA4QAAwAHAAsADwATABcAGwAfACMAJwArAC8AMwA3AAARNTMVMzUzFQE1MxUzNTMVATUzFTM1MxUBNTMVMzUzFQE1IRUFNTMVMzUzFQE1MxUzNTMVBTUhFZb6lv3alvqW/j6WMpb+Ppb6lv4+AV7+Ppb6lv3alvqW/j4BXgH0ZGRkZP7UZGRkZAJYZGRkZP4MZGRkZAEsZGTIZGRkZP7UZGRkZGRkZAAHAAD/OAImAfQAAwAHAAsADwATABcAGwAAEzUhFQU1MxUTNTMVJzUhFQE1MxUDNTMVAzUzFWQBwv3aljKW+gHC/dqWMpb6lgGQZGTIZGT+1GRkZGRkASxkZP4MZGQBLGRkAAkAAP84AiYCvAADAAcACwAPABMAFwAbAB8AIwAAETUzFSc1IRUBNTMVEzUzFQE1MxUDNSEVBTUzFQM1MxUDNTMVljIBwv3aljKW/qKWMgHC/j6W+paWlgH0ZGRkZGT+cGRk/tRkZAGQZGT+1GRkyGRkAlhkZP7UZGQAAAAEADYAAQAAAAAAAQAPAAAAAQAAAAAAAgAHAA8AAwABBAkAAQAeABYAAwABBAkAAgAOADRTb3VuZGZhbHlhUGl4ZWxSZWd1bGFyAFMAbwB1AG4AZABmAGEAbAB5AGEAUABpAHgAZQBsAFIAZQBnAHUAbABhAHIAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACZAAABAgEDAQQBBQEGAQcBCAEJAQoBCwEMAQ0BDgEPARABEQESARMBFAEVARYBFwEYARkBGgEbARwBHQEeAR8BIAEhASIBIwEkASUBJgEnASgBKQEqASsBLAEtAS4BLwEwATEBMgEzATQBNQE2ATcBOAE5AToBOwE8AT0BPgE/AUABQQFCAUMBRAFFAUYBRwFIAUkBSgFLAUwBTQFOAU8BUAFRAVIBUwFUAVUBVgFXAVgBWQFaAVsBXAFdAV4BXwFgAWEBYgFjAWQBZQFmAWcBaAFpAWoBawFsAW0BbgFvAXABcQFyAXMBdAF1AXYBdwF4AXkBegF7AXwBfQF+AX8BgAGBAYIBgwGEAYUBhgGHAYgBiQGKAYsBjAGNAY4BjwGQAZEBkgGTAZQBlQGWAZcBmAADB3VuaTAwNDEHdW5pMDA0Mgd1bmkwMDQzB3VuaTAwNDQHdW5pMDA0NQd1bmkwMDQ2B3VuaTAwNDcHdW5pMDA0OAd1bmkwMDQ5B3VuaTAwNEEHdW5pMDA0Qgd1bmkwMDRDB3VuaTAwNEQHdW5pMDA0RQd1bmkwMDRGB3VuaTAwNTAHdW5pMDA1MQd1bmkwMDUyB3VuaTAwNTMHdW5pMDA1NAd1bmkwMDU1B3VuaTAwNTYHdW5pMDA1Nwd1bmkwMDU4B3VuaTAwNTkHdW5pMDA1QQd1bmkwMDYxB3VuaTAwNjIHdW5pMDA2Mwd1bmkwMDY0B3VuaTAwNjUHdW5pMDA2Ngd1bmkwMDY3B3VuaTAwNjgHdW5pMDA2OQd1bmkwMDZBB3VuaTAwNkIHdW5pMDA2Qwd1bmkwMDZEB3VuaTAwNkUHdW5pMDA2Rgd1bmkwMDcwB3VuaTAwNzEHdW5pMDA3Mgd1bmkwMDczB3VuaTAwNzQHdW5pMDA3NQd1bmkwMDc2B3VuaTAwNzcHdW5pMDA3OAd1bmkwMDc5B3VuaTAwN0EHdW5pMDEzMQd1bmkwMDMwB3VuaTAwMzEHdW5pMDAzMgd1bmkwMDMzB3VuaTAwMzQHdW5pMDAzNQd1bmkwMDM2B3VuaTAwMzcHdW5pMDAzOAd1bmkwMDM5B3VuaTAwMkUHdW5pMDAyQwd1bmkwMDNBB3VuaTAwM0IHdW5pMDAyMQd1bmkwMEExB3VuaTAwM0YHdW5pMDBCRgd1bmkwMDI3B3VuaTAwMjIHdW5pMDAyRAd1bmkwMDVGB3VuaTAwMjgHdW5pMDAyOQd1bmkwMDVCB3VuaTAwNUQHdW5pMDAyRgd1bmkwMDVDB3VuaTAwMkIHdW5pMDAzRAd1bmkwMDJBB3VuaTAwMjMHdW5pMDAyNQd1bmkwMDI2B3VuaTAwNDAHdW5pMDAzQwd1bmkwMDNFB3VuaTAwN0UHdW5pMDBCNwd1bmkwMEQ3B3VuaTIwMTQHdW5pMjAxMwd1bmkyMjEyB3VuaTIwMjYHdW5pMjE5Mgd1bmkyMjQ4B3VuaTI1QjgHdW5pMDAyNAd1bmkwMEEyB3VuaTAwNUUHdW5pMDA2MAd1bmkwMDdDB3VuaTAwN0IHdW5pMDA3RAd1bmkyMDFDB3VuaTIwMUQHdW5pMjAxOAd1bmkyMDE5B3VuaTI3RTgHdW5pMjdFOQd1bmkwMEFCB3VuaTAwQkIHdW5pMDBFMQd1bmkwMEU5B3VuaTAwRUQHdW5pMDBGMwd1bmkwMEZBB3VuaTAwQzEHdW5pMDBDOQd1bmkwMENEB3VuaTAwRDMHdW5pMDBEQQd1bmkwMEUwB3VuaTAwRTgHdW5pMDBFQwd1bmkwMEYyB3VuaTAwRjkHdW5pMDBDMAd1bmkwMEM4B3VuaTAwRDIHdW5pMDBEOQd1bmkwMEUyB3VuaTAwRUEHdW5pMDBFRQd1bmkwMEY0B3VuaTAwRkIHdW5pMDBGMQd1bmkwMEQxB3VuaTAwRkMHdW5pMDBEQwd1bmkwMEU0B3VuaTAwRjYHdW5pMDBFQgd1bmkwMEVGB3VuaTAwQzQHdW5pMDBENgd1bmkwMEU3B3VuaTAwQzc=) format('truetype'); font-display:block }
+*{box-sizing:border-box} [hidden]{display:none!important}
+html,body{min-height:100%}
+body{margin:0; background:var(--night); color:var(--text); font:15px/1.5 system-ui,sans-serif; padding-inline:16px; padding-block:18px 28px; -webkit-font-smoothing:none}
+h1{margin:0; font:normal 26px 'SoundfalyaPixel',Georgia,serif; letter-spacing:1px; color:var(--amberl); text-shadow:0 2px 0 #000; text-wrap:balance}
+.sub{margin:4px 0 0; color:var(--muted); max-width:62ch}
+.app{display:flex; gap:22px; align-items:flex-start; flex-wrap:wrap; max-width:1180px; margin:18px auto 0}
+.stage{flex:0 1 auto; display:flex; flex-direction:column; align-items:center; gap:8px; min-width:0; max-width:100%}
+#cv{display:block; background:#07060f; border:3px solid var(--line); box-shadow:0 0 0 3px #000, 0 12px 40px rgba(0,0,0,.7); image-rendering:pixelated; max-width:100%; height:auto}
+#cv.v{height:min(78vh,860px); width:auto; aspect-ratio:9/16}
+#cv.h{width:min(100%,760px); height:auto; aspect-ratio:16/9}
+.bar{width:100%; display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+#prog{min-width:120px}
+#prog{flex:1; height:14px; background:#1b1735; border:2px solid var(--line); border-radius:3px; cursor:pointer; position:relative; overflow:hidden}
+#clipbox{position:absolute; top:0; bottom:0; background:rgba(255,179,71,.28); border-inline:2px solid var(--amber)}
+#pbar{position:absolute; inset:0 auto 0 0; width:0; background:rgba(62,232,255,.55)}
+.seekrow{width:100%; display:flex; flex-direction:column; gap:2px}
+#clock{font:normal 14px 'SoundfalyaPixel',monospace; color:var(--amberl); min-width:7.5em; text-align:right; font-variant-numeric:tabular-nums}
+.panel{flex:1 1 320px; min-width:0; max-width:540px; display:flex; flex-direction:column; gap:14px; padding:16px 18px 18px;
+  background:var(--night2); border:2px solid var(--line); border-radius:6px; box-shadow:0 0 0 3px #000, 0 10px 34px rgba(0,0,0,.6)}
+.panel h2{margin:0; font:normal 17px 'SoundfalyaPixel',serif; letter-spacing:1px; color:var(--amber)}
+.row{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+.grp{display:flex; flex-direction:column; gap:6px; min-width:0}
+label,.lbl{font-size:13px; color:var(--muted)}
+label b{color:var(--text); font-weight:600}
+.btn{padding:7px 14px; font:normal 15px 'SoundfalyaPixel',serif; letter-spacing:.5px; color:#1a1030; cursor:pointer; touch-action:manipulation;
+  background:var(--amber); border:2px solid #000; border-radius:4px; box-shadow:0 2px 0 #000}
+.btn:hover:not(:disabled){filter:brightness(1.12)} .btn:active:not(:disabled){transform:translateY(1px)} .btn:disabled{opacity:.45; cursor:default}
+.btn.alt{background:#241f45; color:var(--text); border-color:var(--line)}
+.btn.alt.on{background:var(--cyan); color:#06202a; border-color:#000}
+.btn.rec{background:#ff4f6e; color:#fff}
+.btn:focus-visible,input:focus-visible{outline:3px solid #fff; outline-offset:2px}
+input[type=text]{width:100%; padding:7px 10px; font:15px system-ui,sans-serif; color:var(--text); background:#0e0c20; border:2px solid var(--line); border-radius:3px}
+input[type=range]{width:100%; accent-color:var(--amber)}
+input[type=checkbox]{accent-color:var(--amber); width:16px; height:16px}
+.chk{display:flex; gap:8px; align-items:center; font-size:14px; color:var(--text)}
+.info{font-size:13px; color:var(--muted); min-height:1.4em}
+#status{font-size:14px; color:var(--amberl); min-height:1.5em}
+.note{font-size:12px; color:var(--muted)}
+.sw{display:inline-block; width:10px; height:10px; border:1px solid #000; vertical-align:-1px; margin-right:2px}
+hr{border:0; border-top:2px solid var(--line); margin:0}
+@media (max-width:640px){ h1{font-size:21px} .panel{padding:14px 12px 16px} #cv.v{height:auto; width:min(100%,420px)} }
+</style>
+
+<h1>Piano Roll Soundfalya</h1>
+<p class="sub">Notas que caen sobre un teclado pixel bajo una noche de Soundfalya. Elige el momento más reconocible, graba un clip vertical de 15 a 30 segundos y súbelo a Shorts, TikTok o Reels.</p>
+
+<div class="app">
+  <div class="stage">
+    <canvas id="cv" class="v" aria-label="Teclado de piano pixel con notas que caen bajo un cielo nocturno"></canvas>
+    <div class="bar">
+      <button id="play" class="btn" type="button" aria-label="Reproducir o pausar">▶ Tocar</button>
+      <button id="restart" class="btn alt" type="button" aria-label="Volver al inicio del clip">⟲</button>
+      <button id="fmt" class="btn alt" type="button" title="Cambiar entre vertical (TikTok, Reels, Shorts) y horizontal (YouTube)">⇆ 16:9</button>
+      <div id="prog" role="progressbar" aria-label="Avance de la pieza"><div id="clipbox"></div><div id="pbar"></div></div>
+      <div id="clock">0:00 / 0:00</div>
+      <button id="recBar" class="btn rec" type="button">● Grabar</button>
+    </div>
+    <div class="seekrow"><label for="seek" class="lbl">Avanzar en la obra</label><input id="seek" type="range" min="0" max="1000" step="1" value="0"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Pieza</h2>
+    <div class="row">
+      <button id="load" class="btn" type="button">Cargar MIDI o MusicXML…</button>
+      <button id="demo" class="btn alt" type="button">Usar Für Elise de prueba</button>
+      <input id="midi" type="file" hidden>
+    </div>
+    <div class="grp"><label for="title">Título arriba</label><input id="title" type="text" maxlength="40" value="Für Elise"></div>
+    <div class="grp"><label for="cta">Texto flotante</label><input id="cta" type="text" maxlength="48" value="Sheet music link in bio">
+      <label class="chk"><input type="checkbox" id="ctaOn" checked> Mostrar el texto flotante</label>
+      <label class="chk"><input type="checkbox" id="safe"> Ver lo que tapa TikTok (no sale en el video)</label></div>
+    <div class="info" id="info"></div>
+    <hr>
+    <h2>Gancho</h2>
+    <div class="row"><button class="btn alt on" id="mFull" type="button">Pieza completa</button><button class="btn alt" id="mClip" type="button">Clip para redes</button></div>
+    <div class="grp" id="clipCtl">
+      <label for="cs">Empieza en: <b id="csv">0.0 s</b></label><input id="cs" type="range" min="0" max="10" step="0.1" value="0">
+      <label for="cd">Duración: <b id="cdv">20 s</b></label><input id="cd" type="range" min="10" max="60" step="1" value="20">
+      <div class="row"><button id="climax" class="btn alt" type="button">Buscar el clímax</button><button id="here" class="btn alt" type="button">Empezar donde va</button></div>
+      <label class="chk"><input type="checkbox" id="intro" checked> Intro Soundfalya: el cartel baja y suena Fa–Sol–Do–Mi</label>
+      <label class="chk"><input type="checkbox" id="loop" checked> Repetir en bucle al previsualizar</label>
+      <div class="note" id="clipNote"></div>
+    </div>
+    <hr>
+    <h2>Escena</h2>
+    <div class="grp"><span class="lbl">Formato</span>
+      <div class="row"><button class="btn alt on" id="fv" type="button">Vertical 9:16</button><button class="btn alt" id="fh" type="button">Horizontal 16:9</button></div></div>
+    <div class="grp"><span class="lbl">Fondo</span>
+      <div class="row"><button class="btn alt on" id="scMoon" type="button">Noche de luna</button><button class="btn alt" id="scRain" type="button">Noche de lluvia</button></div></div>
+    <div class="grp"><span class="lbl">Colores de las notas</span>
+      <div class="row">
+        <button class="btn alt on" id="pKit" type="button"><span class="sw" style="background:#1f5fd0"></span><span class="sw" style="background:#e8b800"></span><span class="sw" style="background:#e8559a"></span> Colores del kit</button>
+        <button class="btn alt" id="pNeon" type="button"><span class="sw" style="background:#3ee8ff"></span><span class="sw" style="background:#ff4fc8"></span> Neón</button>
+        <button class="btn alt" id="pAmb" type="button"><span class="sw" style="background:#ffb347"></span><span class="sw" style="background:#3ee8ff"></span> Ámbar</button>
+      </div>
+      <div class="note">Colores del kit usa la misma paleta de las partituras (Do azul, Re verde, Mi amarillo, Fa naranja, Sol rojo, La rosado, Si celeste), con los sostenidos en dos colores. Neón y Ámbar dan un color a cada mano.</div></div>
+    <div class="grp"><label for="bpm">Tempo: <b id="bpmv">144</b> negras por minuto</label><input id="bpm" type="range" min="30" max="220" step="1" value="144">
+      <div class="row"><button id="bpmRef" class="btn alt" type="button">Tempo de referencia</button><span class="note" id="bpmNote"></span></div></div>
+    <label class="chk"><input type="checkbox" id="bassUp" checked> Bajo una octava más arriba (teclado más corto, teclas más grandes)</label>
+    <div class="grp"><label for="fall">Tiempo de caída de las notas: <b id="fallv">2.2 s</b></label><input id="fall" type="range" min="1.5" max="5" step="0.1" value="2.2"></div>
+    <hr>
+    <h2>Sonido</h2>
+    <div class="row" id="insRow">
+      <button class="btn alt on" id="sSyn" data-ins="piano" type="button">Piano Soundfalya</button>
+      <button class="btn alt" data-ins="ep" type="button">Piano eléctrico</button>
+      <button class="btn alt" data-ins="box" type="button">Caja de música</button>
+      <button class="btn alt" data-ins="harp" type="button">Arpa</button>
+      <button class="btn alt" data-ins="mar" type="button">Marimba</button>
+      <button class="btn alt" data-ins="chip" type="button">8-bit</button>
+      <button class="btn alt" data-ins="organ" type="button">Órgano</button>
+      <button class="btn alt" data-ins="pad" type="button">Cuerdas suaves</button>
+    </div>
+    <div class="note">Toca un sonido para escuchar la cortina Fa–Sol–Do–Mi con él.</div>
+    <div class="row">
+      <button class="btn alt" id="sAud" type="button" disabled>Mi audio</button>
+      <button class="btn alt" id="loadAud" type="button">Cargar audio…</button>
+      <input id="aud" type="file" accept="audio/*" hidden>
+    </div>
+    <label class="chk"><input type="checkbox" id="rainSnd"> Lluvia ASMR de fondo</label>
+    <div class="note" id="audNote">Si cargas el audio exportado desde Finale, suena tu piano en vez del sintetizador. Debe empezar en el mismo punto que el MIDI.</div>
+    <hr>
+    <h2>Video</h2>
+    <div class="row">
+      <button id="rec" class="btn rec" type="button">● Grabar y exportar</button>
+      <button id="save" class="btn" type="button" hidden>Guardar video</button>
+      <button id="again" class="btn alt" type="button" hidden>Grabar de nuevo</button>
+    </div>
+    <div id="status" role="status"></div>
+    <div class="note">El botón rojo bajo el video también graba y, al terminar, se vuelve «Guardar video». Mientras graba, deja esta pestaña visible. En modo clip graba solo el clip; el título, el texto flotante, el teclado y la marca quedan fuera de lo que tapan la descripción, la foto de usuario y los botones de TikTok y Reels.</div>
+  </div>
+</div>
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const cv = $('cv'), out = cv.getContext('2d');
+const buf = document.createElement('canvas'), bx = buf.getContext('2d');
+const bgc = document.createElement('canvas'), gx = bgc.getContext('2d');
+const SC = 8, DIM = { v:[135, 240], h:[240, 135] };
+const FR = { v:{ sky:74, hit:140, keysH:28, titleY:22, ctaY:34, moon:[110, 54, 8], brandY:171 },
+             h:{ sky:44, hit:103, keysH:20, titleY:4, ctaY:16, moon:[226, 15, 7], brandY:126 } };
+const WHITE = [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1];
+const NAMES = ['Do', 'Do♯', 'Re', 'Re♯', 'Mi', 'Fa', 'Fa♯', 'Sol', 'Sol♯', 'La', 'La♯', 'Si'];
+const noteName = p => NAMES[p % 12] + (Math.floor(p / 12) - 1);
+const mmss = s => { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+const mul = a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+const hex = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const mix = (a, b, t) => { const x = hex(a), y = hex(b); return '#' + x.map((v, i) => Math.round(v + (y[i] - v) * t).toString(16).padStart(2, '0')).join(''); };
+const tri = c => [c, mix(c, '#000000', .5), mix(c, '#ffffff', .55)];   // cuerpo, borde, brillo
+
+/* ---------- Paletas: una sola identidad para todos los videos ---------- */
+const KIT = ['#1f5fd0', '#2e9e3e', '#e8b800', '#f08a1c', '#d82020', '#e8559a', '#4fc3f0'];   // Do Re Mi Fa Sol La Si
+const LETTER = [0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6];
+const PAL = { neon:[tri('#3ee8ff'), tri('#ff4fc8')], amb:[tri('#ffb347'), tri('#3ee8ff')] };
+let palette = 'kit';
+function tileCols(n){                                  // devuelve [abajo, arriba]; iguales salvo sostenidos en modo kit
+  if(palette !== 'kit'){ const c = PAL[palette][n.h]; return [c, c]; }
+  const pc = n.p % 12;
+  const lo = tri(KIT[LETTER[pc]]), hi = WHITE[pc] ? lo : tri(KIT[LETTER[pc + 1]]);
+  return [lo, hi];
+}
+/* ---------- MIDI ---------- */
+function parseMidi(ab){
+  const d = new DataView(ab); let p = 0;
+  const str = n => { let s = ''; for(let i = 0; i < n; i++) s += String.fromCharCode(d.getUint8(p + i)); p += n; return s; };
+  if(ab.byteLength < 14 || str(4) !== 'MThd') throw new Error('Ese archivo no es un MIDI.');
+  const hl = d.getUint32(p); p += 4;
+  const nt = d.getUint16(p + 2), div = d.getUint16(p + 4); p += hl;
+  if(div & 0x8000) throw new Error('Este MIDI usa tiempo SMPTE. Expórtalo de nuevo con tempo en pulsos por negra.');
+  const tempos = [[0, 500000]], tracks = [];
+  for(let tr = 0; tr < nt && p + 8 <= d.byteLength; tr++){
+    if(str(4) !== 'MTrk') break;
+    const len = d.getUint32(p); p += 4; const end = Math.min(p + len, d.byteLength);
+    let tick = 0, run = 0; const ev = [];
+    const vlq = () => { let v = 0, b; do{ b = d.getUint8(p++); v = v * 128 + (b & 127); }while((b & 128) && p < end); return v; };
+    while(p < end){
+      tick += vlq(); let s = d.getUint8(p);
+      if(s < 0x80) s = run; else { p++; if(s < 0xF0) run = s; }
+      if(s === 0xFF){ const type = d.getUint8(p++), l = vlq(); if(type === 0x51 && l === 3) tempos.push([tick, (d.getUint8(p) << 16) | (d.getUint8(p + 1) << 8) | d.getUint8(p + 2)]); p += l; }
+      else if(s === 0xF0 || s === 0xF7){ p += vlq(); }
+      else {
+        const hi = s & 0xF0, ch = s & 15, a = d.getUint8(p++); let b = 0;
+        if(hi !== 0xC0 && hi !== 0xD0) b = d.getUint8(p++);
+        if(hi === 0x90 && b > 0) ev.push([tick, 1, a, b, ch]); else if(hi === 0x80 || hi === 0x90) ev.push([tick, 0, a, b, ch]);
+      }
+    }
+    p = end; tracks.push(ev);
+  }
+  tempos.sort((x, y) => x[0] - y[0]);
+  const seg = []; let sec = 0, lt = 0, mpq = 500000;
+  for(const [t, m] of tempos){ sec += (t - lt) * mpq / div / 1e6; lt = t; mpq = m; if(seg.length && seg[seg.length - 1].t === t) seg.pop(); seg.push({ t, s:sec, m }); }
+  const toSec = t => { let i = seg.length - 1; while(i > 0 && seg[i].t > t) i--; return seg[i].s + (t - seg[i].t) * seg[i].m / div / 1e6; };
+  const raw = []; let withNotes = 0;
+  tracks.forEach((ev, ti) => {
+    const open = new Map(); let any = false, last = 0;
+    for(const [t, on, pt, vel, ch] of ev){
+      last = t; if(ch === 9) continue; const k = ch * 128 + pt;
+      if(on){ (open.get(k) || open.set(k, []).get(k)).push([t, vel]); any = true; }
+      else { const a = open.get(k); if(a && a.length){ const [t0, v] = a.shift(); raw.push([t0, t, pt, v, ti, ch]); } }
+    }
+    for(const [k, a] of open) for(const [t0, v] of a) raw.push([t0, last, k % 128, v, ti, (k / 128) | 0]);
+    if(any) withNotes++;
+  });
+  if(!raw.length) throw new Error('No encontré notas en este MIDI.');
+  const notes = raw.map(([a, b, pt, v, ti, ch]) => ({ t0:toSec(a), t1:Math.max(toSec(b), toSec(a) + .06), p:pt, v, c:(withNotes > 1 ? ti : ch) % 16 }));
+  notes.sort((x, y) => x.t0 - y.t0 || x.p - y.p);
+  const out = finish(notes); out.base = Math.round(60e6 / seg[0].m); out.title0 = ''; return out;
+}
+function finish(notes){
+  let lo = 127, hi = 0, dur = 0, md = 0;
+  for(const n of notes){ lo = Math.min(lo, n.p); hi = Math.max(hi, n.p); dur = Math.max(dur, n.t1); md = Math.max(md, n.t1 - n.t0); }
+  const vs = [...new Set(notes.map(n => n.c))];
+  if(notes.some(n => n.h == null) && !notes.some(n => n.h != null)){
+    if(vs.length > 1){                                  // la voz más aguda es la mano derecha
+      const avg = {}; for(const c of vs){ const a = notes.filter(n => n.c === c); avg[c] = a.reduce((s, n) => s + n.p, 0) / a.length; }
+      const top = vs.reduce((a, b) => avg[a] >= avg[b] ? a : b);
+      for(const n of notes) n.h = n.c === top ? 0 : 1;
+    } else for(const n of notes) n.h = n.p >= 60 ? 0 : 1;   // una sola voz: se separa en el Do central
+  }
+  return { notes, lo, hi, dur, md, voices:vs.length };
+}
+function demoPiece(){                                  // Für Elise, tema principal, arreglo propio (dominio público)
+  const s = .19, notes = [];
+  const add = (t, d, p, h, v = 74) => notes.push({ t0:t * s, t1:(t + d) * s, p, v, c:h, h });
+  const rh = [[0,76],[1,75],[2,76],[3,75],[4,76],[5,71],[6,74],[7,72],
+              [8,69,2],[11,60],[12,64],[13,69],[14,71,2],[17,64],[18,68],[19,71],[20,72,2],[23,64],[24,76],[25,75],
+              [26,76],[27,75],[28,76],[29,71],[30,74],[31,72],[32,69,2],[35,60],[36,64],[37,69],[38,71,2],[41,64],[42,72],[43,71]];
+  const lh = [[8,45],[9,52],[10,57],[14,40],[15,52],[16,56],[20,45],[21,52],[22,57],[32,45],[33,52],[34,57],[38,40],[39,52],[40,56]];
+  for(const o of [0, 46]){
+    rh.forEach(([t, p, d]) => add(o + t, (d || 1) * 1.1, p, 0, 70 + (t % 2 ? 0 : 10)));
+    lh.forEach(([t, p]) => add(o + t, 2.6, p, 1, 58));
+  }
+  add(90, 6, 69, 0, 80); add(90, 6, 45, 1, 66); add(91, 5, 52, 1, 56); add(92, 4, 57, 1, 56);
+  notes.sort((x, y) => x.t0 - y.t0 || x.p - y.p);
+  const out = finish(notes); out.base = Math.round(60 / (2 * s)); out.title0 = 'Für Elise'; out.ours = true; return out;
+}
+
+
+/* ---------- MusicXML (.musicxml, .xml y .mxl comprimido) ---------- */
+function decodeText(u8){                                // UTF-8 o UTF-16 (Finale y otros a veces exportan en UTF-16)
+  if(u8[0] === 0xFF && u8[1] === 0xFE) return new TextDecoder('utf-16le').decode(u8.subarray(2));
+  if(u8[0] === 0xFE && u8[1] === 0xFF) return new TextDecoder('utf-16be').decode(u8.subarray(2));
+  if(u8[0] === 0x3C && u8[1] === 0x00) return new TextDecoder('utf-16le').decode(u8);
+  if(u8[0] === 0x00 && u8[1] === 0x3C) return new TextDecoder('utf-16be').decode(u8);
+  return new TextDecoder().decode(u8);
+}
+async function unzipMxl(ab){
+  const d = new DataView(ab), u8 = new Uint8Array(ab); let e = -1;
+  for(let i = ab.byteLength - 22; i >= Math.max(0, ab.byteLength - 70000); i--) if(d.getUint32(i, true) === 0x06054b50){ e = i; break; }
+  if(e < 0) throw new Error('Ese .mxl no parece un archivo comprimido válido.');
+  const n = d.getUint16(e + 10, true); let p = d.getUint32(e + 16, true); const files = {};
+  const td = new TextDecoder();
+  for(let k = 0; k < n; k++){
+    const m = d.getUint16(p + 10, true), cs = d.getUint32(p + 20, true), nl = d.getUint16(p + 28, true), xl = d.getUint16(p + 30, true), cl = d.getUint16(p + 32, true), off = d.getUint32(p + 42, true);
+    files[td.decode(u8.subarray(p + 46, p + 46 + nl))] = { m, cs, off }; p += 46 + nl + xl + cl;
+  }
+  const read = async name => {
+    const f = files[name]; if(!f) return null;
+    const st = f.off + 30 + d.getUint16(f.off + 26, true) + d.getUint16(f.off + 28, true), raw = u8.subarray(st, st + f.cs);
+    if(f.m === 0) return decodeText(raw);
+    if(typeof DecompressionStream === 'undefined') throw new Error('Este navegador no puede abrir .mxl. Exporta el archivo como MusicXML sin comprimir.');
+    return decodeText(new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer()));
+  };
+  const cont = await read('META-INF/container.xml');
+  let root = cont && (cont.match(/full-path="([^"]+)"/) || [])[1];
+  if(!root) root = Object.keys(files).find(k => /\.(musicxml|xml)$/i.test(k) && !k.startsWith('META-INF'));
+  return read(root);
+}
+function parseMusicXml(text){
+  const doc = new DOMParser().parseFromString(text, 'application/xml');
+  if(doc.querySelector('parsererror')) throw new Error('No pude leer ese MusicXML.');
+  if(doc.documentElement.nodeName === 'score-timewise') throw new Error('Este MusicXML es "timewise". Expórtalo de nuevo como MusicXML normal (partwise).');
+  const parts = [...doc.querySelectorAll('score-partwise > part')]; if(!parts.length) throw new Error('No encontré partes en este MusicXML.');
+  const STEP = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 }, raw = [], tempos = [[0, 90]];
+  const kid = (el, n) => { for(const c of el.children) if(c.nodeName === n) return c; return null; };
+  const num = (el, n, def = 0) => { const c = el && kid(el, n); return c ? parseFloat(c.textContent) : def; };
+  let staves = 1;
+  parts.forEach((part, pi) => {
+    let div = 1, mStart = 0; const open = new Map();
+    for(const meas of part.children){ if(meas.nodeName !== 'measure') continue;
+      let pos = 0, maxPos = 0, last = 0;
+      for(const el of meas.children){
+        const nm = el.nodeName;
+        if(nm === 'attributes'){ const dv = kid(el, 'divisions'); if(dv) div = parseFloat(dv.textContent) || 1; const sv = kid(el, 'staves'); if(sv) staves = Math.max(staves, +sv.textContent || 1); }
+        else if(nm === 'backup') pos -= num(el, 'duration') / div;
+        else if(nm === 'forward'){ pos += num(el, 'duration') / div; maxPos = Math.max(maxPos, pos); }
+        else if(nm === 'direction' || nm === 'sound'){ const s = nm === 'sound' ? el : el.querySelector('sound'); const t = s && parseFloat(s.getAttribute('tempo')); if(t > 0) tempos.push([mStart + pos, t]); }
+        else if(nm === 'note'){
+          if(kid(el, 'grace') || kid(el, 'cue')) continue;
+          const dur = num(el, 'duration') / div, chord = !!kid(el, 'chord'), st = chord ? last : pos;
+          if(!chord){ last = pos; pos += dur; maxPos = Math.max(maxPos, pos); }
+          const pt = kid(el, 'pitch'); if(!pt || kid(el, 'rest')) continue;
+          const p = 12 * (num(pt, 'octave') + 1) + STEP[kid(pt, 'step').textContent.trim()] + Math.round(num(pt, 'alter'));
+          const staff = num(el, 'staff', 1), ties = [...el.querySelectorAll(':scope > tie')].map(t => t.getAttribute('type'));
+          const t0 = mStart + st, t1 = t0 + dur, key = staff * 1000 + p;
+          if(ties.includes('stop') && open.has(key)){ const n = open.get(key); n.q1 = Math.max(n.q1, t1); if(!ties.includes('start')) open.delete(key); continue; }
+          const n = { q0:t0, q1:t1, p, staff, part:pi }; raw.push(n);
+          if(ties.includes('start')) open.set(key, n);
+        }
+      }
+      mStart += Math.max(maxPos, pos);
+    }
+  });
+  if(!raw.length) throw new Error('No encontré notas en este MusicXML.');
+  tempos.sort((a, b) => a[0] - b[0]);
+  const seg = []; let sec = 0, lq = 0, bpm = tempos[0][1];
+  for(const [q, t] of tempos){ sec += (q - lq) * 60 / bpm; lq = q; bpm = t; if(seg.length && seg[seg.length - 1].q === q) seg.pop(); seg.push({ q, s:sec, b:t }); }
+  const toSec = q => { let i = seg.length - 1; while(i > 0 && seg[i].q > q) i--; return seg[i].s + (q - seg[i].q) * 60 / seg[i].b; };
+  const multiPart = parts.length > 1;
+  const notes = raw.map(n => ({ t0:toSec(n.q0), t1:Math.max(toSec(n.q1), toSec(n.q0) + .06), p:n.p, v:78, c:multiPart ? n.part : n.staff - 1,
+    h:(!multiPart && staves > 1) ? (n.staff > 1 ? 1 : 0) : undefined }));
+  notes.sort((x, y) => x.t0 - y.t0 || x.p - y.p);
+  const out = finish(notes); out.noTempo = tempos.length === 1; out.base = tempos[tempos.length > 1 ? 1 : 0][1];
+  if(out.noTempo) out.base = 90;
+  out.title0 = ((doc.querySelector('work-title') || doc.querySelector('movement-title') || {}).textContent || '').trim();
+  out.ours = /soundfalya/i.test((doc.querySelector('identification') || {}).textContent || '');
+  return out;
+}
+async function readScoreFile(f){
+  const ab = await f.arrayBuffer(), h = new Uint8Array(ab, 0, Math.min(4, ab.byteLength)), sig = String.fromCharCode(...h);
+  if(sig === 'MThd') return parseMidi(ab);
+  if(sig.startsWith('PK')) return parseMusicXml(await unzipMxl(ab));
+  if(/\.(mp3|wav|m4a|aac|ogg|pdf|png|jpe?g)$/i.test(f.name)) throw new Error('Ese archivo no es MIDI ni MusicXML. Para el audio usa «Cargar audio…».');
+  return parseMusicXml(decodeText(new Uint8Array(ab)));
+}
+
+/* ---------- Tempo: velocidades de referencia (búsqueda web, oct. 2026) ---------- */
+// Originales en negras por minuto: Für Elise ≈ 72 (3/8, Poco moto), Canon in D ≈ 65 (Adagio), Gymnopédie No. 1 ≈ 60 (Lent).
+// Los arreglos Soundfalya escriben Für Elise y el Canon con figuras del doble de largo, así que su negra va al doble.
+const KNOWN = [
+  { re:/f(ü|u)r\s*elise|bagatelle/i, orig:72, ours:144, name:'Für Elise' },
+  { re:/canon|kanon|pachelbel/i,       orig:65, ours:130, name:'Canon in D' },
+  { re:/gymnop/i,                      orig:60, ours:60,  name:'Gymnopédie No. 1' }];
+function suggestBpm(p, fname){
+  const k = KNOWN.find(k => k.re.test((p.title0 || '') + ' ' + (fname || '')));
+  if(!k) return { bpm:Math.round(p.base), why:p.noTempo ? 'el archivo no trae tempo' : 'tempo del archivo' };
+  return { bpm:p.ours ? k.ours : k.orig, why:k.name + (p.ours ? ', arreglo Soundfalya' : '') + ': tempo de referencia' };
+}
+function withTempo(src, bpm){                          // reescala los tiempos de la pieza al tempo elegido
+  const up = document.getElementById('bassUp') && document.getElementById('bassUp').checked && src.notes.some(n => n.h === 0) && src.notes.some(n => n.h === 1);
+  const k = src.base / bpm, notes = src.notes.map(n => ({ ...n, t0:n.t0 * k, t1:n.t1 * k, p:n.p + (up && n.h === 1 ? 12 : 0) }));
+  const out = finish(notes); out.src = src; out.bpm = bpm; return out;
+}
+
+/* ---------- Estado ---------- */
+let piece = demoPiece(), FORMAT = 'v', SCENE = 'moon', W = 135, H = 240, L = null;
+let ctx = null, bus, comp, dest, sess = null, rainNode = null, base = 0, nextIdx = 0, sched = null, state = 'idle';
+let useSynth = true, audBuf = null, audSrc = null, rec = null, chunks = [], blob = null, recording = false;
+let clipMode = false, cue = null, runEnd = 0, runStart = 0;
+const PRE = .3;                                        // el clip arranca un instante antes de la primera nota
+const status = m => { $('status').textContent = m || ''; };
+
+/* ---------- Clip (gancho de 15–30 s) ---------- */
+function clipRange(){
+  const N = piece.notes, d = +$('cd').value;
+  if(!clipMode) return { a:-(+$('fall').value) - .2, b:piece.dur + .8 };
+  let s = Math.min(+$('cs').value, piece.dur);
+  const i = lowerBound(N, s - .02); if(i < N.length) s = N[i].t0;     // empieza justo en una nota
+  let e = s + d, best = null;                                          // termina en otra nota para que el bucle calce
+  for(const n of N){ if(n.t0 < s + Math.min(8, d * .5)) continue; const k = Math.abs(n.t0 - e); if(k <= 1.2 && (!best || k < Math.abs(best - e))) best = n.t0; if(n.t0 > e + 1.2) break; }
+  if(best != null) e = best; else e = Math.min(e, piece.dur + .6);
+  return { a:s - PRE, b:e - PRE, s, e };
+}
+function findClimax(){
+  const N = piece.notes, d = +$('cd').value, span = Math.max(1, piece.hi - piece.lo);
+  if(piece.dur <= d) return 0;
+  let best = 0, bs = -1;
+  for(let t = 0; t <= piece.dur - d * .8; t += .25){
+    let sc = 0; for(let k = lowerBound(N, t); k < N.length && N[k].t0 < t + d; k++){ const n = N[k]; sc += (n.v / 127) * (.6 + .8 * (n.p - piece.lo) / span); }
+    if(sc > bs * 1.03){ bs = sc; best = t; }
+  }
+  return best;
+}
+function clipInfo(){
+  const r = clipRange();
+  $('csv').textContent = (+$('cs').value).toFixed(1) + ' s'; $('cdv').textContent = $('cd').value + ' s';
+  $('clipNote').textContent = clipMode ? 'Clip: de ' + r.s.toFixed(1) + ' s a ' + r.e.toFixed(1) + ' s (' + (r.e - r.s).toFixed(1) + ' s). Empieza y termina en una nota para que el bucle calce.' : '';
+  const box = $('clipbox'); box.hidden = !clipMode;
+  if(clipMode){ box.style.left = (r.s / piece.dur * 100) + '%'; box.style.width = (Math.min(r.e, piece.dur) - r.s) / piece.dur * 100 + '%'; }
+}
+
+/* ---------- Escena ---------- */
+function buildLayout(){
+  const f = FR[FORMAT], isW = p => WHITE[((p % 12) + 12) % 12];
+  let lo = piece.lo, hi = piece.hi;
+  while(!isW(lo)) lo--; while(!isW(hi)) hi++;
+  let nW = 0; for(let p = lo; p <= hi; p++) if(isW(p)) nW++;
+  const need = FORMAT === 'v' ? Math.max(nW + 2, 15) : Math.max(nW + 3, 22);
+  const wk = Math.max(2, Math.min(10, Math.floor((W - 2) / need))), total = Math.floor((W - 2) / wk);
+  let extra = total - nW, down = Math.floor(extra / 2), up = extra - down;
+  while(down > 0 && lo > 21){ lo--; if(isW(lo)) down--; }
+  while(up + down > 0 && hi < 108){ hi++; if(isW(hi)) up > 0 ? up-- : down--; }
+  while(down > 0 && lo > 0){ lo--; if(isW(lo)) down--; }
+  let n = 0; for(let p = lo; p <= hi; p++) if(isW(p)) n++;
+  const ox = Math.floor((W - n * wk) / 2) + 1, bw = wk <= 3 ? 1 : 2 * Math.floor(wk * .33) + 1;
+  const keys = []; let wi = 0;
+  for(let p = lo; p <= hi; p++){
+    if(isW(p)){ keys.push({ p, x:ox + wi * wk, w:wk - 1, black:false }); wi++; }
+    else keys.push({ p, x:ox + wi * wk - 1 - (bw - 1) / 2, w:bw, black:true });
+  }
+  L = { f, lo, hi, wk, bw, ox, n, keys, bh:Math.round(f.keysH * .62), x1:ox + n * wk - 1 };
+  const r = mul(5);
+  L.stars = Array.from({ length:FORMAT === 'v' ? 46 : 60 }, () => ({ x:(r() * W) | 0, y:(r() * (f.sky - 26)) | 0, ph:r() * 6.28, sp:.8 + r() * 2.2, big:r() < .12 }));
+  L.drops = Array.from({ length:FORMAT === 'v' ? 70 : 110 }, () => ({ x:r() * (W + 30), y:r() * f.sky, v:.75 + r() * .5 }));
+  L.parts = []; L.flash = new Map(); L.prevT = null;
+}
+function buildBG(){
+  [W, H] = DIM[FORMAT];
+  buf.width = bgc.width = W; buf.height = bgc.height = H; cv.width = W * SC; cv.height = H * SC; cv.className = FORMAT;
+  buildLayout();
+  const f = L.f, R = (c, x, y, w, h) => { gx.fillStyle = c; gx.fillRect(x, y, w, h); }, r = mul(9), rain = SCENE === 'rain';
+  gx.globalAlpha = 1;
+  // cielo en franjas con tramado pixel
+  const sky = rain ? ['#0a0b15', '#0d0f1b', '#111420', '#151927', '#1a1e2e', '#1f2436', '#252a3e', '#2b3046']
+                   : ['#08071a', '#0b0a20', '#0f0d27', '#13102f', '#181337', '#1e1740', '#251c49', '#2d2252'];
+  const bh = Math.ceil(f.sky / sky.length);
+  for(let i = 0; i < sky.length; i++){
+    R(sky[i], 0, i * bh, W, bh);
+    if(i + 1 < sky.length) for(let x = 0; x < W; x++) if(x % 2 === 0) R(sky[i + 1], x, i * bh + bh - 1, 1, 1);
+  }
+  // estrellas quietas (las que titilan se dibujan en cada cuadro)
+  if(!rain) for(let i = 0; i < 70; i++) R(r() < .5 ? '#3a3468' : '#4b4580', (r() * W) | 0, (r() * (f.sky - 24)) | 0, 1, 1);
+  // luna con halo
+  const [mx, my, mr] = f.moon;
+  gx.globalAlpha = rain ? .25 : 1;
+  for(const [k, a] of [[mr + 7, .05], [mr + 4, .08], [mr + 2, .12]]){ gx.globalAlpha = (rain ? .25 : 1) * a; disc(gx, mx, my, k, '#f6eccb'); }
+  gx.globalAlpha = rain ? .35 : 1;
+  disc(gx, mx, my, mr, '#f2e6c2'); disc(gx, mx + 3, my - 1, mr - 1, '#f2e6c2');
+  for(let y = -mr; y <= mr; y++) for(let x = -mr; x <= mr; x++) if(x * x + y * y <= mr * mr && (x + 3) * (x + 3) + (y + 3) * (y + 3) > (mr + 1) * (mr + 1)) R('#d9cba0', mx + x, my + y, 1, 1);
+  R('#d4c596', mx - 3, my + 1, 2, 2); R('#d4c596', mx + 2, my + 4, 2, 1); R('#d4c596', mx - 1, my - 4, 1, 1);
+  gx.globalAlpha = 1;
+  // cerros lejanos y cercanos
+  const ridge = (base, amp, fr, ph, col) => { for(let x = 0; x < W; x++){ const y = Math.round(base - amp * (Math.sin(x * fr + ph) * .6 + Math.sin(x * fr * 2.3 + ph * 2) * .4)); R(col, x, y, 1, f.sky - y); } };
+  ridge(f.sky - 18, 6, .045, 1.2, rain ? '#1a1d2c' : '#1b1638');
+  ridge(f.sky - 9, 4, .07, 3.1, rain ? '#13151f' : '#120f28');
+  // el pueblo de Soundfalya: casas, torre y ventanas encendidas
+  L.wins = [];
+  const vil = mul(21), cx = Math.floor(W * (FORMAT === 'v' ? .36 : .4));
+  const house = (x, w, h, roof) => {
+    const y = f.sky - 6 - h; R('#0c0a1d', x, y, w, h + 6);
+    for(let k = 0; k <= roof; k++) R('#0c0a1d', x - 1 + k, y - k, w + 2 - k * 2, 1);
+    for(let wy = y + 2; wy < f.sky - 7; wy += 4) for(let wx = x + 1; wx < x + w - 1; wx += 3) if(vil() < .45) L.wins.push([wx, wy, vil() < .5 ? '#ffb347' : '#ffd27a', vil() * 6.28]);
+  };
+  const xs = FORMAT === 'v' ? [[8, 9, 6, 4], [20, 7, 9, 3], [cx - 14, 10, 7, 5], [cx + 10, 8, 11, 4], [cx + 22, 11, 6, 5], [W - 22, 8, 8, 4], [W - 12, 9, 5, 4]]
+                            : [[10, 10, 6, 5], [24, 8, 9, 4], [cx - 30, 12, 7, 6], [cx + 12, 9, 10, 4], [cx + 26, 12, 6, 6], [W - 64, 9, 8, 4], [W - 50, 10, 5, 5], [W - 34, 8, 7, 4]];
+  xs.forEach(([x, w, h, rf]) => house(x, w, h, rf));
+  // torre del reloj con campanario
+  const tx = cx, ty = f.sky - 6 - 22; R('#0c0a1d', tx, ty, 6, 28); for(let k = 0; k < 4; k++) R('#0c0a1d', tx + k - 1 + (k > 0 ? 1 : 0), ty - k * 2 - 1, Math.max(1, 8 - k * 2 - (k > 0 ? 2 : 0)), 2);
+  R('#0c0a1d', tx + 2, ty - 10, 1, 3); L.wins.push([tx + 2, ty + 4, '#ffd27a', 1], [tx + 2, ty + 5, '#ffd27a', 1]);
+  R('#0c0a1d', 0, f.sky - 6, W, 6);
+  // neblina del horizonte que se funde con la zona de caída
+  R(rain ? '#161a28' : '#17132f', 0, f.sky - 2, W, 1); R(rain ? '#11141f' : '#120f26', 0, f.sky - 1, W, 1);
+  // zona de caída: oscura, sin ruido; solo guías muy tenues en cada Do
+  const fz = rain ? ['#0e1019', '#0d0f17', '#0c0e15', '#0b0c13'] : ['#0f0d22', '#0d0c1e', '#0c0a1b', '#0a0918'];
+  const fh = Math.ceil((f.hit - f.sky) / fz.length);
+  for(let i = 0; i < fz.length; i++) R(fz[i], 0, f.sky + i * fh, W, fh);
+  for(const k of L.keys) if(k.p % 12 === 0) R(rain ? '#151826' : '#17142e', k.x - 1, f.sky, 1, f.hit - f.sky - 3);
+  R('#05040c', 0, f.hit, W, f.keysH);
+  // fieltro y riel sobre las teclas
+  R('#05040c', 0, f.hit - 3, W, 1); R('#4a1630', 0, f.hit - 2, W, 1); R('#2a0e1d', 0, f.hit - 1, W, 1);
+  // mueble del piano bajo las teclas y la marca
+  R('#05040c', 0, f.hit + f.keysH, W, 1); R('#1a1730', 0, f.hit + f.keysH + 1, W, 1);
+  for(let y = f.hit + f.keysH + 2, k = 0; y < H; y += 6, k++) R(k % 2 ? '#0c0b19' : '#0e0d1d', 0, y, W, 6);
+}
+function disc(g, cx, cy, r, c){ g.fillStyle = c; for(let y = -r; y <= r; y++){ const h = Math.floor(Math.sqrt(r * r - y * y)); g.fillRect(cx - h, cy + y, h * 2 + 1, 1); } }
+
+const lowerBound = (a, t) => { let l = 0, h = a.length; while(l < h){ const m = (l + h) >> 1; if(a[m].t0 < t) l = m + 1; else h = m; } return l; };
+function keyOf(p){ const i = p - L.lo; return i >= 0 && i < L.keys.length ? L.keys[i] : null; }
+
+function draw(songT, now){
+  const f = L.f, R = (c, x, y, w, h) => { bx.fillStyle = c; bx.fillRect(x, y, w, h); };
+  bx.imageSmoothingEnabled = false; bx.globalAlpha = 1; bx.drawImage(bgc, 0, 0);
+  const fallT = +$('fall').value, speed = (f.hit - 3 - f.sky) / fallT, hitY = f.hit - 3, rain = SCENE === 'rain';
+  // cielo vivo
+  if(!rain){
+    for(const s of L.stars){ const a = .35 + .65 * Math.max(0, Math.sin(now * s.sp + s.ph)); bx.globalAlpha = a; R(s.big ? '#fff3c8' : '#cfd3ff', s.x, s.y, 1, 1); if(s.big && a > .8){ bx.globalAlpha = a * .5; R('#fff3c8', s.x - 1, s.y, 3, 1); R('#fff3c8', s.x, s.y - 1, 1, 3); } }
+    const sh = now % 9; if(sh < .7){ const x0 = W * .15 + (Math.floor(now / 9) * 37 % (W * .5)), y0 = 4 + (Math.floor(now / 9) * 13 % 14); for(let k = 0; k < 7; k++){ bx.globalAlpha = (1 - k / 7) * (1 - sh / .7); R('#ffffff', Math.round(x0 + sh * 60 - k), Math.round(y0 + sh * 22 - k * .4), 1, 1); } }
+  } else {
+    bx.globalAlpha = .9;
+    for(let i = 0; i < 4; i++){ const cy = 3 + i * 7, w = 40 + i * 6, x = ((now * (2 + i) + i * 53) % (W + w)) - w; R(i % 2 ? '#1e2233' : '#23283b', Math.round(x), cy, w, 4); R(i % 2 ? '#1e2233' : '#23283b', Math.round(x) + 6, cy - 2, w - 14, 2); }
+    bx.globalAlpha = .38;
+    for(const d of L.drops){ const y = (d.y + now * 28 * d.v) % f.sky, x = Math.round((d.x - now * 4 * d.v) % (W + 30) + (W + 30)) % (W + 30) - 10; R('#8fa3d6', x, Math.round(y), 1, 3); }
+  }
+  bx.globalAlpha = 1;
+  for(const [x, y, c, ph] of L.wins){ bx.globalAlpha = .75 + .25 * Math.sin(now * 1.7 + ph * 3); R(c, x, y, 1, 1); }
+  bx.globalAlpha = 1;
+  // notas que caen
+  const act = new Map();
+  const i0 = lowerBound(piece.notes, songT - piece.md - .05);
+  for(let k = i0; k < piece.notes.length; k++){
+    const n = piece.notes[k]; if(n.t0 - songT > fallT + .1) break;
+    const key = keyOf(n.p); if(!key) continue;
+    if(n.t0 <= songT && songT < n.t1) act.set(n.p, n);
+    let y1 = Math.min(Math.round(hitY - (n.t0 - songT) * speed), hitY), y0 = Math.max(Math.round(hitY - (n.t1 - songT) * speed), f.sky);
+    if(y1 <= f.sky) continue; if(y1 - y0 < 3) y0 = Math.max(f.sky, y1 - 3); if(y1 <= y0) continue;
+    const [cl, ch] = tileCols(n), x = key.x, w = key.w, h = y1 - y0, mid = y0 + Math.floor(h / 2);
+    bx.globalAlpha = .18; R(cl[0], x - 1, y0, w + 2, h); bx.globalAlpha = 1;             // halo suave
+    R(cl[1], x, y0, w, h);
+    if(ch === cl){ R(cl[0], x + 1, y0 + 1, Math.max(1, w - 2), Math.max(1, h - 2)); }
+    else { R(ch[1], x, y0, w, mid - y0); R(ch[0], x + 1, y0 + 1, Math.max(1, w - 2), Math.max(1, mid - y0 - 1)); R(cl[0], x + 1, mid, Math.max(1, w - 2), Math.max(1, y1 - mid - 1)); }
+    R(ch[2], x + 1, y0 + 1, Math.max(1, w - 2), 1);                                         // brillo arriba
+    if(w > 2 && h > 3){ R('#0b0a18', x, y0, 1, 1); R('#0b0a18', x + w - 1, y0, 1, 1); R('#0b0a18', x, y1 - 1, 1, 1); R('#0b0a18', x + w - 1, y1 - 1, 1, 1); }
+    if(n.t0 <= songT){ R('#ffffff', x, y1 - 1, w, 1); }
+  }
+  // chispas al tocar: se generan cuando una nota cruza la línea
+  const prev = L.prevT; L.prevT = songT;
+  if(prev == null || songT < prev || songT - prev > .3){ L.parts.length = 0; }
+  else {
+    const dt = songT - prev;
+    for(let k = lowerBound(piece.notes, prev + 1e-6); k < piece.notes.length && piece.notes[k].t0 <= songT; k++){
+      const n = piece.notes[k], key = keyOf(n.p); if(!key) continue;
+      L.flash.set(n.p, { t:n.t0, n }); const [cl, ch] = tileCols(n), r = Math.random;
+      for(let j = 0; j < 9; j++) L.parts.push({ x:key.x + key.w / 2 + (r() - .5) * key.w, y:hitY - 1, vx:(r() - .5) * 46, vy:-(18 + r() * 46), life:.45 + r() * .5, age:0, c:[cl[2], ch[0], '#ffffff'][j % 3] });
+    }
+    for(const p of L.parts){ p.age += dt; p.vy += 95 * dt; p.x += p.vx * dt; p.y += p.vy * dt; }
+    for(let k = L.parts.length - 1; k >= 0; k--) if(L.parts[k].age >= L.parts[k].life || L.parts[k].y > f.hit) L.parts.splice(k, 1);
+  }
+  // haces de luz sobre las teclas que suenan
+  for(const [p, n] of act){
+    const key = keyOf(p), [cl] = tileCols(n), age = songT - n.t0;
+    for(let s = 0; s < 8; s++){ bx.globalAlpha = (.16 + .2 * Math.max(0, 1 - age * 3)) * (1 - s / 8); R(cl[0], key.x, hitY - (s + 1) * 4, key.w, 4); }
+  }
+  // destellos en la línea de golpe
+  for(const [p, fl] of L.flash){
+    const age = songT - fl.t; if(age < 0 || age > .35){ L.flash.delete(p); continue; }
+    const key = keyOf(p), [cl] = tileCols(fl.n), a = 1 - age / .35, w = key.w + 2 + Math.round(age * 16);
+    bx.globalAlpha = .5 * a; R(cl[0], Math.round(key.x + key.w / 2 - w / 2), hitY - 2, w, 3);
+    bx.globalAlpha = .9 * a; R('#ffffff', key.x, hitY - 1, key.w, 1);
+  }
+  for(const p of L.parts){ bx.globalAlpha = Math.max(0, 1 - p.age / p.life); R(p.c, Math.round(p.x), Math.round(p.y), p.age < .12 ? 2 : 1, 1); }
+  bx.globalAlpha = 1;
+  // el teclado se dibuja en la capa fina (overlay) para que las negras se lean bien
+  const kt = f.hit, kh = f.keysH; R('#05040c', 0, kt, W, kh); L.act = act;
+  // reflejo de colores en el mueble
+  for(const [p, n] of act){ const key = keyOf(p), [cl] = tileCols(n); bx.globalAlpha = .28; R(cl[0], key.x, kt + kh + 2, key.w, 3); bx.globalAlpha = .12; R(cl[0], key.x, kt + kh + 5, key.w, 4); }
+  bx.globalAlpha = 1;
+  // título y texto flotante
+  bx.font = '8px SoundfalyaPixel, monospace'; bx.textBaseline = 'top'; bx.textAlign = 'center'; bx.fontKerning = 'none';
+  const fit = (t, mw) => { while(bx.measureText(t).width > mw && t.length > 3) t = t.slice(0, -2).trimEnd() + '…'; return t; };
+  const title = ($('title').value || '').trim();
+  if(title){ const t = fit(title, W - 10); bx.fillStyle = '#05040c'; bx.fillText(t, W / 2 + 1, f.titleY + 1); bx.fillStyle = '#f6eccb'; bx.fillText(t, W / 2, f.titleY); }
+  out.imageSmoothingEnabled = false; out.drawImage(buf, 0, 0, W, H, 0, 0, W * SC, H * SC);
+  overlay(now);
+}
+/* Capa a resolución completa: texto flotante más fino (grilla de 6 px) y la marca con el sello */
+const SEAL = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 30; const g = c.getContext('2d');
+  const R = (col, x, y, w, h) => { g.fillStyle = col; g.fillRect(x, y, w, h); };
+  const disc = (col, cx, cy, r) => { for(let y = -r; y <= r; y++) for(let x = -r; x <= r; x++) if(x * x + y * y <= r * r + r * .6) R(col, cx + x, cy + y, 1, 1); };
+  const sx = 15, sy = 15;
+  for(let k = 0; k < 8; k++){ const a = k * Math.PI / 4; disc('#2b1608', sx + Math.round(Math.cos(a) * 11), sy + Math.round(Math.sin(a) * 11), 4); } disc('#2b1608', sx, sy, 12);
+  for(let k = 0; k < 8; k++){ const a = k * Math.PI / 4; disc('#8c1c22', sx + Math.round(Math.cos(a) * 11), sy + Math.round(Math.sin(a) * 11), 3); }
+  disc('#8c1c22', sx, sy, 11); disc('#b3202e', sx - 1, sy - 1, 9); disc('#a01a28', sx, sy, 6); R('#e86060', sx - 7, sy - 6, 3, 1); R('#e86060', sx - 8, sy - 5, 1, 2);
+  const clef = ['..#..', '.#.#.', '.##..', '.#...', '##...', '#.##.', '#.#.#', '.###.', '..#..', '.##..'];
+  clef.forEach((r, j) => [...r].forEach((b, i) => { if(b === '#'){ R('#4f1010', sx - 1 + i, sy - 4 + j, 1, 1); R('#e8b84a', sx - 2 + i, sy - 5 + j, 1, 1); } }));
+  return c;
+})();
+function introCard(g, U){                             // cartel SOUNDFALYA que tapa la zona de caída y baja al dar play
+  const p = typeof introP === 'function' ? introP() : 0; if(p >= 1) return;
+  const f = L.f, y0 = f.sky * U, y1 = (f.hit - 3) * U, h = y1 - y0, k = Math.max(0, (p - .2) / .8), dy = Math.round(k * k * h / 8) * 8;
+  g.save(); g.beginPath(); g.rect(0, y0, W * U, h); g.clip();
+  g.fillStyle = SCENE === 'rain' ? '#0d0f17' : '#0d0c1e'; g.fillRect(0, y0 + dy, W * U, h);
+  g.fillStyle = '#ffb347'; g.globalAlpha = .5; g.fillRect(0, y0 + dy, W * U, 4); g.globalAlpha = 1;
+  const big = FORMAT === 'v' ? 64 : 48, sz = FORMAT === 'v' ? 150 : 120, cy = y0 + dy + h / 2;
+  g.drawImage(SEAL, Math.round((W * U - sz) / 2), Math.round(cy - sz - 8), sz, sz);
+  g.font = big + 'px SoundfalyaPixel, monospace'; g.textAlign = 'center'; g.textBaseline = 'top';
+  g.fillStyle = '#05040c'; g.fillText('SOUNDFALYA', W * U / 2 + 8, cy + 24 + 8); g.fillStyle = '#ffd9a0'; g.fillText('SOUNDFALYA', W * U / 2, cy + 24);
+  g.restore();
+}
+function drawKeys(g, U){
+  const f = L.f, act = L.act || new Map(), Rr = (c, x, y, w, h) => { g.fillStyle = c; g.fillRect(x, y, w, h); };
+  const kt = f.hit * U, kh = f.keysH * U, wp = L.wk * U, q = 4;
+  Rr('#05040c', (L.ox - 1) * U, kt, L.n * wp + U, kh);
+  for(const k of L.keys) if(!k.black){                         // blancas: cara clara, sombra del fieltro arriba y labio abajo
+    const x = k.x * U, w = wp - q, n = act.get(k.p);
+    if(n){ const [cl, ch] = tileCols(n); Rr(cl[2], x, kt, w, kh - q); Rr(ch[0], x, kt, w, 2 * q); Rr(cl[0], x, kt + kh - 3 * q, w, 2 * q); }
+    else { Rr('#eceaf6', x, kt, w, kh - q); Rr('#b9b3cf', x, kt, w, 2 * q); Rr('#f9f8ff', x, kt + 2 * q, q, kh - 7 * q); Rr('#d3cfe3', x, kt + kh - 4 * q, w, 3 * q); Rr('#ffffff', x, kt + kh - 4 * q, w, q); }
+  }
+  const bwp = Math.max(3 * q, Math.round(wp * .6 / q) * q), bh = Math.round(kh * .62 / q) * q;
+  for(const k of L.keys) if(k.black){                          // negras: más anchas, con sombra sobre las blancas y un borde de luz
+    const cx = (k.x + k.w / 2) * U, x = Math.round((cx - bwp / 2) / q) * q, n = act.get(k.p);
+    g.globalAlpha = .45; Rr('#2a2445', x + bwp, kt, q, bh + q); Rr('#2a2445', x + q, kt + bh, bwp, q); g.globalAlpha = 1;
+    Rr('#000000', x - q / 2, kt, bwp + q, bh + q / 2);
+    if(n){ const [cl, ch] = tileCols(n); Rr(ch[0], x, kt, bwp, Math.round(bh / 2 / q) * q); Rr(cl[0], x, kt + Math.round(bh / 2 / q) * q, bwp, bh - Math.round(bh / 2 / q) * q - 2 * q); Rr(cl[1], x, kt + bh - 2 * q, bwp, 2 * q); Rr(cl[2], x + q, kt + bh - 3 * q, bwp - 2 * q, q); }
+    else { Rr('#1d1a33', x, kt, bwp, bh); Rr('#2c2850', x + q, kt, bwp - 2 * q, bh - 4 * q); Rr('#4a4580', x + q, kt + q, q, bh - 6 * q); Rr('#0b0a16', x, kt + bh - 3 * q, bwp, 3 * q); Rr('#6a64a8', x + q, kt + bh - 4 * q, bwp - 2 * q, q); }
+  }
+}
+function overlay(now){
+  const f = L.f, g = out, U = SC, Rr = (c, x, y, w, h) => { g.fillStyle = c; g.fillRect(x, y, w, h); };
+  g.imageSmoothingEnabled = false; g.textBaseline = 'top'; g.textAlign = 'center'; g.fontKerning = 'none';
+  const CW = W * U;
+  introCard(g, U); drawKeys(g, U);
+  // texto flotante
+  const cta = ($('cta').value || '').trim();
+  if(cta && $('ctaOn').checked){
+    g.font = '40px SoundfalyaPixel, monospace'; const maxW = FORMAT === 'v' ? CW - 24 * U : CW * .7, q = 5;
+    let t = cta; while(g.measureText(t).width > maxW && t.length > 3) t = t.slice(0, -2).trimEnd() + '…';
+    const tw = Math.ceil(g.measureText(t).width / q) * q + 8 * q, th = 14 * q, x = Math.round((CW - tw) / 2 / q) * q, y = f.ctaY * U + Math.round(Math.sin(now * 2.2)) * q;
+    g.globalAlpha = .8; Rr('#0b0a18', x, y, tw, th); g.globalAlpha = 1;
+    Rr('#ffb347', x + q, y - q, tw - 2 * q, q); Rr('#ffb347', x + q, y + th, tw - 2 * q, q); Rr('#ffb347', x, y, q, th); Rr('#ffb347', x + tw - q, y, q, th);
+    g.textBaseline = 'alphabetic'; const m = g.measureText(t), asc = Math.ceil(m.actualBoundingBoxAscent), dsc = Math.ceil(m.actualBoundingBoxDescent);
+    g.fillStyle = '#ffd9a0'; g.fillText(t, CW / 2, Math.round((y + (th - asc - dsc) / 2 + asc) / q) * q); g.textBaseline = 'top';
+    const sp = (now * 1.3) % 3; if(sp < 1){ g.globalAlpha = 1 - sp; Rr('#ffffff', x + tw - 3 * q, y - 2 * q, 3 * q, q); Rr('#ffffff', x + tw - 2 * q, y - 3 * q, q, 3 * q); g.globalAlpha = 1; }
+  }
+  // sello de Soundfalya centrado bajo el teclado, como la placa de marca de un piano
+  const sz = FORMAT === 'v' ? 120 : 72, sx = Math.round((CW - sz) / 2), sy = (f.hit + f.keysH) * U + (FORMAT === 'v' ? 3 * U : Math.round((H - f.hit - f.keysH) * U - sz) / 2);
+  g.globalAlpha = .4; g.fillStyle = '#ffb347'; g.fillRect(sx - 14 * U, sy + sz / 2 - 4, 12 * U, 4); g.fillRect(sx + sz + 2 * U, sy + sz / 2 - 4, 12 * U, 4); g.globalAlpha = 1;
+  g.drawImage(SEAL, sx, sy, sz, sz);
+  // guía de zonas que tapa TikTok (solo en pantalla, nunca en la grabación)
+  if($('safe').checked && !recording && FORMAT === 'v'){
+    const H8 = H * U; g.globalAlpha = .3; g.fillStyle = '#ff4f6e';
+    g.fillRect(0, 0, CW, 150); g.fillRect(CW - 150, 820, 150, 820); g.fillRect(0, H8 - 400, CW, 400);
+    g.globalAlpha = 1; g.font = '24px system-ui, sans-serif'; g.fillStyle = '#fff';
+    g.fillText('pestañas de TikTok', CW / 2, 60); g.fillText('descripción, usuario y música', CW / 2, H8 - 220);
+    g.save(); g.translate(CW - 75, 1230); g.rotate(-Math.PI / 2); g.fillText('foto y botones', 0, -12); g.restore();
+  }
+}
+
+/* ---------- Audio: piano cálido con un toque lo-fi ---------- */
+function ensureAudio(){
+  if(ctx) return;
+  ctx = new (window.AudioContext || window.webkitAudioContext)();
+  bus = ctx.createGain(); comp = ctx.createDynamicsCompressor(); dest = ctx.createMediaStreamDestination();
+  const warm = ctx.createBiquadFilter(); warm.type = 'lowpass'; warm.frequency.value = 5200; warm.Q.value = .4;
+  const dry = ctx.createGain(), wet = ctx.createGain(), vb = ctx.createConvolver(), len = Math.floor(ctx.sampleRate * 2.6), ir = ctx.createBuffer(2, len, ctx.sampleRate);
+  for(let c = 0; c < 2; c++){ const d = ir.getChannelData(c); for(let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3); }
+  vb.buffer = ir; dry.gain.value = .9; wet.gain.value = .26; bus.gain.value = .9;
+  bus.connect(warm); warm.connect(dry); dry.connect(comp); warm.connect(vb); vb.connect(wet); wet.connect(comp);
+  comp.connect(ctx.destination); comp.connect(dest);
+}
+function pianoVoice(p, vel, t0, t1, out, off){
+  const f = 440 * Math.pow(2, (p - 69) / 12), end = Math.max(t0 + .08, t1), g = ctx.createGain();
+  const tc = .55 * Math.pow(2, -(p - 60) / 24), pk = (.13 * Math.pow(vel / 127, .9) + .02) * Math.exp(-off / tc * .7);
+  g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(pk, t0 + (off ? .03 : .006));
+  g.gain.setTargetAtTime(pk * .22, t0 + .01, tc); g.gain.setTargetAtTime(0, end, .11);
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(Math.min(9000, f * 8 + 1400), t0); lp.frequency.setTargetAtTime(f * 3 + 500, t0 + .02, tc * .8);
+  for(const [m, a, det] of [[1, 1, 0], [1, .35, 4], [2, .42, 0], [3, .18, 0], [4, .09, 0], [5, .04, 0]]){
+    const fr = f * m; if(fr > 12000) continue;
+    const o = ctx.createOscillator(), og = ctx.createGain(); o.type = m === 1 && !det ? 'triangle' : 'sine'; o.frequency.value = fr; o.detune.value = det; og.gain.value = a;
+    o.connect(og); og.connect(lp); o.start(t0); o.stop(end + .9);
+  }
+  lp.connect(g); g.connect(out);
+}
+/* ---------- Otros sonidos ---------- */
+let INSTR = 'piano';
+const INS = {                                          // parts: [múltiplo, nivel, onda, desafinación]
+  box:{ oct:12, parts:[[1, 1], [3, .12], [6.1, .04]], a:.002, d:.45, s:0, r:.3, ring:1.8, gain:1.1 },
+  harp:{ parts:[[1, 1, 'triangle'], [2, .3], [3, .1]], a:.004, d:.5, s:0, r:.25, ring:1.6, gain:1.1, lp:f => f * 6 + 800 },
+  mar:{ parts:[[1, 1], [4, .16], [9.9, .04]], a:.003, d:.2, s:0, r:.12, ring:.9, gain:1.3 },
+  chip:{ parts:[[1, 1, 'square']], a:.002, d:.12, s:.5, r:.04, gain:.32, lp:() => 4200 },
+  organ:{ parts:[[1, 1], [2, .55], [3, .3], [4, .22], [8, .08]], a:.02, d:1, s:1, r:.08, gain:.5 },
+  pad:{ parts:[[1, .55, 'sawtooth', -8], [1, .55, 'sawtooth', 8], [2, .12, 'sine']], a:.28, d:1.2, s:.75, r:.6, gain:.5, lp:f => Math.min(1800, f * 3 + 300) }
+};
+function synthVoice(S, p, vel, t0, t1, out, off){
+  const f = 440 * Math.pow(2, (p + (S.oct || 0) - 69) / 12), end = S.ring ? t0 + S.ring : Math.max(t0 + .08, t1);
+  const pk = (.13 * Math.pow(vel / 127, .9) + .02) * S.gain * (S.s < 1 ? Math.exp(-off / S.d * .7) : 1), g = ctx.createGain();
+  g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(pk, t0 + (off ? .03 : S.a));
+  if(S.s < 1) g.gain.setTargetAtTime(pk * S.s, t0 + S.a, S.d);
+  g.gain.setTargetAtTime(0, end, S.r);
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = Math.min(12000, S.lp ? S.lp(f) : f * 10 + 1500); lp.connect(g);
+  for(const [m, a, type = 'sine', det = 0] of S.parts){
+    const fr = f * m; if(fr > 12000) continue;
+    const o = ctx.createOscillator(), og = ctx.createGain(); o.type = type; o.frequency.value = fr; o.detune.value = det; og.gain.value = a;
+    o.connect(og); og.connect(lp); o.start(t0); o.stop(end + S.r * 6 + .1);
+  }
+  g.connect(out);
+}
+function epVoice(p, vel, t0, t1, out, off){             // piano eléctrico tipo Rhodes (FM)
+  const f = 440 * Math.pow(2, (p - 69) / 12), end = Math.max(t0 + .08, t1), pk = (.13 * Math.pow(vel / 127, .9) + .02) * 1.1 * Math.exp(-off / 1.2), g = ctx.createGain();
+  g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(pk, t0 + (off ? .03 : .004)); g.gain.setTargetAtTime(pk * .3, t0 + .01, .9); g.gain.setTargetAtTime(0, end, .2);
+  const c = ctx.createOscillator(), m = ctx.createOscillator(), mg = ctx.createGain(), t = ctx.createOscillator(), tg = ctx.createGain();
+  c.frequency.value = f; m.frequency.value = f; mg.gain.setValueAtTime(f * 1.6 * vel / 127, t0); mg.gain.setTargetAtTime(f * .15, t0, .3);
+  t.frequency.value = Math.min(11000, f * 7); tg.gain.setValueAtTime(off ? 0 : .1, t0); tg.gain.setTargetAtTime(0, t0, .03);
+  m.connect(mg); mg.connect(c.frequency); c.connect(g); t.connect(tg); tg.connect(g); g.connect(out);
+  for(const o of [c, m, t]){ o.start(t0); o.stop(end + 1.2); }
+}
+function voice(p, vel, t0, t1, out, off){
+  if(INSTR === 'ep') return epVoice(p, vel, t0, t1, out, off);
+  if(INS[INSTR]) return synthVoice(INS[INSTR], p, vel, t0, t1, out, off);
+  return pianoVoice(p, vel, t0, t1, out, off);
+}
+function startRain(t0, t1){
+  const len = ctx.sampleRate * 2, b = ctx.createBuffer(1, len, ctx.sampleRate), d = b.getChannelData(0);
+  for(let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (Math.random() < .002 ? 3 : 1);
+  const src = ctx.createBufferSource(), hp = ctx.createBiquadFilter(), lp = ctx.createBiquadFilter(), g = ctx.createGain();
+  src.buffer = b; src.loop = true; hp.type = 'highpass'; hp.frequency.value = 350; lp.type = 'lowpass'; lp.frequency.value = 1800;
+  g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(.022, t0 + .5); g.gain.setValueAtTime(.022, t1 - .4); g.gain.linearRampToValueAtTime(0, t1);
+  src.connect(hp); hp.connect(lp); lp.connect(g); g.connect(comp); src.start(t0); src.stop(t1 + .1);
+  return src;
+}
+function schedule(){
+  if(!ctx || state !== 'playing') return;
+  const now = ctx.currentTime, hz = now + 1.2;
+  while(nextIdx < piece.notes.length){
+    const n = piece.notes[nextIdx], when = base + n.t0; if(when > hz || n.t0 > runEnd) break; nextIdx++;
+    if(!useSynth || base + n.t1 <= now + .02) continue;
+    const at = Math.max(when, now + .01); voice(n.p, n.v, at, base + Math.min(n.t1, runEnd + .2), sess, at - when);
+  }
+}
+function killSession(){
+  clearInterval(sched); sched = null;
+  for(const k of ['sess', 'audSrc', 'rainNode']){ const nd = k === 'sess' ? sess : k === 'audSrc' ? audSrc : rainNode; if(nd){ try{ nd.stop && nd.stop(); }catch(e){} try{ nd.disconnect(); }catch(e){} } }
+  sess = audSrc = rainNode = null;
+}
+function start(a, b, at){
+  ensureAudio(); ctx.resume(); killSession();
+  const t00 = at || ctx.currentTime + .12; base = t00 - a; runStart = a; runEnd = b;
+  sess = ctx.createGain(); sess.connect(bus);
+  sess.gain.setValueAtTime(0, t00); sess.gain.linearRampToValueAtTime(1, t00 + .03); sess.gain.setValueAtTime(1, base + b - .3); sess.gain.linearRampToValueAtTime(0, base + b);
+  nextIdx = lowerBound(piece.notes, a - piece.md - .05);
+  while(nextIdx < piece.notes.length && piece.notes[nextIdx].t1 <= a) nextIdx++;
+  if(!useSynth && audBuf){
+    const ag = ctx.createGain(); ag.connect(comp); ag.gain.setValueAtTime(1, base + b - .3); ag.gain.linearRampToValueAtTime(0, base + b);
+    audSrc = ctx.createBufferSource(); audSrc.buffer = audBuf; audSrc.connect(ag);
+    try{ audSrc.start(base + Math.max(0, a), Math.max(0, a)); }catch(e){}
+  }
+  if($('rainSnd').checked) rainNode = startRain(t00, base + b);
+  state = 'playing'; sched = setInterval(schedule, 40); schedule(); sync();
+}
+function songTime(){
+  if(!ctx || state === 'idle') return cue != null ? cue : clipRange().a;
+  if(state === 'ended') return runEnd;
+  return ctx.currentTime - base;
+}
+const INTRO = 1.6; let introAt = -1e9;
+function jingle(t){                                    // cortina de Soundfalya: Fa, Sol, Do, Mi en arpegio
+  [65, 67, 72, 76].forEach((p, i) => voice(p, 92, t + i * .15, t + 1.5, bus, 0));
+}
+function play(intro){
+  const r = clipRange(), a = !clipMode && cue != null ? cue : r.a, fromTop = cue == null || clipMode; cue = null;
+  if(intro && fromTop && $('intro').checked){ ensureAudio(); ctx.resume(); killSession(); const t = ctx.currentTime + .08; jingle(t); introAt = t; start(a, r.b, t + INTRO); }
+  else { introAt = -1e9; start(a, r.b); }
+}
+function introP(){                                     // 0 = cartel al centro, 1 = ya bajó
+  if(state === 'idle' || state === 'ended' || !ctx) return 0;
+  return Math.max(0, Math.min(1, (ctx.currentTime - introAt) / INTRO));
+}
+function endRun(){
+  killSession(); state = 'ended'; sync();
+  if(recording && rec) setTimeout(() => { try{ rec.stop(); }catch(e){} }, clipMode ? 60 : 600);
+}
+
+/* ---------- Grabación ---------- */
+async function record(){
+  if(typeof MediaRecorder === 'undefined' || !cv.captureStream){ status('Este navegador no puede grabar video desde la página.'); return; }
+  ensureAudio(); await ctx.resume();
+  const cands = ['video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
+  const mime = cands.find(t => MediaRecorder.isTypeSupported(t));
+  try{
+    const stream = new MediaStream([...cv.captureStream(30).getVideoTracks(), ...dest.stream.getAudioTracks()]);
+    rec = new MediaRecorder(stream, mime ? { mimeType:mime, videoBitsPerSecond:10e6, audioBitsPerSecond:192000 } : undefined);
+  }catch(e){ status('No pude iniciar la grabación: ' + e.message); return; }
+  chunks = []; blob = null; $('save').hidden = true; $('again').hidden = true;
+  rec.ondataavailable = e => { if(e.data && e.data.size) chunks.push(e.data); };
+  rec.onstop = () => {
+    recording = false; blob = new Blob(chunks, { type:(rec.mimeType || mime || 'video/webm').split(';')[0] });
+    status('Listo: ' + (blob.size / 1048576).toFixed(1) + ' MB (' + (blob.type.includes('mp4') ? 'MP4' : 'WebM') + '). Pulsa «Guardar video».'); $('save').hidden = false; $('again').hidden = false; sync();
+  };
+  recording = true; const r = clipRange(); rec.start(500); play(true); status('Grabando ' + (r.b - r.a + ($('intro').checked ? INTRO : 0)).toFixed(1) + ' s… deja esta pestaña visible hasta que termine.');
+}
+async function saveVideo(){
+  if(!blob) return;
+  const ext = blob.type.includes('mp4') ? 'mp4' : 'webm', name = (($('title').value || 'piano-roll').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w]+/g, '-').replace(/^-|-$/g, '').toLowerCase() || 'piano-roll') + '-soundfalya.' + ext;
+  let dl = null; try{ dl = window.claude && window.claude.use && await window.claude.use('downloads'); }catch(e){}
+  if(dl){
+    try{ await dl.save({ filename:name, data:blob }); status('Video guardado.'); }
+    catch(e){ status(e && e.code === 'declined' ? 'Cancelaste la descarga.' : 'No pude guardar el video (' + ((e && (e.code || e.message)) || 'error') + ').'); }
+    return;
+  }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(() => { a.remove(); URL.revokeObjectURL(a.href); }, 60000);
+}
+
+/* ---------- Interfaz ---------- */
+const toggles = { fv:() => FORMAT === 'v', fh:() => FORMAT === 'h', scMoon:() => SCENE === 'moon', scRain:() => SCENE === 'rain', pNeon:() => palette === 'neon', pAmb:() => palette === 'amb', pKit:() => palette === 'kit', mClip:() => clipMode, mFull:() => !clipMode, sAud:() => !useSynth };
+function sync(){
+  const run = state === 'playing', locked = recording;
+  $('play').textContent = run ? '❚❚ Pausa' : (state === 'paused' ? '▶ Seguir' : '▶ Tocar');
+  for(const id of ['bpm', 'bpmRef', 'load', 'demo', 'fv', 'fh', 'fall', 'loadAud', 'restart', 'title', 'cta', 'ctaOn', 'safe', 'mClip', 'mFull', 'cs', 'cd', 'climax', 'here', 'scMoon', 'scRain', 'pNeon', 'pAmb', 'pKit', 'rainSnd', 'again', 'intro', 'bassUp']) $(id).disabled = locked;
+  $('sAud').disabled = locked || !audBuf; $('play').disabled = locked; $('seek').disabled = locked;
+  $('rec').textContent = locked ? '■ Parar grabación' : (clipMode ? '● Grabar el clip' : '● Grabar la pieza');
+  const rb = $('recBar'); rb.dataset.ready = blob && !locked ? '1' : '';
+  rb.textContent = locked ? '■ Parar' : (blob ? '⬇ Guardar video' : '● Grabar');
+  document.querySelectorAll('[data-ins]').forEach(b => { b.disabled = locked; b.classList.toggle('on', useSynth && INSTR === b.dataset.ins); });
+  for(const id in toggles) $(id).classList.toggle('on', toggles[id]());
+  $('fmt').textContent = FORMAT === 'v' ? '⇆ 16:9' : '⇅ 9:16'; $('fmt').disabled = locked;
+  $('clipCtl').hidden = !clipMode; clipInfo();
+}
+function info(){
+  $('info').textContent = piece.notes.length + ' notas · ' + mmss(piece.dur) + ' · de ' + noteName(piece.lo) + ' a ' + noteName(piece.hi) + ' · ' + (piece.voices > 1 ? piece.voices + ' pistas, la más aguda es la mano derecha' : 'una pista, las manos se separan en el Do central');
+}
+let sug = { bpm:144, why:'' };
+function setBpm(b){
+  b = Math.max(30, Math.min(220, Math.round(b))); $('bpm').value = b; $('bpmv').textContent = b;
+  const at = state === 'playing' ? songTime() * piece.bpm / b : null;
+  piece = withTempo(piece.src || piece, b); $('cs').max = Math.max(0, piece.dur - 2).toFixed(1);
+  $('bpmNote').textContent = sug.why ? 'Referencia: ' + sug.bpm + ' (' + sug.why + ')' : '';
+  if(at != null) start(at, clipMode ? clipRange().b : piece.dur + .8);
+  info(); sync();
+}
+function setPiece(p, title, fname){
+  killSession(); if(ctx) ctx.resume(); state = 'idle'; cue = null; blob = null; $('save').hidden = $('again').hidden = true;
+  if(p.title0) title = p.title0; if(title != null) $('title').value = title.slice(0, 40);
+  sug = suggestBpm(p, fname); piece = p; piece.src = null; piece = withTempo(p, sug.bpm); piece.src = p;
+  $('cs').value = 0; setBpm(sug.bpm); buildBG();
+}
+const SAVE_KEY = 'soundfalya-roll-pieza';
+function savePiece(p, title, fname){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify({ p:{ ...p, src:null }, title, fname, bpm:piece.bpm })); }catch(e){} }
+function saveBpm(){ try{ const o = JSON.parse(localStorage.getItem(SAVE_KEY)); if(o){ o.bpm = piece.bpm; localStorage.setItem(SAVE_KEY, JSON.stringify(o)); } }catch(e){} }
+function loadSaved(){ try{ const o = JSON.parse(localStorage.getItem(SAVE_KEY)); if(o && o.p && o.p.notes && o.p.notes.length) return o; }catch(e){} return null; }
+const idleReset = () => { cue = null; if(state !== 'playing'){ killSession(); state = 'idle'; } if(L) L.prevT = null; sync(); };
+$('load').onclick = () => { $('midi').value = ''; $('midi').click(); };
+$('again').onclick = record;
+$('midi').onchange = async () => {
+  const f = $('midi').files[0]; if(!f) return;
+  try{ const p = await readScoreFile(f); setPiece(p, f.name.replace(/\.[^.]+$/, '').replace(/[_]+/g, ' '), f.name); savePiece(p, $('title').value, f.name); status('Leí «' + f.name + '». Tempo: ' + piece.bpm + ' negras por minuto (' + sug.why + '). Pulsa «Tocar» o arrastra la barra para avanzar en la obra.'); }
+  catch(e){ status(e.message || 'No pude leer ese archivo.'); }
+};
+$('demo').onclick = () => { try{ localStorage.removeItem(SAVE_KEY); }catch(e){} setPiece(demoPiece(), 'Für Elise'); status(''); };
+$('bpm').oninput = () => { setBpm(+$('bpm').value); saveBpm(); };
+$('bpmRef').onclick = () => { setBpm(sug.bpm); saveBpm(); };
+$('bassUp').onchange = () => { setBpm(+$('bpm').value); buildBG(); };
+$('fv').onclick = () => { FORMAT = 'v'; buildBG(); sync(); };
+$('fh').onclick = () => { FORMAT = 'h'; buildBG(); sync(); };
+$('fmt').onclick = () => { FORMAT = FORMAT === 'v' ? 'h' : 'v'; buildBG(); sync(); };
+$('scMoon').onclick = () => { SCENE = 'moon'; buildBG(); sync(); };
+$('scRain').onclick = () => { SCENE = 'rain'; $('rainSnd').checked = true; buildBG(); sync(); };
+$('rainSnd').onchange = () => { if(rainNode){ try{ rainNode.stop(); rainNode.disconnect(); }catch(e){} rainNode = null; } if($('rainSnd').checked && ctx && state === 'playing' && base + runEnd > ctx.currentTime + 1) rainNode = startRain(ctx.currentTime + .02, base + runEnd); };
+$('pNeon').onclick = () => { palette = 'neon'; sync(); };
+$('pAmb').onclick = () => { palette = 'amb'; sync(); };
+$('pKit').onclick = () => { palette = 'kit'; sync(); };
+$('mClip').onclick = () => { clipMode = true; idleReset(); };
+$('mFull').onclick = () => { clipMode = false; idleReset(); };
+$('cs').oninput = $('cd').oninput = () => { if(state !== 'playing') state = 'idle'; sync(); };
+$('climax').onclick = () => { $('cs').value = findClimax().toFixed(1); state = 'idle'; sync(); };
+$('here').onclick = () => { $('cs').value = Math.max(0, songTime()).toFixed(1); if(state === 'playing') play(); else state = 'idle'; sync(); };
+$('fall').oninput = () => { $('fallv').textContent = (+$('fall').value).toFixed(1) + ' s'; if(!clipMode && state !== 'playing') state = 'idle'; };
+document.querySelectorAll('[data-ins]').forEach(b => b.onclick = () => {
+  INSTR = b.dataset.ins; useSynth = true;
+  if(state === 'playing') start(songTime(), runEnd); else { ensureAudio(); ctx.resume(); jingle(ctx.currentTime + .05); }
+  sync();
+});
+$('sAud').onclick = () => { useSynth = false; if(state === 'playing') start(songTime(), runEnd); sync(); };
+$('loadAud').onclick = () => { $('aud').value = ''; $('aud').click(); };
+$('aud').onchange = async () => {
+  const f = $('aud').files[0]; if(!f) return; ensureAudio();
+  try{ audBuf = await ctx.decodeAudioData(await f.arrayBuffer()); useSynth = false;
+    $('audNote').textContent = 'Audio cargado: ' + f.name + ' (' + mmss(audBuf.duration) + '). La pieza dura ' + mmss(piece.dur) + '.'; status(''); }
+  catch(e){ status('No pude leer ese audio. Prueba con un WAV o MP3.'); }
+  sync();
+};
+$('play').onclick = async () => {
+  if(state === 'playing'){ await ctx.suspend(); state = 'paused'; }
+  else if(state === 'paused'){ await ctx.resume(); state = 'playing'; }
+  else play(true);
+  sync();
+};
+$('restart').onclick = () => { cue = null; play(true); };
+$('rec').onclick = $('recBar').onclick = () => { if(recording){ status('Deteniendo la grabación…'); endRun(); return; } if(blob && !recording && $('recBar').dataset.ready) saveVideo(); else record(); };
+$('save').onclick = saveVideo;
+$('prog').onclick = e => {
+  if(recording) return; const r = $('prog').getBoundingClientRect(), t = Math.max(0, (e.clientX - r.left) / r.width * piece.dur);
+  if(clipMode){ $('cs').value = Math.min(+$('cs').max, t).toFixed(1); play(); } else start(t, piece.dur + .8);
+};
+let seeking = false, seekResume = false;
+$('seek').onpointerdown = () => { seeking = true; };
+$('seek').oninput = () => {
+  if(recording) return; seeking = true; const t = +$('seek').value / 1000 * piece.dur;
+  if(state === 'playing'){ seekResume = true; killSession(); }
+  if(clipMode) $('cs').value = Math.min(+$('cs').max, t).toFixed(1);
+  else cue = t;
+  state = 'idle'; if(L) L.prevT = null; sync();
+};
+$('seek').onchange = () => { seeking = false; if(seekResume){ seekResume = false; play(); } };
+window.addEventListener('pointerup', () => { seeking = false; });
+window.addEventListener('keydown', e => { if(e.code === 'Space' && !/input|textarea|button/i.test((e.target.tagName || ''))){ e.preventDefault(); $('play').click(); } });
+
+function frame(ts){
+  const now = ts / 1000; let st = songTime();
+  if(state === 'playing' && st >= runEnd){
+    if(clipMode && $('loop').checked && !recording){ play(); st = songTime(); } else { endRun(); st = runEnd; }
+  }
+  draw(st, now);
+  const shown = Math.max(0, Math.min(piece.dur, st)); $('pbar').style.width = (shown / piece.dur * 100) + '%';
+  if(!seeking) $('seek').value = Math.round(shown / piece.dur * 1000);
+  $('clock').textContent = mmss(shown) + ' / ' + mmss(piece.dur);
+  requestAnimationFrame(frame);
+}
+$('cs').max = Math.max(0, piece.dur - 2).toFixed(1);
+{ const sv = loadSaved();
+  if(sv){ setPiece(sv.p, sv.title, sv.fname); if(sv.bpm) setBpm(sv.bpm); status('Sigo con «' + (sv.title || sv.fname || 'tu pieza') + '», la última que cargaste.'); }
+  else setPiece(demoPiece(), 'Für Elise'); }
+(document.fonts && document.fonts.load ? document.fonts.load('8px SoundfalyaPixel') : Promise.resolve()).catch(() => {}).then(() => { buildBG(); requestAnimationFrame(frame); });
+window.PianoRoll = window.Organo = { get piece(){ return piece; }, parseMidi, start, play, get state(){ return state; }, songTime, draw, clipRange, findClimax };
+})();
+</script>
+
+</body></html>
