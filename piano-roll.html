@@ -72,10 +72,10 @@ hr{border:0; border-top:2px solid var(--line); margin:0}
     <div class="row">
       <button id="load" class="btn" type="button">Cargar MIDI o MusicXML…</button>
       <button id="demo" class="btn alt" type="button">Usar Für Elise de prueba</button>
-      <input id="midi" type="file" hidden>
+      <input id="midi" type="file" accept=".mid,.midi,.xml,.musicxml,.mxl" hidden>
     </div>
     <div class="grp"><label for="title">Título arriba</label><input id="title" type="text" maxlength="40" value="Für Elise"></div>
-    <div class="grp"><label for="cta">Texto flotante</label><input id="cta" type="text" maxlength="48" value="Sheet music link in bio">
+    <div class="grp"><label for="cta">Texto flotante (escribe lo que quieras)</label><input id="cta" type="text" maxlength="48" value="Sheet music link in bio">
       <label class="chk"><input type="checkbox" id="ctaOn" checked> Mostrar el texto flotante</label>
       <label class="chk"><input type="checkbox" id="safe"> Ver lo que tapa TikTok (no sale en el video)</label></div>
     <div class="info" id="info"></div>
@@ -94,15 +94,12 @@ hr{border:0; border-top:2px solid var(--line); margin:0}
     <h2>Escena</h2>
     <div class="grp"><span class="lbl">Formato</span>
       <div class="row"><button class="btn alt on" id="fv" type="button">Vertical 9:16</button><button class="btn alt" id="fh" type="button">Horizontal 16:9</button></div></div>
-    <div class="grp"><span class="lbl">Fondo</span>
-      <div class="row"><button class="btn alt on" id="scMoon" type="button">Noche de luna</button><button class="btn alt" id="scRain" type="button">Noche de lluvia</button></div></div>
     <div class="grp"><span class="lbl">Colores de las notas</span>
       <div class="row">
         <button class="btn alt on" id="pKit" type="button"><span class="sw" style="background:#1f5fd0"></span><span class="sw" style="background:#e8b800"></span><span class="sw" style="background:#e8559a"></span> Colores del kit</button>
         <button class="btn alt" id="pNeon" type="button"><span class="sw" style="background:#3ee8ff"></span><span class="sw" style="background:#ff4fc8"></span> Neón</button>
-        <button class="btn alt" id="pAmb" type="button"><span class="sw" style="background:#ffb347"></span><span class="sw" style="background:#3ee8ff"></span> Ámbar</button>
       </div>
-      <div class="note">Colores del kit usa la misma paleta de las partituras (Do azul, Re verde, Mi amarillo, Fa naranja, Sol rojo, La rosado, Si celeste), con los sostenidos en dos colores. Neón y Ámbar dan un color a cada mano.</div></div>
+      <div class="note">Colores del kit usa la misma paleta de las partituras (Do azul, Re verde, Mi amarillo, Fa naranja, Sol rojo, La rosado, Si celeste), con los sostenidos en dos colores. Neón da un color a cada mano.</div></div>
     <div class="grp"><label for="bpm">Tempo: <b id="bpmv">144</b> negras por minuto</label><input id="bpm" type="range" min="30" max="220" step="1" value="144">
       <div class="row"><button id="bpmRef" class="btn alt" type="button">Tempo de referencia</button><span class="note" id="bpmNote"></span></div></div>
     <label class="chk"><input type="checkbox" id="bassUp" checked> Bajo una octava más arriba (teclado más corto, teclas más grandes)</label>
@@ -125,7 +122,6 @@ hr{border:0; border-top:2px solid var(--line); margin:0}
       <button class="btn alt" id="loadAud" type="button">Cargar audio…</button>
       <input id="aud" type="file" accept="audio/*" hidden>
     </div>
-    <label class="chk"><input type="checkbox" id="rainSnd"> Lluvia ASMR de fondo</label>
     <div class="note" id="audNote">Si cargas el audio exportado desde Finale, suena tu piano en vez del sintetizador. Debe empezar en el mismo punto que el MIDI.</div>
     <hr>
     <h2>Video</h2>
@@ -723,7 +719,6 @@ function start(a, b, at){
     audSrc = ctx.createBufferSource(); audSrc.buffer = audBuf; audSrc.connect(ag);
     try{ audSrc.start(base + Math.max(0, a), Math.max(0, a)); }catch(e){}
   }
-  if($('rainSnd').checked) rainNode = startRain(t00, base + b);
   state = 'playing'; sched = setInterval(schedule, 40); schedule(); sync();
 }
 function songTime(){
@@ -781,11 +776,11 @@ async function saveVideo(){
 }
 
 /* ---------- Interfaz ---------- */
-const toggles = { fv:() => FORMAT === 'v', fh:() => FORMAT === 'h', scMoon:() => SCENE === 'moon', scRain:() => SCENE === 'rain', pNeon:() => palette === 'neon', pAmb:() => palette === 'amb', pKit:() => palette === 'kit', mClip:() => clipMode, mFull:() => !clipMode, sAud:() => !useSynth };
+const toggles = { fv:() => FORMAT === 'v', fh:() => FORMAT === 'h', pNeon:() => palette === 'neon', pKit:() => palette === 'kit', mClip:() => clipMode, mFull:() => !clipMode, sAud:() => !useSynth };
 function sync(){
   const run = state === 'playing', locked = recording;
   $('play').textContent = run ? '❚❚ Pausa' : (state === 'paused' ? '▶ Seguir' : '▶ Tocar');
-  for(const id of ['bpm', 'bpmRef', 'load', 'demo', 'fv', 'fh', 'fall', 'loadAud', 'restart', 'title', 'cta', 'ctaOn', 'safe', 'mClip', 'mFull', 'cs', 'cd', 'climax', 'here', 'scMoon', 'scRain', 'pNeon', 'pAmb', 'pKit', 'rainSnd', 'again', 'intro', 'bassUp']) $(id).disabled = locked;
+  for(const id of ['bpm', 'bpmRef', 'load', 'demo', 'fv', 'fh', 'fall', 'loadAud', 'restart', 'title', 'cta', 'ctaOn', 'safe', 'mClip', 'mFull', 'cs', 'cd', 'climax', 'here', 'pNeon', 'pKit', 'again', 'intro', 'bassUp']) $(id).disabled = locked;
   $('sAud').disabled = locked || !audBuf; $('play').disabled = locked; $('seek').disabled = locked;
   $('rec').textContent = locked ? '■ Parar grabación' : (clipMode ? '● Grabar el clip' : '● Grabar la pieza');
   const rb = $('recBar'); rb.dataset.ready = blob && !locked ? '1' : '';
@@ -832,11 +827,7 @@ $('bassUp').onchange = () => { setBpm(+$('bpm').value); buildBG(); };
 $('fv').onclick = () => { FORMAT = 'v'; buildBG(); sync(); };
 $('fh').onclick = () => { FORMAT = 'h'; buildBG(); sync(); };
 $('fmt').onclick = () => { FORMAT = FORMAT === 'v' ? 'h' : 'v'; buildBG(); sync(); };
-$('scMoon').onclick = () => { SCENE = 'moon'; buildBG(); sync(); };
-$('scRain').onclick = () => { SCENE = 'rain'; $('rainSnd').checked = true; buildBG(); sync(); };
-$('rainSnd').onchange = () => { if(rainNode){ try{ rainNode.stop(); rainNode.disconnect(); }catch(e){} rainNode = null; } if($('rainSnd').checked && ctx && state === 'playing' && base + runEnd > ctx.currentTime + 1) rainNode = startRain(ctx.currentTime + .02, base + runEnd); };
 $('pNeon').onclick = () => { palette = 'neon'; sync(); };
-$('pAmb').onclick = () => { palette = 'amb'; sync(); };
 $('pKit').onclick = () => { palette = 'kit'; sync(); };
 $('mClip').onclick = () => { clipMode = true; idleReset(); };
 $('mFull').onclick = () => { clipMode = false; idleReset(); };
