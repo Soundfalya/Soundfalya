@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Melody Breakout</title>
+<style>
+:root{--bg:#141022;--ink:#f3e9d2;--muted:#9b8fb5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#141022}}
+:root[data-theme="dark"]{--bg:#141022}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:ui-monospace,Menlo,monospace}
+body{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px;box-sizing:border-box;overflow:hidden}
+#wrap{width:min(100%,960px,calc((100vh - 80px)*4/3));aspect-ratio:4/3;position:relative}
+canvas{width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges;display:block;touch-action:none;border-radius:4px;box-shadow:0 0 0 2px #2a2140,0 8px 30px #0008}
+#bar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;font-size:13px;color:var(--muted)}
+select,button{font:inherit;background:#2a2140;color:var(--ink);border:1px solid #4a3d6b;border-radius:4px;padding:4px 8px}
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="c" width="320" height="240"></canvas></div>
+<div id="bar">
+  <label>Song <select id="song"></select></label>
+  <button id="mute">Sound: on</button>
+  <span>Move: mouse / touch / arrows · Launch: click / space</span>
+</div>
+<script>
+// ---- Melodies (from the Soundfalya beginner sheets) ----
+// each note: [step, octave, beats]; measures grouped so bricks read like the score
+const SONGS=[
+ {title:"Ode to Joy",composer:"L. v. Beethoven",tempo:120,measures:[
+  [["E",4,1],["E",4,1],["F",4,1],["G",4,1]],
+  [["G",4,1],["F",4,1],["E",4,1],["D",4,1]],
+  [["C",4,1],["C",4,1],["D",4,1],["E",4,1]],
+  [["E",4,1.5],["D",4,.5],["D",4,2]],
+  [["E",4,1],["E",4,1],["F",4,1],["G",4,1]],
+  [["G",4,1],["F",4,1],["E",4,1],["D",4,1]],
+  [["C",4,1],["C",4,1],["D",4,1],["E",4,1]],
+  [["D",4,1.5],["C",4,.5],["C",4,2]]]}
+];
+
+// Soundfalya note colors: C blue, D green, E yellow, F orange, G red, A purple, B light blue
+const NOTE_COL={C:["#2f6fd6","#6fa8ff","#1a3f86"],D:["#2f9e44","#7bd87f","#1b5e2a"],E:["#e8c22a","#fff07a","#9a7b10"],
+ F:["#ee7a1e","#ffb066","#9c4508"],G:["#d6323a","#ff7b7b","#86161c"],A:["#8a4fd0","#c49bff","#4f2588"],B:["#3fb8e0","#9be6ff","#1b6f8e"]};
+const SEMI={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+const OUT="#1a1226";
+
+// ---- tiny 3x5 pixel font ----
+const F={A:"010101111101101",B:"110101110101110",C:"011100100100011",D:"110101101101110",E:"111100110100111",F:"111100110100100",
+G:"011100101101011",H:"101101111101101",I:"111010010010111",J:"001001001101010",K:"101101110101101",L:"100100100100111",M:"101111111101101",
+N:"110101101101101",O:"010101101101010",P:"110101110100100",Q:"010101101110011",R:"110101110101101",S:"011100010001110",T:"111010010010010",
+U:"101101101101111",V:"101101101101010",W:"101101111111101",X:"101101010101101",Y:"101101010010010",Z:"111001010100111",
+0:"111101101101111",1:"010110010010111",2:"110001010100111",3:"110001010001110",4:"101101111001001",5:"111100110001110",
+6:"011100111101111",7:"111001010010010",8:"111101111101111",9:"111101111001110",":":"000010000010000",".":"000000000000010",
+"!":"010010010000010","-":"000000111000000","/":"001001010100100","'":"010010000000000"," ":"000000000000000","x":"000101010101000"};
+function txt(s,x,y,col,sc=1,shadow=true){s=String(s).toUpperCase();
+ const draw=(ox,oy,c)=>{ctx.fillStyle=c;let cx=ox;for(const ch of s){const g=F[ch]||F[" "];
+  for(let i=0;i<15;i++)if(g[i]==="1")ctx.fillRect(cx+(i%3)*sc,oy+((i/3)|0)*sc,sc,sc);cx+=4*sc;}};
+ if(shadow)draw(x+sc,y+sc,OUT);draw(x,y,col);}
+const tw=(s,sc=1)=>String(s).length*4*sc-sc;
+
+// ---- setup ----
+const cv=document.getElementById("c"),ctx=cv.getContext("2d"),W=320,H=240;
+const songSel=document.getElementById("song");
+SONGS.forEach((s,i)=>songSel.add(new Option(s.title,i)));
+let song,bricks,seq,ball,pad,lives,score,state,combo,particles,flash,stars,t=0,muted=false;
+
+// fixed starfield (own seeded rng, does not touch anything else)
+(function(){let s=7;const r=()=>(s=(s*16807)%2147483647)/2147483647;stars=[];for(let i=0;i<70;i++)stars.push([r()*W|0,r()*H|0,r()]);})();
+
+function load(i){song=SONGS[i];bricks=[];seq=[];
+ const unit=18, rowH=16, top=44; // 1 beat = 36px, eighth = 18px
+ for(let m=0;m<song.measures.length;m++){const row=(m/2)|0;let x=16+(m%2)*144;
+  for(const [st,oc,b] of song.measures[m]){const w=b*36;
+   const br={x,y:top+row*rowH,w,h:rowH-2,step:st,oct:oc,beats:b,idx:seq.length,alive:true,hit:0};
+   bricks.push(br);seq.push(br);x+=w;}}
+ lives=3;score=0;combo=0;particles=[];flash=0;resetBall();state="ready";}
+function resetBall(){pad={x:W/2-22,w:44,y:222};ball={x:W/2,y:pad.y-4,vx:0,vy:0,r:3,stuck:true};}
+
+// ---- audio ----
+let ac=null;
+function audio(){if(!ac){try{ac=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(ac&&ac.state==="suspended")ac.resume();return ac;}
+function freq(st,oc){return 440*Math.pow(2,((oc+1)*12+SEMI[st]-69)/12);}
+function tone(f,when=0,dur=.5,vol=.25){const a=audio();if(!a||muted)return;const t0=a.currentTime+when;
+ const g=a.createGain();g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(vol,t0+.008);g.gain.exponentialRampToValueAtTime(.001,t0+dur+.4);
+ g.connect(a.destination);
+ [[1,"triangle",1],[2,"sine",.35],[3,"sine",.12]].forEach(([h,ty,v])=>{const o=a.createOscillator(),og=a.createGain();o.type=ty;o.frequency.value=f*h;og.gain.value=v;o.connect(og);og.connect(g);o.start(t0);o.stop(t0+dur+.5);});}
+function blip(f,d=.06){const a=audio();if(!a||muted)return;const o=a.createOscillator(),g=a.createGain();o.type="square";o.frequency.value=f;
+ g.gain.setValueAtTime(.05,a.currentTime);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+d);o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+d);}
+function playSong(){const spb=60/song.tempo;let w=.2;seq.forEach(n=>{tone(freq(n.step,n.oct),w,n.beats*spb*.9,.22);const at=w;setTimeout(()=>{n.hit=1;},at*1000);w+=n.beats*spb;});}
+
+// ---- input ----
+const keys={};
+addEventListener("keydown",e=>{keys[e.key]=1;if(e.key===" "||e.key==="Enter"){launch();e.preventDefault();}if(e.key.startsWith("Arrow"))e.preventDefault();});
+addEventListener("keyup",e=>keys[e.key]=0);
+function ptr(e){const r=cv.getBoundingClientRect();const p=e.touches?e.touches[0]:e;pad.x=Math.max(4,Math.min(W-4-pad.w,(p.clientX-r.left)/r.width*W-pad.w/2));}
+cv.addEventListener("mousemove",ptr);cv.addEventListener("touchmove",e=>{ptr(e);e.preventDefault();},{passive:false});
+cv.addEventListener("touchstart",e=>{ptr(e);launch();e.preventDefault();},{passive:false});
+cv.addEventListener("mousedown",launch);
+songSel.onchange=()=>{load(+songSel.value);songSel.blur();};
+document.getElementById("mute").onclick=e=>{muted=!muted;e.target.textContent="Sound: "+(muted?"off":"on");e.target.blur();};
+function launch(){audio();
+ if(state==="won"||state==="over"){load(+songSel.value);return;}
+ if(ball.stuck){ball.stuck=false;const a=-Math.PI/2+(Math.random()-.5)*.6;ball.vx=Math.cos(a)*2.2;ball.vy=Math.sin(a)*2.2;state="play";blip(660);}}
+
+// ---- update ----
+function update(){t++;
+ if(keys.ArrowLeft)pad.x-=4;if(keys.ArrowRight)pad.x+=4;pad.x=Math.max(4,Math.min(W-4-pad.w,pad.x));
+ if(ball.stuck){ball.x=pad.x+pad.w/2;ball.y=pad.y-4;}
+ else if(state==="play"){const steps=4;for(let s=0;s<steps;s++)stepBall(1/steps);}
+ particles=particles.filter(p=>(p.x+=p.vx,p.y+=p.vy,p.vy+=.08,--p.l>0));
+ if(flash>0)flash--;}
+function stepBall(k){const b=ball;b.x+=b.vx*k;b.y+=b.vy*k;
+ if(b.x<b.r+4){b.x=b.r+4;b.vx=Math.abs(b.vx);blip(220,.03);}
+ if(b.x>W-4-b.r){b.x=W-4-b.r;b.vx=-Math.abs(b.vx);blip(220,.03);}
+ if(b.y<b.r+38){b.y=b.r+38;b.vy=Math.abs(b.vy);blip(220,.03);}
+ // paddle
+ if(b.vy>0&&b.y+b.r>=pad.y&&b.y+b.r<=pad.y+6&&b.x>=pad.x-2&&b.x<=pad.x+pad.w+2){
+  const rel=((b.x-pad.x)/pad.w-.5)*2, sp=Math.min(3.6,Math.hypot(b.vx,b.vy)+.02), a=-Math.PI/2+rel*1.0;
+  b.vx=Math.cos(a)*sp;b.vy=Math.sin(a)*sp;b.y=pad.y-b.r;combo=0;blip(330,.04);}
+ // bricks
+ for(const br of bricks){if(!br.alive)continue;
+  if(b.x+b.r>br.x&&b.x-b.r<br.x+br.w&&b.y+b.r>br.y&&b.y-b.r<br.y+br.h){
+   const ox=Math.min(b.x+b.r-br.x,br.x+br.w-(b.x-b.r)),oy=Math.min(b.y+b.r-br.y,br.y+br.h-(b.y-b.r));
+   if(ox<oy)b.vx=-b.vx;else b.vy=-b.vy;
+   breakBrick(br);break;}}
+ if(b.y>H+6){lives--;blip(110,.3);if(lives<=0){state="over";}else{resetBall();state="ready";}}}
+function breakBrick(br){const inOrder=seq.find(n=>n.alive)===br; // broke the next note of the tune: bonus
+ br.alive=false;br.hit=1;combo++;score+=10*combo+(inOrder?25:0);
+ tone(freq(br.step,br.oct),0,.45);
+ const c=NOTE_COL[br.step];
+ for(let i=0;i<14;i++)particles.push({x:br.x+Math.random()*br.w,y:br.y+Math.random()*br.h,vx:(Math.random()-.5)*2.4,vy:-Math.random()*2,l:24+Math.random()*16|0,c:c[i%2]});
+ if(bricks.every(b=>!b.alive)){state="won";flash=20;seq.forEach(n=>n.hit=0);setTimeout(playSong,400);}}
+
+// ---- draw ----
+function px(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(x|0,y|0,w|0,h|0);}
+function drawBg(){
+ const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,"#1c1538");g.addColorStop(1,"#2b1f46");ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+ for(const [x,y,r] of stars){if(y>200)continue;const tw=(Math.sin(t/30+r*20)+1)/2;px(x,y,1,1,tw>.7?"#fff6d0":"#6c5f94");}
+ // moon
+ px(272,140,14,14,"#f3e9d2");px(270,142,18,10,"#f3e9d2");px(274,138,10,18,"#f3e9d2");px(280,142,5,4,"#d9ccae");px(276,148,3,3,"#d9ccae");
+ // hills + village silhouette (Soundfalya)
+ ctx.fillStyle="#18122b";ctx.beginPath();ctx.moveTo(0,206);for(let x=0;x<=W;x+=8)ctx.lineTo(x,200+Math.sin(x/37)*5+Math.sin(x/13)*2);ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.fill();
+ const houses=[[22,10,9],[40,14,12],[64,9,8],[230,12,11],[252,16,13],[282,10,9]];
+ for(const [x,w,h] of houses){const y=204-h;px(x,y,w,h,"#120d22");for(let i=0;i<=w/2+1;i++)px(x-1+i,y-i,w+2-2*i,1,"#120d22");
+  if(((x/3)|0)%2===0)px(x+w/2-1,y+h/2-1,2,2,(t>>5)%7?"#f2b84b":"#c98e2c");}
+ // frame (wood)
+ px(0,36,4,H-36,"#5a3a22");px(W-4,36,4,H-36,"#5a3a22");px(0,36,W,2,"#5a3a22");
+ for(let y=40;y<H;y+=6){px(1,y,2,1,"#7a5232");px(W-3,y+3,2,1,"#3d2614");}
+}
+function drawBrick(br){const c=NOTE_COL[br.step],x=br.x,y=br.y,w=br.w,h=br.h;
+ px(x,y,w,h,OUT);px(x+1,y+1,w-2,h-2,c[0]);
+ px(x+1,y+1,w-2,1,c[1]);px(x+1,y+1,1,h-2,c[1]);                      // warm light top-left
+ px(x+1,y+h-2,w-2,1,c[2]);px(x+w-2,y+1,1,h-2,c[2]);                  // cool shade bottom-right
+ for(let i=x+3;i<x+w-3;i+=2)if(((i+y)>>1)%3===0)px(i,y+h-3,1,1,c[2]); // dithered texture at the tone edge
+ const L=br.step;txt(L,x+(w-3)/2|0,y+4,"#fff",1,true);}
+function drawPad(){const x=pad.x|0,y=pad.y;
+ // wizard staff as paddle: wood shaft + golden caps
+ px(x,y,pad.w,5,OUT);px(x+1,y+1,pad.w-2,3,"#8a5a2e");px(x+1,y+1,pad.w-2,1,"#c08a4e");px(x+1,y+3,pad.w-2,1,"#5a3818");
+ for(let i=x+4;i<x+pad.w-4;i+=5)px(i,y+2,2,1,"#6e4422");
+ px(x-1,y-1,5,7,OUT);px(x,y,3,5,"#e8b83a");px(x,y,3,1,"#fff07a");
+ px(x+pad.w-4,y-1,5,7,OUT);px(x+pad.w-3,y,3,5,"#e8b83a");px(x+pad.w-3,y,3,1,"#fff07a");}
+function drawBall(){const b=ball,x=b.x|0,y=b.y|0,glow=(Math.sin(t/6)+1)/2;
+ ctx.fillStyle=`rgba(140,200,255,${.12+glow*.12})`;ctx.fillRect(x-3,y-5,7,11);ctx.fillRect(x-5,y-3,11,7);
+ px(x-2,y-3,5,7,OUT);px(x-3,y-2,7,5,OUT);px(x-2,y-2,5,5,"#7fd0ff");px(x-1,y-2,2,1,"#e8f8ff");px(x-2,y-1,1,2,"#e8f8ff");px(x+1,y+1,2,1,"#3a7fc0");}
+function drawStrip(){ // the melody as colored notes, filling in as you play
+ px(0,0,W,36,"#100b1e");px(0,35,W,1,"#3a2d58");
+ txt(song.title,6,4,"#f3e9d2");txt("SCORE "+score,W-6-tw("SCORE "+score),4,"#f2b84b");
+ for(let i=0;i<lives;i++){const x=W/2-14+i*10;px(x,4,7,5,OUT);px(x+1,5,5,3,"#d6323a");px(x+1,5,2,1,"#ff7b7b");} // lives = wax seals
+ const n=seq.length,sw=Math.min(9,(W-12)/n),x0=(W-sw*n)/2;
+ for(let i=0;i<5;i++)px(x0-2,10+i*4,sw*n+4,1,"#3a2d58"); // staff lines
+ seq.forEach((s,i)=>{const lv={C:-2,D:-1,E:0,F:1,G:2,A:3,B:4}[s.step]+(s.oct-4)*7; // E4 = bottom line
+  const y=26-lv*2-2, x=x0+i*sw+1, c=NOTE_COL[s.step], on=!s.alive||s.hit;
+  px(x,y,5,4,on?OUT:"#3a2d58");px(x+1,y+1,3,2,on?c[0]:"#241a3a");if(on)px(x+1,y+1,1,1,c[1]);
+  if(s.step==="C"&&s.oct===4)px(x-1,y+1,7,1,on?OUT:"#3a2d58");});}
+function drawMsg(a,b){const w=Math.max(tw(a,2),tw(b))+20;const x=(W-w)/2|0,y=128;
+ px(x,y,w,36,OUT);px(x+1,y+1,w-2,34,"#2a2140");px(x+1,y+1,w-2,1,"#4a3d6b");
+ txt(a,(W-tw(a,2))/2|0,y+7,"#f2b84b",2);txt(b,(W-tw(b))/2|0,y+25,"#c7bce0");}
+function draw(){drawBg();drawStrip();
+ for(const br of bricks)if(br.alive)drawBrick(br);
+ for(const p of particles)px(p.x,p.y,2,2,p.c);
+ drawPad();drawBall();
+ if(flash>0&&flash%4<2)px(0,36,W,H-36,"rgba(255,240,200,.08)");
+ if(state==="ready"&&score===0&&lives===3)drawMsg("MELODY BREAKOUT","CLICK OR PRESS SPACE TO PLAY");
+ else if(state==="ready")drawMsg("READY?","CLICK OR SPACE TO LAUNCH");
+ if(state==="won")drawMsg("SONG COMPLETE!","LISTEN... THEN CLICK TO PLAY AGAIN");
+ if(state==="over")drawMsg("GAME OVER","CLICK TO TRY AGAIN");
+ txt("SOUNDFALYA",W-6-tw("SOUNDFALYA"),H-8,"#6c5f94",1,false);}
+function loop(){update();draw();requestAnimationFrame(loop);}
+load(0);loop();
+</script>
+</body>
+</html>
