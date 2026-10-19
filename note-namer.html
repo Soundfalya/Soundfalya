@@ -17,10 +17,19 @@ body{font:20px 'VT323',monospace;overflow-x:hidden}
 .brand b{color:#fff;text-shadow:2px 2px 0 var(--ink)} .brand small{display:block;font:18px 'VT323',monospace;color:var(--bodyDD)}
 .seal{width:36px;height:36px;image-rendering:pixelated}
 .slot{width:120px;height:12px;background:var(--bodyDD);border:4px solid var(--ink);border-radius:3px;box-shadow:inset 0 3px 0 #1a4a40}
-.screen{background:#2a6e60;border:5px solid var(--ink);border-radius:10px;padding:10px;box-shadow:inset 0 0 0 4px var(--bodyD)}
+.screen{position:relative;background:#2a6e60;border:5px solid var(--ink);border-radius:10px;padding:10px;box-shadow:inset 0 0 0 4px var(--bodyD)}
 .glass{position:relative;background:var(--paper);min-height:48vh;max-height:56vh;overflow:auto;border:4px solid var(--ink);border-radius:6px}
 .glass::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(transparent 0 3px,rgba(0,40,30,.03) 3px 4px)}
 #sheetBox{margin:12px auto;overflow:hidden}
+.fsBtn{position:absolute;top:18px;right:18px;z-index:6;font:inherit;font-size:20px;line-height:1;padding:6px 10px;cursor:pointer;background:var(--paper);color:var(--ink);border:3px solid var(--ink);border-radius:6px;box-shadow:2px 2px 0 var(--ink)}
+.fsBtn:hover{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--ink)}
+/* pantalla completa: solo la partitura */
+.screen:fullscreen,.screen.fs{padding:0;border:0;border-radius:0;box-shadow:none;background:var(--paper)}
+.screen:-webkit-full-screen{padding:0;border:0;border-radius:0;box-shadow:none;background:var(--paper)}
+.screen.fs{position:fixed;inset:0;z-index:50}
+.screen:fullscreen .glass,.screen.fs .glass{height:100vh;height:100dvh;min-height:0;max-height:none;border:0;border-radius:0}
+.screen:-webkit-full-screen .glass{height:100vh;min-height:0;max-height:none;border:0;border-radius:0}
+.screen:fullscreen .fsBtn,.screen.fs .fsBtn{top:10px;right:14px}
 #sheet{width:794px;transform-origin:0 0;display:flex;flex-direction:column;gap:16px}
 #sheet>div,#sheet svg{box-shadow:0 2px 0 rgba(0,0,0,.25),0 0 0 1px #c8c0a8;background:#fff}
 .empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:20px;color:var(--bodyDD);font-size:24px}
@@ -72,7 +81,7 @@ body{font:20px 'VT323',monospace;overflow-x:hidden}
 <div class="wrap">
   <div class="pc">
     <div class="top"><div class="brand"><canvas class="seal" id="seal" width="24" height="24"></canvas><div><b>SOUNDFALYA</b> NOTE-NAMER 3000<small>Sube un .mxl o MusicXML y le escribo el nombre a cada nota</small></div></div><div class="slot"></div></div>
-    <div class="screen"><div class="glass"><div id="sheetBox"><div id="sheet"></div></div><div class="paste" id="lib" hidden><b>BIBLIOTECA · <span id="libN"></span> PARTITURAS</b><input id="libQ" type="search" placeholder="Buscar título o compositor…"><div class="list" id="libL"></div><div class="row"><button class="btn alt" id="libDrive" type="button">Subir las 60 a mi Drive</button><button class="btn pale" id="libNo" type="button">Cerrar</button></div></div><div class="paste" id="paste" hidden><b>PEGA AQUÍ TU MUSICXML</b><textarea id="pasteTxt" spellcheck="false" placeholder="&lt;?xml version=&quot;1.0&quot; ...&gt;&#10;&lt;score-partwise&gt; ..."></textarea><div class="row"><button class="btn pale" id="pasteNo" type="button">Cancelar</button><button class="btn" id="pasteOk" type="button">Usar texto</button></div></div><div class="empty" id="empty"><div><b>INSERTE PARTITURA</b>Arrastra aquí un .mxl o .musicxml, o pega el texto</div></div></div></div>
+    <div class="screen"><button class="fsBtn" id="fsBtn" type="button" title="Pantalla completa" aria-label="Pantalla completa">⛶</button><div class="glass"><div id="sheetBox"><div id="sheet"></div></div><div class="paste" id="lib" hidden><b>BIBLIOTECA · <span id="libN"></span> PARTITURAS</b><input id="libQ" type="search" placeholder="Buscar título o compositor…"><div class="list" id="libL"></div><div class="row"><button class="btn alt" id="libDrive" type="button">Subir las 60 a mi Drive</button><button class="btn pale" id="libNo" type="button">Cerrar</button></div></div><div class="paste" id="paste" hidden><b>PEGA AQUÍ TU MUSICXML</b><textarea id="pasteTxt" spellcheck="false" placeholder="&lt;?xml version=&quot;1.0&quot; ...&gt;&#10;&lt;score-partwise&gt; ..."></textarea><div class="row"><button class="btn pale" id="pasteNo" type="button">Cancelar</button><button class="btn" id="pasteOk" type="button">Usar texto</button></div></div><div class="empty" id="empty"><div><b>INSERTE PARTITURA</b>Arrastra aquí un .mxl o .musicxml, o pega el texto</div></div></div></div>
     <div class="panel">
       <div class="dpad" aria-hidden="true"><i></i><b></b><i></i></div>
       <div class="ctrl">
@@ -255,10 +264,10 @@ function addNames(xml){
           else if(el.tagName === 'note' && !el.querySelector(':scope > chord, :scope > grace')){ on.add(t); t += +((el.querySelector(':scope > duration') || {}).textContent || 0); } } }
       return Math.max(1, on.size); };
     // 4 compases por sistema (como las partituras de José en Finale), contando desde el inicio de cada sección;
-    // si la música es densa el sistema lleva menos, y FORCE guarda los cortes que hicieron falta al dibujar
+    // si la música es densa el sistema lleva menos (nunca menos de 2), y FORCE guarda los cortes que hicieron falta al dibujar
     let k = 0, load = 0;
     ms.forEach((m, i) => { const w = onsets(i) + 2;
-      if(i && (starts.has(i) || FORCE.has(i) || k >= PER_SYSTEM || (k && load + w > SYSTEM_LOAD))){ BRK.push(i); k = 0; load = 0; } k++; load += w; });
+      if(i && (starts.has(i) || FORCE.has(i) || k >= PER_SYSTEM || (k >= MIN_SYSTEM && load + w > SYSTEM_LOAD))){ BRK.push(i); k = 0; load = 0; } k++; load += w; });
     for(const pm of parts) for(const i of BRK){ const m = pm[i]; if(!m) continue; let pr = m.querySelector(':scope > print');
       if(!pr){ pr = doc.createElement('print'); m.insertBefore(pr, m.firstChild); } pr.setAttribute('new-system', 'yes'); } }
   const view = new XMLSerializer().serializeToString(doc);
@@ -268,22 +277,37 @@ function addNames(xml){
 const PAGE_W = 794;
 function fitPage(){
   const sh = $('sheet'), box = $('sheetBox'), gl = document.querySelector('.glass'); if(!sh.firstChild) return;
-  const k = Math.min(1, (gl.clientHeight - 28) / (PAGE_W * 1.4142), (gl.clientWidth - 28) / PAGE_W);
+  // en pantalla completa la hoja ocupa todo el ancho y se recorre hacia abajo; si no, la hoja entera entra en la pantallita
+  const k = isFull() ? Math.min(1.5, (gl.clientWidth - 28) / PAGE_W) : Math.min(1, (gl.clientHeight - 28) / (PAGE_W * 1.4142), (gl.clientWidth - 28) / PAGE_W);
   sh.style.transform = 'scale(' + k + ')'; box.style.width = Math.ceil(PAGE_W * k) + 'px'; box.style.height = Math.ceil(sh.scrollHeight * k) + 'px';
 }
 let fitT = 0; addEventListener('resize', () => { clearTimeout(fitT); fitT = setTimeout(fitPage, 200); });
+// botón de pantalla completa: muestra solo la partitura (en iPhone, sin pantalla completa real, la pantallita cubre la página)
+const scr = document.querySelector('.screen');
+const isFull = () => !!(document.fullscreenElement || document.webkitFullscreenElement || scr.classList.contains('fs'));
+function fsShow(){ const on = isFull(); $('fsBtn').textContent = on ? '✕' : '⛶'; $('fsBtn').title = on ? 'Salir de pantalla completa' : 'Pantalla completa'; document.body.style.overflow = scr.classList.contains('fs') ? 'hidden' : ''; setTimeout(fitPage, 60); }
+$('fsBtn').onclick = () => {
+  if(scr.classList.contains('fs')){ scr.classList.remove('fs'); return fsShow(); }
+  if(document.fullscreenElement || document.webkitFullscreenElement) return (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  const req = scr.requestFullscreen || scr.webkitRequestFullscreen;
+  if(req) Promise.resolve(req.call(scr)).catch(() => { scr.classList.add('fs'); fsShow(); }); else { scr.classList.add('fs'); fsShow(); } };
+document.addEventListener('fullscreenchange', fsShow); document.addEventListener('webkitfullscreenchange', fsShow);
+addEventListener('keydown', e => { if(e.key === 'Escape' && scr.classList.contains('fs')){ scr.classList.remove('fs'); fsShow(); } });
 // hojas compactas: márgenes y espacios justos, notas un poco más chicas, más sistemas por página
-const PAGE_ZOOM = .8, PER_SYSTEM = 4, SYSTEM_LOAD = 34;
+const PAGE_ZOOM = .8, PER_SYSTEM = 4, MIN_SYSTEM = 2, SYSTEM_LOAD = 34, MIN_ZOOM = .45;
+let zoom = PAGE_ZOOM;
 function compact(o){ const r = o.EngravingRules; if(!r) return;
   Object.assign(r, { PageTopMargin:4, PageBottomMargin:4, PageLeftMargin:4.5, PageRightMargin:4.5, MinimumDistanceBetweenSystems:3, MinSkyBottomDistBetweenSystems:2.5,
     StaffDistance:5, BetweenStaffDistance:4, TitleTopDistance:2.5, TitleBottomDistance:.5, SheetTitleHeight:3.6, SystemComposerDistance:1 });
-  o.zoom = PAGE_ZOOM; }
+  o.zoom = zoom; }
 function rebalance(o){ let firsts = [];
   try{ for(const pg of o.GraphicSheet.MusicPages) for(const sy of pg.MusicSystems){ const gm = sy.GraphicalMeasures[0] && sy.GraphicalMeasures[0][0]; if(gm) firsts.push(gm.parentSourceMeasure.measureListIndex); } }catch(e){ return false; }
-  const cuts = new Set([0, ...BRK]), sorted = [0, ...BRK].sort((x, y) => x - y); let more = false;
+  const cuts = new Set([0, ...BRK]), sorted = [0, ...BRK].sort((x, y) => x - y); let more = false, small = false;
   for(const f of firsts){ if(cuts.has(f)) continue;
     const gs = sorted.filter(x => x < f).pop() || 0, ge = sorted.find(x => x > f) || (gs + PER_SYSTEM), mid = gs + Math.ceil((ge - gs) / 2);
-    if(mid > gs && !FORCE.has(mid)){ FORCE.add(mid); more = true; } }
+    // un grupo de 4 o más se parte en dos mitades; uno de 2 o 3 no se parte: se achica la hoja para que quepa
+    if(ge - gs >= 2 * MIN_SYSTEM && !FORCE.has(mid)){ FORCE.add(mid); more = true; } else small = true; }
+  if(small && zoom > MIN_ZOOM){ zoom = Math.max(MIN_ZOOM, zoom - .1); more = true; }
   return more; }
 async function render(keepParts, pass){
   if(!src) return; stop();
@@ -299,12 +323,12 @@ async function render(keepParts, pass){
     try{ await osmd.load(view); compact(osmd); osmd.render(); note = k; break; }catch(e){ if(sel === 'direction, sound') throw e; }
   }
   // si un sistema no cupo y el programa lo cortó solo, se reparte ese grupo en partes parejas y se dibuja de nuevo
-  if(tidy && (pass || 0) < 3 && rebalance(osmd)) return render(keepParts, (pass || 0) + 1);
+  if(tidy && (pass || 0) < 6 && rebalance(osmd)) return render(keepParts, (pass || 0) + 1);
   shiftGrace($('sheet')); fitPage();
   if(!keepParts){ const sc = parseScore(src); parts = sc.parts; tempo = sc.tempo; $('tempo').value = tempo; partsUI(); }
   st(r.n + ' notas con nombre' + (r.fixed ? ' · ' + r.fixed + ' corregidas' : '') + note + '.');
 }
-async function load(text, name){ src = text; FORCE = new Set(); fname = (name || 'partitura').replace(/\.(musicxml|xml|mxl)$/i, ''); try{ await render(); }catch(e){ st(e.message || 'No pude leer el archivo.'); } }
+async function load(text, name){ src = text; FORCE = new Set(); zoom = PAGE_ZOOM; fname = (name || 'partitura').replace(/\.(musicxml|xml|mxl)$/i, ''); try{ await render(); }catch(e){ st(e.message || 'No pude leer el archivo.'); } }
 async function readFile(f){
   const buf = await f.arrayBuffer(), u = new Uint8Array(buf);
   const dec = x => { if(x[0] === 0xFF && x[1] === 0xFE) return new TextDecoder('utf-16le').decode(x); if(x[0] === 0xFE && x[1] === 0xFF) return new TextDecoder('utf-16be').decode(x); return new TextDecoder('utf-8').decode(x).replace(/^﻿/, ''); };
