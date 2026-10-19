@@ -13,6 +13,8 @@ body{display:flex;flex-direction:column;align-items:center;justify-content:cente
 #wrap{width:min(100%,960px,calc((100vh - 80px)*4/3));aspect-ratio:4/3;position:relative}
 canvas{width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges;display:block;touch-action:none;border-radius:4px;box-shadow:0 0 0 2px #2a2140,0 8px 30px #0008}
 #bar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;font-size:13px;color:var(--muted)}
+#legend{display:flex;gap:6px 12px;flex-wrap:wrap;justify-content:center;font-size:12px;color:var(--muted);max-width:960px}
+#legend i{display:inline-block;width:10px;height:10px;margin-right:4px;border:1px solid #000;vertical-align:-1px}
 select,button{font:inherit;background:#2a2140;color:var(--ink);border:1px solid #4a3d6b;border-radius:4px;padding:4px 8px}
 </style>
 </head>
@@ -20,23 +22,20 @@ select,button{font:inherit;background:#2a2140;color:var(--ink);border:1px solid 
 <div id="wrap"><canvas id="c" width="320" height="240"></canvas></div>
 <div id="bar">
   <label>Song <select id="song"></select></label>
+  <label>Level <select id="lvl"></select></label>
   <button id="mute">Sound: on</button>
   <span>Move: mouse / touch / arrows · Launch: click / space</span>
+</div>
+<div id="legend">
+  <span><i style="background:#2f6fd6"></i>C bonus</span><span><i style="background:#2f9e44"></i>D wide staff</span>
+  <span><i style="background:#e8c22a"></i>E double points</span><span><i style="background:#ee7a1e"></i>F fireball</span>
+  <span><i style="background:#d6323a"></i>G tough (2 hits)</span><span><i style="background:#8a4fd0"></i>A slow ball</span>
+  <span><i style="background:#3fb8e0"></i>B extra life</span>
 </div>
 <script>
 // ---- Melodies (from the Soundfalya beginner sheets) ----
 // each note: [step, octave, beats]; measures grouped so bricks read like the score
-const SONGS=[
- {title:"Ode to Joy",composer:"L. v. Beethoven",tempo:120,measures:[
-  [["E",4,1],["E",4,1],["F",4,1],["G",4,1]],
-  [["G",4,1],["F",4,1],["E",4,1],["D",4,1]],
-  [["C",4,1],["C",4,1],["D",4,1],["E",4,1]],
-  [["E",4,1.5],["D",4,.5],["D",4,2]],
-  [["E",4,1],["E",4,1],["F",4,1],["G",4,1]],
-  [["G",4,1],["F",4,1],["E",4,1],["D",4,1]],
-  [["C",4,1],["C",4,1],["D",4,1],["E",4,1]],
-  [["D",4,1.5],["C",4,.5],["C",4,2]]]}
-];
+const SONGS=[{"title":"Ode to Joy","composer":"L. van Beethoven","tempo":112,"measures":[[["E",4,1.0],["E",4,1.0],["F",4,1.0],["G",4,1.0]],[["G",4,1.0],["F",4,1.0],["E",4,1.0],["D",4,1.0]],[["C",4,1.0],["C",4,1.0],["D",4,1.0],["E",4,1.0]],[["E",4,1.5],["D",4,0.5],["D",4,2.0]],[["E",4,1.0],["E",4,1.0],["F",4,1.0],["G",4,1.0]],[["G",4,1.0],["F",4,1.0],["E",4,1.0],["D",4,1.0]],[["C",4,1.0],["C",4,1.0],["D",4,1.0],["E",4,1.0]],[["D",4,1.5],["C",4,0.5],["C",4,2.0]]]},{"title":"Twinkle, Twinkle, Little Star","composer":"Traditional French","tempo":112,"measures":[[["C",4,1.0],["C",4,1.0],["G",4,1.0],["G",4,1.0]],[["A",4,1.0],["A",4,1.0],["G",4,2.0]],[["F",4,1.0],["F",4,1.0],["E",4,1.0],["E",4,1.0]],[["D",4,1.0],["D",4,1.0],["C",4,2.0]],[["C",4,1.0],["C",4,1.0],["G",4,1.0],["G",4,1.0]],[["A",4,1.0],["A",4,1.0],["G",4,2.0]],[["F",4,1.0],["F",4,1.0],["E",4,1.0],["E",4,1.0]],[["D",4,1.0],["D",4,1.0],["C",4,2.0]]]},{"title":"Frère Jacques","composer":"Traditional French","tempo":112,"measures":[[["C",4,1.0],["D",4,1.0],["E",4,1.0],["C",4,1.0]],[["C",4,1.0],["D",4,1.0],["E",4,1.0],["C",4,1.0]],[["E",4,1.0],["F",4,1.0],["G",4,2.0]],[["E",4,1.0],["F",4,1.0],["G",4,2.0]],[["G",4,0.5],["A",4,0.5],["G",4,0.5],["F",4,0.5],["E",4,1.0],["C",4,1.0]],[["G",4,0.5],["A",4,0.5],["G",4,0.5],["F",4,0.5],["E",4,1.0],["C",4,1.0]],[["C",4,1.0],["G",3,1.0],["C",4,2.0]],[["C",4,1.0],["G",3,1.0],["C",4,2.0]]]},{"title":"Au Clair de la Lune","composer":"Traditional French","tempo":100,"measures":[[["C",4,1.0],["C",4,1.0],["C",4,1.0],["D",4,1.0]],[["E",4,2.0],["D",4,2.0]],[["C",4,1.0],["E",4,1.0],["D",4,1.0],["D",4,1.0]],[["C",4,4.0]],[["C",4,1.0],["C",4,1.0],["C",4,1.0],["D",4,1.0]],[["E",4,2.0],["D",4,2.0]],[["C",4,1.0],["E",4,1.0],["D",4,1.0],["D",4,1.0]],[["C",4,4.0]]]},{"title":"Mary Had a Little Lamb","composer":"Traditional American","tempo":112,"measures":[[["E",4,1.0],["D",4,1.0],["C",4,1.0],["D",4,1.0]],[["E",4,1.0],["E",4,1.0],["E",4,2.0]],[["D",4,1.0],["D",4,1.0],["D",4,2.0]],[["E",4,1.0],["G",4,1.0],["G",4,2.0]],[["E",4,1.0],["D",4,1.0],["C",4,1.0],["D",4,1.0]],[["E",4,1.0],["E",4,1.0],["E",4,1.0],["E",4,1.0]],[["D",4,1.0],["D",4,1.0],["E",4,1.0],["D",4,1.0]],[["C",4,4.0]]]},{"title":"Jingle Bells","composer":"J. Pierpont","tempo":112,"measures":[[["E",4,1.0],["E",4,1.0],["E",4,2.0]],[["E",4,1.0],["E",4,1.0],["E",4,2.0]],[["E",4,1.0],["G",4,1.0],["C",4,1.5],["D",4,0.5]],[["E",4,4.0]],[["F",4,1.0],["F",4,1.0],["F",4,1.5],["F",4,0.5]],[["F",4,1.0],["E",4,1.0],["E",4,1.0],["E",4,0.5],["E",4,0.5]],[["G",4,1.0],["G",4,1.0],["F",4,1.0],["D",4,1.0]],[["C",4,4.0]]]},{"title":"London Bridge","composer":"Traditional English","tempo":112,"measures":[[["G",4,1.5],["A",4,0.5],["G",4,1.0],["F",4,1.0]],[["E",4,1.0],["F",4,1.0],["G",4,2.0]],[["D",4,1.0],["E",4,1.0],["F",4,2.0]],[["E",4,1.0],["F",4,1.0],["G",4,2.0]],[["G",4,1.5],["A",4,0.5],["G",4,1.0],["F",4,1.0]],[["E",4,1.0],["F",4,1.0],["G",4,2.0]],[["D",4,2.0],["G",4,2.0]],[["E",4,1.0],["C",4,3.0]]]},{"title":"Largo from the New World Symphony","composer":"A. Dvořák","tempo":72,"measures":[[["E",4,1.5],["G",4,0.5],["G",4,2.0]],[["E",4,1.5],["D",4,0.5],["C",4,2.0]],[["D",4,1.5],["E",4,0.5],["G",4,1.5],["E",4,0.5]],[["D",4,4.0]],[["E",4,1.5],["G",4,0.5],["G",4,2.0]],[["E",4,1.5],["D",4,0.5],["C",4,2.0]],[["D",4,1.5],["E",4,0.5],["D",4,1.5],["C",4,0.5]],[["C",4,4.0]]]},{"title":"Minuet in G","composer":"C. Petzold","tempo":126,"measures":[[["D",5,1.0],["G",4,0.5],["A",4,0.5],["B",4,0.5],["C",5,0.5]],[["D",5,1.0],["G",4,1.0],["G",4,1.0]],[["E",5,1.0],["C",5,0.5],["D",5,0.5],["E",5,0.5],["F#",5,0.5]],[["G",5,1.0],["G",4,1.0],["G",4,1.0]],[["C",5,1.0],["D",5,0.5],["C",5,0.5],["B",4,0.5],["A",4,0.5]],[["B",4,1.0],["C",5,0.5],["B",4,0.5],["A",4,0.5],["G",4,0.5]],[["F#",4,1.0],["G",4,0.5],["A",4,0.5],["B",4,0.5],["G",4,0.5]],[["A",4,3.0]]]},{"title":"Für Elise","composer":"L. van Beethoven","tempo":80,"measures":[[["E",5,0.25],["D#",5,0.25]],[["E",5,0.25],["D#",5,0.25],["E",5,0.25],["B",4,0.25],["D",5,0.25],["C",5,0.25]],[["A",4,0.5],["R",0,0.25],["C",4,0.25],["E",4,0.25],["A",4,0.25]],[["B",4,0.5],["R",0,0.25],["E",4,0.25],["G#",4,0.25],["B",4,0.25]],[["C",5,0.5],["R",0,0.25],["E",4,0.25],["E",5,0.25],["D#",5,0.25]],[["E",5,0.25],["D#",5,0.25],["E",5,0.25],["B",4,0.25],["D",5,0.25],["C",5,0.25]],[["A",4,0.5],["R",0,0.25],["C",4,0.25],["E",4,0.25],["A",4,0.25]],[["B",4,0.5],["R",0,0.25],["E",4,0.25],["C",5,0.25],["B",4,0.25]],[["A",4,1.5]]]}];
 
 // Soundfalya note colors: C blue, D green, E yellow, F orange, G red, A purple, B light blue
 const NOTE_COL={C:["#2f6fd6","#6fa8ff","#1a3f86"],D:["#2f9e44","#7bd87f","#1b5e2a"],E:["#e8c22a","#fff07a","#9a7b10"],
@@ -51,7 +50,7 @@ N:"110101101101101",O:"010101101101010",P:"110101110100100",Q:"010101101110011",
 U:"101101101101111",V:"101101101101010",W:"101101111111101",X:"101101010101101",Y:"101101010010010",Z:"111001010100111",
 0:"111101101101111",1:"010110010010111",2:"110001010100111",3:"110001010001110",4:"101101111001001",5:"111100110001110",
 6:"011100111101111",7:"111001010010010",8:"111101111101111",9:"111101111001110",":":"000010000010000",".":"000000000000010",
-"!":"010010010000010","-":"000000111000000","/":"001001010100100","'":"010010000000000"," ":"000000000000000","x":"000101010101000"};
+"!":"010010010000010","-":"000000111000000","/":"001001010100100","'":"010010000000000","#":"010111010111010","+":"000010111010000"," ":"000000000000000","x":"000101010101000"};
 function txt(s,x,y,col,sc=1,shadow=true){s=String(s).toUpperCase();
  const draw=(ox,oy,c)=>{ctx.fillStyle=c;let cx=ox;for(const ch of s){const g=F[ch]||F[" "];
   for(let i=0;i<15;i++)if(g[i]==="1")ctx.fillRect(cx+(i%3)*sc,oy+((i/3)|0)*sc,sc,sc);cx+=4*sc;}};
@@ -61,25 +60,36 @@ const tw=(s,sc=1)=>String(s).length*4*sc-sc;
 // ---- setup ----
 const cv=document.getElementById("c"),ctx=cv.getContext("2d"),W=320,H=240;
 const songSel=document.getElementById("song");
+const lvlSel=document.getElementById("lvl");
 SONGS.forEach((s,i)=>songSel.add(new Option(s.title,i)));
-let song,bricks,seq,ball,pad,lives,score,state,combo,particles,flash,stars,t=0,muted=false;
+for(let i=1;i<=11;i++)lvlSel.add(new Option(i,i));
+const ascii=s=>s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/,/g,"");
+let song,bricks,seq,ball,pad,lives,score,state,combo,particles,flash,stars,t=0,muted=false,level=1,pw={},pop=null;
+// each note has its own power when it breaks
+const POWER={C:"BONUS",D:"WIDE",E:"2X",F:"FIRE",G:"TOUGH",A:"SLOW",B:"+1 LIFE"};
+const baseSpeed=()=>1.9+level*.2;
 
 // fixed starfield (own seeded rng, does not touch anything else)
 (function(){let s=7;const r=()=>(s=(s*16807)%2147483647)/2147483647;stars=[];for(let i=0;i<70;i++)stars.push([r()*W|0,r()*H|0,r()]);})();
 
-function load(i){song=SONGS[i];bricks=[];seq=[];
- const unit=18, rowH=16, top=44; // 1 beat = 36px, eighth = 18px
- for(let m=0;m<song.measures.length;m++){const row=(m/2)|0;let x=16+(m%2)*144;
-  for(const [st,oc,b] of song.measures[m]){const w=b*36;
-   const br={x,y:top+row*rowH,w,h:rowH-2,step:st,oct:oc,beats:b,idx:seq.length,alive:true,hit:0};
-   bricks.push(br);seq.push(br);x+=w;}}
- lives=3;score=0;combo=0;particles=[];flash=0;resetBall();state="ready";}
-function resetBall(){pad={x:W/2-22,w:44,y:222};ball={x:W/2,y:pad.y-4,vx:0,vy:0,r:3,stuck:true};}
+function load(i,keep){song=SONGS[i];bricks=[];seq=[];
+ const rowH=16, top=44, rowW=288;
+ const total=song.measures.flat().reduce((a,n)=>a+n[2],0), bw=Math.min(72,Math.floor(rowW*4/total)); // px per beat
+ let row=0,x=16;
+ for(const meas of song.measures){const mw=meas.reduce((a,n)=>a+n[2],0)*bw;
+  if(x>16&&x-16+mw>rowW+.5){row++;x=16;}
+  for(const [st,oc,b] of meas){const w=b*bw;
+   if(st!=="R"){const br={x,y:top+row*rowH,w,h:rowH-2,step:st,oct:oc,beats:b,idx:seq.length,alive:true,hit:0,hp:st[0]==="G"?2:1};
+    bricks.push(br);seq.push(br);}
+   x+=w;}}
+ if(!keep){lives=3;score=0;}
+ combo=0;particles=[];flash=0;pw={};pop=null;resetBall();state="ready";}
+function resetBall(){pad={x:W/2-22,w:44,y:222};ball={x:W/2,y:pad.y-4,vx:0,vy:0,r:3,stuck:true};pw={};}
 
 // ---- audio ----
 let ac=null;
 function audio(){if(!ac){try{ac=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(ac&&ac.state==="suspended")ac.resume();return ac;}
-function freq(st,oc){return 440*Math.pow(2,((oc+1)*12+SEMI[st]-69)/12);}
+function freq(st,oc){return 440*Math.pow(2,((oc+1)*12+SEMI[st[0]]+(st[1]==="#"?1:0)-69)/12);}
 function tone(f,when=0,dur=.5,vol=.25){const a=audio();if(!a||muted)return;const t0=a.currentTime+when;
  const g=a.createGain();g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(vol,t0+.008);g.gain.exponentialRampToValueAtTime(.001,t0+dur+.4);
  g.connect(a.destination);
@@ -97,16 +107,21 @@ cv.addEventListener("mousemove",ptr);cv.addEventListener("touchmove",e=>{ptr(e);
 cv.addEventListener("touchstart",e=>{ptr(e);launch();e.preventDefault();},{passive:false});
 cv.addEventListener("mousedown",launch);
 songSel.onchange=()=>{load(+songSel.value);songSel.blur();};
+lvlSel.onchange=()=>{level=+lvlSel.value;load(+songSel.value);lvlSel.blur();};
 document.getElementById("mute").onclick=e=>{muted=!muted;e.target.textContent="Sound: "+(muted?"off":"on");e.target.blur();};
 function launch(){audio();
- if(state==="won"||state==="over"){load(+songSel.value);return;}
- if(ball.stuck){ball.stuck=false;const a=-Math.PI/2+(Math.random()-.5)*.6;ball.vx=Math.cos(a)*2.2;ball.vy=Math.sin(a)*2.2;state="play";blip(660);}}
+ if(state==="won"){if(level<11){level++;lvlSel.value=level;load(+songSel.value,true);}else{level=1;lvlSel.value=1;load(+songSel.value);}return;}
+ if(state==="over"){load(+songSel.value);return;}
+ if(ball.stuck){ball.stuck=false;const a=-Math.PI/2+(Math.random()-.5)*.6,sp=baseSpeed();ball.vx=Math.cos(a)*sp;ball.vy=Math.sin(a)*sp;state="play";blip(660);}}
 
 // ---- update ----
 function update(){t++;
  if(keys.ArrowLeft)pad.x-=4;if(keys.ArrowRight)pad.x+=4;pad.x=Math.max(4,Math.min(W-4-pad.w,pad.x));
+ for(const k in pw)if(--pw[k]<=0)delete pw[k];
+ const pwW=pw.WIDE?72:44;if(pad.w!==pwW){pad.x+=(pad.w-pwW)/2;pad.w=pwW;pad.x=Math.max(4,Math.min(W-4-pad.w,pad.x));}
+ if(pop&&--pop.l<=0)pop=null;
  if(ball.stuck){ball.x=pad.x+pad.w/2;ball.y=pad.y-4;}
- else if(state==="play"){const steps=4;for(let s=0;s<steps;s++)stepBall(1/steps);}
+ else if(state==="play"){const steps=4,k=pw.SLOW?.6:1;for(let s=0;s<steps;s++)stepBall(k/steps);}
  particles=particles.filter(p=>(p.x+=p.vx,p.y+=p.vy,p.vy+=.08,--p.l>0));
  if(flash>0)flash--;}
 function stepBall(k){const b=ball;b.x+=b.vx*k;b.y+=b.vy*k;
@@ -115,19 +130,24 @@ function stepBall(k){const b=ball;b.x+=b.vx*k;b.y+=b.vy*k;
  if(b.y<b.r+38){b.y=b.r+38;b.vy=Math.abs(b.vy);blip(220,.03);}
  // paddle
  if(b.vy>0&&b.y+b.r>=pad.y&&b.y+b.r<=pad.y+6&&b.x>=pad.x-2&&b.x<=pad.x+pad.w+2){
-  const rel=((b.x-pad.x)/pad.w-.5)*2, sp=Math.min(3.6,Math.hypot(b.vx,b.vy)+.02), a=-Math.PI/2+rel*1.0;
+  const rel=((b.x-pad.x)/pad.w-.5)*2, sp=Math.min(baseSpeed()*1.5,Math.hypot(b.vx,b.vy)+.02), a=-Math.PI/2+rel*1.0;
   b.vx=Math.cos(a)*sp;b.vy=Math.sin(a)*sp;b.y=pad.y-b.r;combo=0;blip(330,.04);}
  // bricks
  for(const br of bricks){if(!br.alive)continue;
   if(b.x+b.r>br.x&&b.x-b.r<br.x+br.w&&b.y+b.r>br.y&&b.y-b.r<br.y+br.h){
    const ox=Math.min(b.x+b.r-br.x,br.x+br.w-(b.x-b.r)),oy=Math.min(b.y+b.r-br.y,br.y+br.h-(b.y-b.r));
-   if(ox<oy)b.vx=-b.vx;else b.vy=-b.vy;
-   breakBrick(br);break;}}
+   if(!pw.FIRE){if(ox<oy)b.vx=-b.vx;else b.vy=-b.vy;}
+   if(--br.hp>0){br.hit=1;blip(180,.05);for(let i=0;i<6;i++)particles.push({x:br.x+Math.random()*br.w,y:br.y+br.h/2,vx:(Math.random()-.5)*2,vy:-Math.random(),l:14,c:"#ff7b7b"});}
+   else breakBrick(br);
+   if(!pw.FIRE)break;}}
  if(b.y>H+6){lives--;blip(110,.3);if(lives<=0){state="over";}else{resetBall();state="ready";}}}
 function breakBrick(br){const inOrder=seq.find(n=>n.alive)===br; // broke the next note of the tune: bonus
- br.alive=false;br.hit=1;combo++;score+=10*combo+(inOrder?25:0);
+ br.alive=false;br.hit=1;combo++;const L=br.step[0],mult=pw["2X"]?2:1;
+ score+=(10*combo+(inOrder?25:0)+(L==="C"?50:0)+(L==="G"?30:0))*mult;
  tone(freq(br.step,br.oct),0,.45);
- const c=NOTE_COL[br.step];
+ if(L==="D")pw.WIDE=600;if(L==="E")pw["2X"]=600;if(L==="F")pw.FIRE=300;if(L==="A")pw.SLOW=480;if(L==="B"&&lives<5)lives++;
+ pop={s:L==="C"?"+50":POWER[L],x:br.x+br.w/2,y:br.y,l:40,c:NOTE_COL[L][1]};
+ const c=NOTE_COL[L];
  for(let i=0;i<14;i++)particles.push({x:br.x+Math.random()*br.w,y:br.y+Math.random()*br.h,vx:(Math.random()-.5)*2.4,vy:-Math.random()*2,l:24+Math.random()*16|0,c:c[i%2]});
  if(bricks.every(b=>!b.alive)){state="won";flash=20;seq.forEach(n=>n.hit=0);setTimeout(playSong,400);}}
 
@@ -147,29 +167,32 @@ function drawBg(){
  px(0,36,4,H-36,"#5a3a22");px(W-4,36,4,H-36,"#5a3a22");px(0,36,W,2,"#5a3a22");
  for(let y=40;y<H;y+=6){px(1,y,2,1,"#7a5232");px(W-3,y+3,2,1,"#3d2614");}
 }
-function drawBrick(br){const c=NOTE_COL[br.step],x=br.x,y=br.y,w=br.w,h=br.h;
+function drawBrick(br){const c=NOTE_COL[br.step[0]],x=br.x,y=br.y,w=br.w,h=br.h;
  px(x,y,w,h,OUT);px(x+1,y+1,w-2,h-2,c[0]);
  px(x+1,y+1,w-2,1,c[1]);px(x+1,y+1,1,h-2,c[1]);                      // warm light top-left
  px(x+1,y+h-2,w-2,1,c[2]);px(x+w-2,y+1,1,h-2,c[2]);                  // cool shade bottom-right
  for(let i=x+3;i<x+w-3;i+=2)if(((i+y)>>1)%3===0)px(i,y+h-3,1,1,c[2]); // dithered texture at the tone edge
- const L=br.step;txt(L,x+(w-3)/2|0,y+4,"#fff",1,true);}
+ if(br.step[0]==="G"&&br.hp>1){px(x+2,y+2,w-4,1,"#ffd0d0");px(x+2,y+h-3,w-4,1,"#5a0c10");} // tough brick: double frame
+ if(br.step[0]==="G"&&br.hp===1){px(x+w/2|0,y+2,1,4,OUT);px((x+w/2|0)+1,y+5,1,4,OUT);} // crack
+ const L=br.step;txt(L,x+(w-tw(L))/2|0,y+4,"#fff",1,true);}
 function drawPad(){const x=pad.x|0,y=pad.y;
  // wizard staff as paddle: wood shaft + golden caps
  px(x,y,pad.w,5,OUT);px(x+1,y+1,pad.w-2,3,"#8a5a2e");px(x+1,y+1,pad.w-2,1,"#c08a4e");px(x+1,y+3,pad.w-2,1,"#5a3818");
  for(let i=x+4;i<x+pad.w-4;i+=5)px(i,y+2,2,1,"#6e4422");
  px(x-1,y-1,5,7,OUT);px(x,y,3,5,"#e8b83a");px(x,y,3,1,"#fff07a");
  px(x+pad.w-4,y-1,5,7,OUT);px(x+pad.w-3,y,3,5,"#e8b83a");px(x+pad.w-3,y,3,1,"#fff07a");}
-function drawBall(){const b=ball,x=b.x|0,y=b.y|0,glow=(Math.sin(t/6)+1)/2;
- ctx.fillStyle=`rgba(140,200,255,${.12+glow*.12})`;ctx.fillRect(x-3,y-5,7,11);ctx.fillRect(x-5,y-3,11,7);
- px(x-2,y-3,5,7,OUT);px(x-3,y-2,7,5,OUT);px(x-2,y-2,5,5,"#7fd0ff");px(x-1,y-2,2,1,"#e8f8ff");px(x-2,y-1,1,2,"#e8f8ff");px(x+1,y+1,2,1,"#3a7fc0");}
+function drawBall(){const b=ball,x=b.x|0,y=b.y|0,glow=(Math.sin(t/6)+1)/2,fire=!!pw.FIRE;
+ ctx.fillStyle=fire?`rgba(255,150,60,${.2+glow*.2})`:`rgba(140,200,255,${.12+glow*.12})`;ctx.fillRect(x-3,y-5,7,11);ctx.fillRect(x-5,y-3,11,7);
+ px(x-2,y-3,5,7,OUT);px(x-3,y-2,7,5,OUT);px(x-2,y-2,5,5,fire?"#ff9a3c":"#7fd0ff");px(x-1,y-2,2,1,fire?"#fff07a":"#e8f8ff");px(x-2,y-1,1,2,fire?"#fff07a":"#e8f8ff");px(x+1,y+1,2,1,fire?"#c0441a":"#3a7fc0");}
 function drawStrip(){ // the melody as colored notes, filling in as you play
  px(0,0,W,36,"#100b1e");px(0,35,W,1,"#3a2d58");
- txt(song.title,6,4,"#f3e9d2");txt("SCORE "+score,W-6-tw("SCORE "+score),4,"#f2b84b");
- for(let i=0;i<lives;i++){const x=W/2-14+i*10;px(x,4,7,5,OUT);px(x+1,5,5,3,"#d6323a");px(x+1,5,2,1,"#ff7b7b");} // lives = wax seals
+ const ttl=ascii(song.title)+" - LV "+level;txt(ttl,6,4,"#f3e9d2");txt("SCORE "+score,W-6-tw("SCORE "+score),4,"#f2b84b");
+ const lx=W-6-tw("SCORE "+score)-8-lives*10;
+ for(let i=0;i<lives;i++){const x=lx+i*10;px(x,4,7,5,OUT);px(x+1,5,5,3,"#d6323a");px(x+1,5,2,1,"#ff7b7b");} // lives = wax seals
  const n=seq.length,sw=Math.min(9,(W-12)/n),x0=(W-sw*n)/2;
  for(let i=0;i<5;i++)px(x0-2,10+i*4,sw*n+4,1,"#3a2d58"); // staff lines
- seq.forEach((s,i)=>{const lv={C:-2,D:-1,E:0,F:1,G:2,A:3,B:4}[s.step]+(s.oct-4)*7; // E4 = bottom line
-  const y=26-lv*2-2, x=x0+i*sw+1, c=NOTE_COL[s.step], on=!s.alive||s.hit;
+ seq.forEach((s,i)=>{const lv={C:-2,D:-1,E:0,F:1,G:2,A:3,B:4}[s.step[0]]+(s.oct-4)*7; // E4 = bottom line
+  const y=26-lv*2-2, x=x0+i*sw+1, c=NOTE_COL[s.step[0]], on=!s.alive||(s.hit&&s.hp<=0);
   px(x,y,5,4,on?OUT:"#3a2d58");px(x+1,y+1,3,2,on?c[0]:"#241a3a");if(on)px(x+1,y+1,1,1,c[1]);
   if(s.step==="C"&&s.oct===4)px(x-1,y+1,7,1,on?OUT:"#3a2d58");});}
 function drawMsg(a,b){const w=Math.max(tw(a,2),tw(b))+20;const x=(W-w)/2|0,y=128;
@@ -182,7 +205,9 @@ function draw(){drawBg();drawStrip();
  if(flash>0&&flash%4<2)px(0,36,W,H-36,"rgba(255,240,200,.08)");
  if(state==="ready"&&score===0&&lives===3)drawMsg("MELODY BREAKOUT","CLICK OR PRESS SPACE TO PLAY");
  else if(state==="ready")drawMsg("READY?","CLICK OR SPACE TO LAUNCH");
- if(state==="won")drawMsg("SONG COMPLETE!","LISTEN... THEN CLICK TO PLAY AGAIN");
+ if(pop)txt(pop.s,Math.max(4,Math.min(W-4-tw(pop.s),pop.x-tw(pop.s)/2))|0,(pop.y-(40-pop.l)/3)|0,pop.c);
+ {let x=8;for(const k in pw){const s=k+" "+Math.ceil(pw[k]/60);txt(s,x,H-8,"#f2b84b");x+=tw(s)+8;}}
+ if(state==="won")drawMsg(level<11?"LEVEL "+level+" COMPLETE!":"ALL 11 LEVELS!",level<11?"LISTEN... THEN CLICK FOR LEVEL "+(level+1):"YOU MASTERED THIS SONG! CLICK TO RESTART");
  if(state==="over")drawMsg("GAME OVER","CLICK TO TRY AGAIN");
  txt("SOUNDFALYA",W-6-tw("SOUNDFALYA"),H-8,"#6c5f94",1,false);}
 function loop(){update();draw();requestAnimationFrame(loop);}
