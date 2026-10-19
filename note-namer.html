@@ -21,7 +21,7 @@ body{font:20px 'VT323',monospace;overflow-x:hidden}
 .glass{position:relative;background:var(--paper);min-height:48vh;max-height:56vh;overflow:auto;border:4px solid var(--ink);border-radius:6px}
 .glass::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(transparent 0 3px,rgba(0,40,30,.03) 3px 4px)}
 #sheetBox{margin:12px auto;overflow:hidden}
-.fsBtn{position:absolute;top:18px;right:18px;z-index:6;font:inherit;font-size:20px;line-height:1;padding:6px 10px;cursor:pointer;background:var(--paper);color:var(--ink);border:3px solid var(--ink);border-radius:6px;box-shadow:2px 2px 0 var(--ink)}
+.fsBtn{position:absolute;top:18px;right:18px;z-index:6;font:inherit;font-size:18px;line-height:1;padding:7px 12px;cursor:pointer;background:#f5c832;color:var(--ink);border:3px solid var(--ink);border-radius:6px;box-shadow:2px 2px 0 var(--ink)}
 .fsBtn:hover{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--ink)}
 /* pantalla completa: solo la partitura */
 .screen:fullscreen,.screen.fs{padding:0;border:0;border-radius:0;box-shadow:none;background:var(--paper)}
@@ -81,7 +81,7 @@ body{font:20px 'VT323',monospace;overflow-x:hidden}
 <div class="wrap">
   <div class="pc">
     <div class="top"><div class="brand"><canvas class="seal" id="seal" width="24" height="24"></canvas><div><b>SOUNDFALYA</b> NOTE-NAMER 3000<small>Sube un .mxl o MusicXML y le escribo el nombre a cada nota</small></div></div><div class="slot"></div></div>
-    <div class="screen"><button class="fsBtn" id="fsBtn" type="button" title="Pantalla completa" aria-label="Pantalla completa">⛶</button><div class="glass"><div id="sheetBox"><div id="sheet"></div></div><div class="paste" id="lib" hidden><b>BIBLIOTECA · <span id="libN"></span> PARTITURAS</b><input id="libQ" type="search" placeholder="Buscar título o compositor…"><div class="list" id="libL"></div><div class="row"><button class="btn alt" id="libDrive" type="button">Subir las 60 a mi Drive</button><button class="btn pale" id="libNo" type="button">Cerrar</button></div></div><div class="paste" id="paste" hidden><b>PEGA AQUÍ TU MUSICXML</b><textarea id="pasteTxt" spellcheck="false" placeholder="&lt;?xml version=&quot;1.0&quot; ...&gt;&#10;&lt;score-partwise&gt; ..."></textarea><div class="row"><button class="btn pale" id="pasteNo" type="button">Cancelar</button><button class="btn" id="pasteOk" type="button">Usar texto</button></div></div><div class="empty" id="empty"><div><b>INSERTE PARTITURA</b>Arrastra aquí un .mxl o .musicxml, o pega el texto</div></div></div></div>
+    <div class="screen"><button class="fsBtn" id="fsBtn" type="button" title="Pantalla completa" aria-label="Pantalla completa">⛶ Pantalla completa</button><div class="glass"><div id="sheetBox"><div id="sheet"></div></div><div class="paste" id="lib" hidden><b>BIBLIOTECA · <span id="libN"></span> PARTITURAS</b><input id="libQ" type="search" placeholder="Buscar título o compositor…"><div class="list" id="libL"></div><div class="row"><button class="btn alt" id="libDrive" type="button">Subir las 60 a mi Drive</button><button class="btn pale" id="libNo" type="button">Cerrar</button></div></div><div class="paste" id="paste" hidden><b>PEGA AQUÍ TU MUSICXML</b><textarea id="pasteTxt" spellcheck="false" placeholder="&lt;?xml version=&quot;1.0&quot; ...&gt;&#10;&lt;score-partwise&gt; ..."></textarea><div class="row"><button class="btn pale" id="pasteNo" type="button">Cancelar</button><button class="btn" id="pasteOk" type="button">Usar texto</button></div></div><div class="empty" id="empty"><div><b>INSERTE PARTITURA</b>Arrastra aquí un .mxl o .musicxml, o pega el texto</div></div></div></div>
     <div class="panel">
       <div class="dpad" aria-hidden="true"><i></i><b></b><i></i></div>
       <div class="ctrl">
@@ -89,7 +89,6 @@ body{font:20px 'VT323',monospace;overflow-x:hidden}
         <button class="btn pale" id="pasteBtn" type="button">Pegar texto</button>
         <button class="btn pale" id="libBtn" type="button">Biblioteca</button>
         <div class="seg" role="group" aria-label="Nombres"><button type="button" data-n="sol" class="on">Do Re Mi</button><button type="button" data-n="abc">C D E</button></div>
-        <div class="seg" role="group" aria-label="Orden"><button type="button" data-o="1" class="on">Ordenar</button><button type="button" data-o="0">Original</button></div>
         <div class="seg" role="group" aria-label="Colores"><button type="button" data-c="0" class="on">Negro</button><button type="button" data-c="1">Colores</button></div>
         <button class="btn alt" id="dl" type="button">MXL</button>
         <button class="btn alt" id="dlp" type="button">PDF</button>
@@ -167,7 +166,7 @@ requestAnimationFrame(frame);
 const SOL = { C:'Do', D:'Re', E:'Mi', F:'Fa', G:'Sol', A:'La', B:'Si' };
 const COL = ['#1f5fd0','#2e9e3e','#e8b800','#f08a1c','#d82020','#7b3fb0','#4fc3f0','#000000'];
 let FORCE = new Set(), BRK = [];
-let src = null, out = null, view = null, mode = 'sol', colors = false, tidy = true, osmd = null, fname = 'partitura';
+let src = null, out = null, view = null, mode = 'sol', colors = false, tidy = false, osmd = null, fname = 'partitura';
 const $ = id => document.getElementById(id), st = m => $('st').textContent = '> ' + m;
 // marca invisible para los nombres de adornos: solo en la vista, para correrlos sobre la notita
 const GRACE_MARK = '\u2063';
@@ -285,7 +284,7 @@ let fitT = 0; addEventListener('resize', () => { clearTimeout(fitT); fitT = setT
 // botón de pantalla completa: muestra solo la partitura (en iPhone, sin pantalla completa real, la pantallita cubre la página)
 const scr = document.querySelector('.screen');
 const isFull = () => !!(document.fullscreenElement || document.webkitFullscreenElement || scr.classList.contains('fs'));
-function fsShow(){ const on = isFull(); $('fsBtn').textContent = on ? '✕' : '⛶'; $('fsBtn').title = on ? 'Salir de pantalla completa' : 'Pantalla completa'; document.body.style.overflow = scr.classList.contains('fs') ? 'hidden' : ''; setTimeout(fitPage, 60); }
+function fsShow(){ const on = isFull(); $('fsBtn').textContent = on ? '✕ Salir' : '⛶ Pantalla completa'; $('fsBtn').title = on ? 'Salir de pantalla completa' : 'Pantalla completa'; document.body.style.overflow = scr.classList.contains('fs') ? 'hidden' : ''; setTimeout(fitPage, 60); }
 $('fsBtn').onclick = () => {
   if(scr.classList.contains('fs')){ scr.classList.remove('fs'); return fsShow(); }
   if(document.fullscreenElement || document.webkitFullscreenElement) return (document.exitFullscreen || document.webkitExitFullscreen).call(document);
@@ -302,6 +301,10 @@ function compact(o){ const r = o.EngravingRules; if(!r) return;
   o.zoom = zoom; }
 function rebalance(o){ let firsts = [];
   try{ for(const pg of o.GraphicSheet.MusicPages) for(const sy of pg.MusicSystems){ const gm = sy.GraphicalMeasures[0] && sy.GraphicalMeasures[0][0]; if(gm) firsts.push(gm.parentSourceMeasure.measureListIndex); } }catch(e){ return false; }
+  if(!tidy){ // modo original: se respetan los saltos del archivo; si el programa tuvo que cortar más líneas, se achica la hoja
+    const own = new Set([0]); try{ const d = new DOMParser().parseFromString(view, 'application/xml'), pt = d.querySelector('part');
+      if(pt) [...pt.querySelectorAll(':scope > measure')].forEach((m, i) => { const pr = m.querySelector(':scope > print'); if(pr && /yes/.test((pr.getAttribute('new-system') || '') + (pr.getAttribute('new-page') || ''))) own.add(i); }); }catch(e){}
+    if(firsts.some(f => !own.has(f)) && zoom > MIN_ZOOM){ zoom = Math.max(MIN_ZOOM, zoom - .1); return true; } return false; }
   const cuts = new Set([0, ...BRK]), sorted = [0, ...BRK].sort((x, y) => x - y); let more = false, small = false;
   for(const f of firsts){ if(cuts.has(f)) continue;
     const gs = sorted.filter(x => x < f).pop() || 0, ge = sorted.find(x => x > f) || (gs + PER_SYSTEM), mid = gs + Math.ceil((ge - gs) / 2);
@@ -323,7 +326,7 @@ async function render(keepParts, pass){
     try{ await osmd.load(view); compact(osmd); osmd.render(); note = k; break; }catch(e){ if(sel === 'direction, sound') throw e; }
   }
   // si un sistema no cupo y el programa lo cortó solo, se reparte ese grupo en partes parejas y se dibuja de nuevo
-  if(tidy && (pass || 0) < 6 && rebalance(osmd)) return render(keepParts, (pass || 0) + 1);
+  if((pass || 0) < 6 && rebalance(osmd)) return render(keepParts, (pass || 0) + 1);
   shiftGrace($('sheet')); fitPage();
   if(!keepParts){ const sc = parseScore(src); parts = sc.parts; tempo = sc.tempo; $('tempo').value = tempo; partsUI(); }
   st(r.n + ' notas con nombre' + (r.fixed ? ' · ' + r.fixed + ' corregidas' : '') + note + '.');
@@ -397,7 +400,6 @@ document.addEventListener('paste', e => { if(e.target === $('pasteTxt') || /inpu
   const x = e.clipboardData && e.clipboardData.getData('text'); if(x && /<score-(partwise|timewise)/.test(x)){ e.preventDefault(); usePasted(x); } });
 $('file').onchange = async e => { const f = e.target.files[0]; if(!f) return; load(await readFile(f), f.name); };
 document.querySelectorAll('[data-n]').forEach(b => b.onclick = () => { mode = b.dataset.n; document.querySelectorAll('[data-n]').forEach(x => x.classList.toggle('on', x === b)); render(true); });
-document.querySelectorAll('[data-o]').forEach(b => b.onclick = () => { tidy = b.dataset.o === '1'; document.querySelectorAll('[data-o]').forEach(x => x.classList.toggle('on', x === b)); render(true); });
 document.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { colors = b.dataset.c === '1'; document.querySelectorAll('[data-c]').forEach(x => x.classList.toggle('on', x === b)); render(true); });
 $('bigb').onclick = () => play();
 const dlP = (window.claude && claude.use) ? claude.use('downloads').catch(() => null) : Promise.resolve(null);
