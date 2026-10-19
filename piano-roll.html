@@ -806,7 +806,7 @@ function setPiece(p, title, fname){
   killSession(); if(ctx) ctx.resume(); state = 'idle'; cue = null; blob = null; $('save').hidden = $('again').hidden = true;
   if(p.title0) title = p.title0; if(title != null) $('title').value = title.slice(0, 40);
   sug = suggestBpm(p, fname); piece = p; piece.src = null; piece = withTempo(p, sug.bpm); piece.src = p;
-  $('cs').value = 0; setBpm(sug.bpm); buildBG();
+  $('cs').value = 0; clipMode = false; setBpm(sug.bpm); buildBG(); sync();
 }
 const SAVE_KEY = 'soundfalya-roll-pieza';
 function savePiece(p, title, fname){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify({ p:{ ...p, src:null }, title, fname, bpm:piece.bpm })); }catch(e){} }
