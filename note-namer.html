@@ -269,6 +269,24 @@ function addNames(xml){
   if(ed) for(const pt of doc.querySelectorAll('part')) [...pt.querySelectorAll(':scope > measure')].forEach((m, i) => {
     let pr = m.querySelector(':scope > print'); if(pr){ pr.removeAttribute('new-system'); pr.removeAttribute('new-page'); }
     if(i && ed.has(i)){ if(!pr){ pr = doc.createElement('print'); m.insertBefore(pr, m.firstChild); } pr.setAttribute('new-system', 'yes'); } });
+  // silencios de varios compases: los compases de silencio seguidos se juntan en un bloque con el número encima,
+  // y el bloque se corta donde empieza una sección (doble barra, marca de ensayo, cambio de compás o de tonalidad, repetición) o una línea nueva
+  { const pl = [...doc.querySelectorAll('part')].map(pt => [...pt.querySelectorAll(':scope > measure')]), ms = pl[0] || [];
+    const quiet = m => !m || ([...m.querySelectorAll(':scope > note')].every(nt => nt.querySelector(':scope > rest')) && !m.querySelector(':scope > harmony, :scope > figured-bass, barline repeat, barline ending, fermata')
+      && [...m.querySelectorAll(':scope > direction direction-type > *')].every(x => /^(rehearsal|segno|coda)$/.test(x.tagName)));
+    const changes = m => m && m.querySelector(':scope > attributes clef, :scope > attributes key, :scope > attributes time');
+    const cut = i => { if(!i) return true; const m = ms[i], prev = ms[i - 1];
+      if(m.querySelector(':scope > print[new-system="yes"], :scope > print[new-page="yes"], rehearsal, segno, coda')) return true;
+      const bl = prev && prev.querySelector('barline[location="right"] bar-style');
+      return !!(bl && /light-light|light-heavy|heavy/.test(bl.textContent)) || pl.some(pm => changes(pm[i])); };
+    const runs = []; let a = -1;
+    ms.forEach((m, i) => { const ok = pl.every(pm => quiet(pm[i]));
+      if(ok && a >= 0 && !cut(i)) return; if(a >= 0 && i - a > 1) runs.push([a, i - a]); a = ok ? i : -1; });
+    if(a >= 0 && ms.length - a > 1) runs.push([a, ms.length - a]);
+    for(const [i, len] of runs) for(const pm of pl){ const m = pm[i]; if(!m) continue;
+      let at = m.querySelector(':scope > attributes'); if(!at){ at = doc.createElement('attributes'); const pr = m.querySelector(':scope > print'); m.insertBefore(at, pr ? pr.nextSibling : m.firstChild); }
+      at.querySelectorAll('measure-style').forEach(x => x.remove());
+      const st = doc.createElement('measure-style'), mr = doc.createElement('multiple-rest'); mr.textContent = String(len); st.appendChild(mr); at.appendChild(st); } }
   // ordenar: cada sección (marca de ensayo, doble barra, cambio de compás o de tonalidad) empieza en una línea nueva
   // ordenar: se ignoran los saltos de línea y de página del archivo original, para llenar mejor cada hoja
   if(tidy) doc.querySelectorAll('print').forEach(pr => { pr.removeAttribute('new-system'); pr.removeAttribute('new-page'); pr.querySelectorAll('system-layout, page-layout, staff-layout').forEach(x => x.remove()); if(!pr.attributes.length && !pr.children.length) pr.remove(); });
@@ -592,9 +610,11 @@ $('sheet').addEventListener('click', e => {
   const pg = [...$('sheet').querySelectorAll('svg')].indexOf(svg), pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
   const q = pt.matrixTransform(svg.getScreenCTM().inverse()), n = osmd.GraphicSheet.MeasureList.length;
   let hit = -1; for(let i = 0; i < n; i++){ const b = mBox(i); if(b && b.pg === pg && q.x >= b.x && q.x <= b.x + b.w && q.y >= b.y && q.y <= b.y + b.h){ hit = i; break; } }
+  // un bloque de silencios se marca entero (sus compases escondidos no tienen dibujo propio)
+  const blockEnd = i => { let j = i; while(j + 1 < n && !osmd.GraphicSheet.MeasureList[j + 1].some(Boolean)) j++; return j; };
   if(hit < 0){ sel = null; }
-  else if(e.shiftKey && sel){ sel = { a:Math.min(sel.a, sel.b, hit), b:Math.max(sel.a, sel.b, hit) }; }
-  else sel = (sel && sel.a === hit && sel.b === hit) ? null : { a:hit, b:hit };
+  else if(e.shiftKey && sel){ sel = { a:Math.min(sel.a, hit), b:Math.max(sel.b, blockEnd(hit)) }; }
+  else sel = (sel && sel.a === hit && sel.b === blockEnd(hit)) ? null : { a:hit, b:blockEnd(hit) };
   showSel(); });
 // el bloque que se mueve se junta con la línea de arriba o de abajo; las demás líneas quedan como estaban
 async function moveSel(dir){
