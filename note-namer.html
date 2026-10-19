@@ -178,7 +178,7 @@ requestAnimationFrame(frame);
 /* ---------- nombres de las notas ---------- */
 const SOL = { C:'Do', D:'Re', E:'Mi', F:'Fa', G:'Sol', A:'La', B:'Si' };
 const COL = ['#1f5fd0','#2e9e3e','#e8b800','#f08a1c','#d82020','#7b3fb0','#4fc3f0','#000000'];
-let FORCE = new Set(), BRK = [], solo = -1, EDITS = {}, sel = null, moving = false;
+let FORCE = new Set(), BRK = [], solo = -1, EDITS = {}, sel = null, moving = false, noRests = false;
 let src = null, out = null, view = null, mode = 'sol', colors = false, tidy = false, osmd = null, fname = 'partitura';
 const $ = id => document.getElementById(id), st = m => $('st').textContent = '> ' + m;
 // marca invisible para los nombres de adornos: solo en la vista, para correrlos sobre la notita
@@ -271,7 +271,7 @@ function addNames(xml){
     if(i && ed.has(i)){ if(!pr){ pr = doc.createElement('print'); m.insertBefore(pr, m.firstChild); } pr.setAttribute('new-system', 'yes'); } });
   // silencios de varios compases: los compases de silencio seguidos se juntan en un bloque con el número encima,
   // y el bloque se corta donde empieza una sección (doble barra, marca de ensayo, cambio de compás o de tonalidad, repetición) o una línea nueva
-  { const pl = [...doc.querySelectorAll('part')].map(pt => [...pt.querySelectorAll(':scope > measure')]), ms = pl[0] || [];
+  if(!noRests) try{ const pl = [...doc.querySelectorAll('part')].map(pt => [...pt.querySelectorAll(':scope > measure')]), ms = pl[0] || [];
     const quiet = m => !m || ([...m.querySelectorAll(':scope > note')].every(nt => nt.querySelector(':scope > rest')) && !m.querySelector(':scope > harmony, :scope > figured-bass, barline repeat, barline ending, fermata')
       && [...m.querySelectorAll(':scope > direction direction-type > *')].every(x => /^(rehearsal|segno|coda)$/.test(x.tagName)));
     const changes = m => m && m.querySelector(':scope > attributes clef, :scope > attributes key, :scope > attributes time');
@@ -286,7 +286,7 @@ function addNames(xml){
     for(const [i, len] of runs) for(const pm of pl){ const m = pm[i]; if(!m) continue;
       let at = m.querySelector(':scope > attributes'); if(!at){ at = doc.createElement('attributes'); const pr = m.querySelector(':scope > print'); m.insertBefore(at, pr ? pr.nextSibling : m.firstChild); }
       at.querySelectorAll('measure-style').forEach(x => x.remove());
-      const st = doc.createElement('measure-style'), mr = doc.createElement('multiple-rest'); mr.textContent = String(len); st.appendChild(mr); at.appendChild(st); } }
+      const st = doc.createElement('measure-style'), mr = doc.createElement('multiple-rest'); mr.textContent = String(len); st.appendChild(mr); at.appendChild(st); } }catch(e){}
   // ordenar: cada sección (marca de ensayo, doble barra, cambio de compás o de tonalidad) empieza en una línea nueva
   // ordenar: se ignoran los saltos de línea y de página del archivo original, para llenar mejor cada hoja
   if(tidy) doc.querySelectorAll('print').forEach(pr => { pr.removeAttribute('new-system'); pr.removeAttribute('new-page'); pr.querySelectorAll('system-layout, page-layout, staff-layout').forEach(x => x.remove()); if(!pr.attributes.length && !pr.children.length) pr.remove(); });
@@ -371,7 +371,12 @@ async function render(keepParts, pass){
   if(!keepParts){ const sc = parseScore(src); parts = sc.parts; tempo = sc.tempo; $('tempo').value = tempo; partsUI(); soloUI(); }
   st(r.n + ' notas con nombre' + (r.fixed ? ' · ' + r.fixed + ' corregidas' : '') + note + '.');
 }
-async function load(text, name){ src = text; FORCE = new Set(); zoom = PAGE_ZOOM; solo = -1; EDITS = {}; sel = null; fname = (name || 'partitura').replace(/\.(musicxml|xml|mxl)$/i, ''); try{ await render(); }catch(e){ st(e.message || 'No pude leer el archivo.'); } }
+async function load(text, name){ src = text; FORCE = new Set(); zoom = PAGE_ZOOM; solo = -1; EDITS = {}; sel = null; noRests = false; fname = (name || 'partitura').replace(/\.(musicxml|xml|mxl)$/i, '');
+  // los instrumentos se leen antes de dibujar, así el selector de particellas aparece aunque el dibujo falle
+  try{ const sc = parseScore(src); parts = sc.parts; tempo = sc.tempo; $('tempo').value = tempo; }catch(e){ parts = []; } partsUI(); soloUI();
+  try{ await render(true); }
+  catch(e){ // si falla con los bloques de silencio, se dibuja sin ellos
+    noRests = true; try{ await render(true); }catch(e2){ st(e2.message || 'No pude leer el archivo.'); } } }
 async function readFile(f){
   const buf = await f.arrayBuffer(), u = new Uint8Array(buf);
   const dec = x => { if(x[0] === 0xFF && x[1] === 0xFE) return new TextDecoder('utf-16le').decode(x); if(x[0] === 0xFE && x[1] === 0xFF) return new TextDecoder('utf-16be').decode(x); return new TextDecoder('utf-8').decode(x).replace(/^﻿/, ''); };
