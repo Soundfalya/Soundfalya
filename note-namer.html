@@ -71,6 +71,16 @@ body{font:20px 'VT323',monospace;overflow-x:hidden}
 .parts{display:flex;flex-wrap:wrap;gap:6px}
 .chip{display:flex;align-items:center;gap:6px;padding:4px 8px;border:3px solid var(--ink);border-radius:6px;background:var(--bodyL);font-size:18px;cursor:pointer}
 .chip input{accent-color:var(--red);width:16px;height:16px}
+.solo{display:none;align-items:center;gap:8px;font:11px 'Press Start 2P',monospace}
+.solo.on{display:flex}
+.solo select{font:20px 'VT323',monospace;padding:4px 6px;border:4px solid var(--ink);border-radius:6px;background:var(--bodyL);color:var(--ink);max-width:220px}
+.moveBar{position:absolute;top:18px;left:18px;z-index:6;display:none;align-items:center;gap:6px;padding:4px 6px;background:var(--paper);color:var(--ink);border:3px solid var(--ink);border-radius:6px;box-shadow:2px 2px 0 var(--ink);font-size:18px}
+.moveBar.on{display:flex}
+.moveBar button{font:inherit;font-size:20px;line-height:1;min-width:34px;padding:4px 8px;cursor:pointer;background:#f5c832;color:var(--ink);border:3px solid var(--ink);border-radius:5px}
+.moveBar button.x{background:var(--bodyL)}
+.screen:fullscreen .moveBar,.screen.fs .moveBar{top:10px;left:14px}
+#sheet svg{cursor:pointer}
+@media (max-width:700px){.moveBar{top:auto;bottom:18px}.screen:fullscreen .moveBar,.screen.fs .moveBar{top:auto;bottom:14px}}
 .big.on{background:#ff6a5a;box-shadow:0 0 14px #ff6a5a,inset 4px 4px 0 #ffb0a8}
 .status{width:100%;text-align:center;font-size:22px;color:var(--ink);margin-top:10px}
 .legs{display:flex;gap:min(340px,30vw);margin-bottom:46px}
@@ -81,7 +91,7 @@ body{font:20px 'VT323',monospace;overflow-x:hidden}
 <div class="wrap">
   <div class="pc">
     <div class="top"><div class="brand"><canvas class="seal" id="seal" width="24" height="24"></canvas><div><b>SOUNDFALYA</b> NOTE-NAMER 3000<small>Sube un .mxl o MusicXML y le escribo el nombre a cada nota</small></div></div><div class="slot"></div></div>
-    <div class="screen"><button class="fsBtn" id="fsBtn" type="button" title="Pantalla completa" aria-label="Pantalla completa">⛶ Pantalla completa</button><div class="glass"><div id="sheetBox"><div id="sheet"></div></div><div class="paste" id="lib" hidden><b>BIBLIOTECA · <span id="libN"></span> PARTITURAS</b><input id="libQ" type="search" placeholder="Buscar título o compositor…"><div class="list" id="libL"></div><div class="row"><button class="btn alt" id="libDrive" type="button">Subir las 60 a mi Drive</button><button class="btn pale" id="libNo" type="button">Cerrar</button></div></div><div class="paste" id="paste" hidden><b>PEGA AQUÍ TU MUSICXML</b><textarea id="pasteTxt" spellcheck="false" placeholder="&lt;?xml version=&quot;1.0&quot; ...&gt;&#10;&lt;score-partwise&gt; ..."></textarea><div class="row"><button class="btn pale" id="pasteNo" type="button">Cancelar</button><button class="btn" id="pasteOk" type="button">Usar texto</button></div></div><div class="empty" id="empty"><div><b>INSERTE PARTITURA</b>Arrastra aquí un .mxl o .musicxml, o pega el texto</div></div></div></div>
+    <div class="screen"><button class="fsBtn" id="fsBtn" type="button" title="Pantalla completa" aria-label="Pantalla completa">⛶ Pantalla completa</button><div class="moveBar" id="moveBar"><span id="moveTxt"></span><button type="button" id="mvUp" title="Subir a la línea de arriba (flecha ↑)">↑</button><button type="button" id="mvDn" title="Bajar a la línea siguiente (flecha ↓)">↓</button><button type="button" class="x" id="mvX" title="Quitar selección">✕</button></div><div class="glass"><div id="sheetBox"><div id="sheet"></div></div><div class="paste" id="lib" hidden><b>BIBLIOTECA · <span id="libN"></span> PARTITURAS</b><input id="libQ" type="search" placeholder="Buscar título o compositor…"><div class="list" id="libL"></div><div class="row"><button class="btn alt" id="libDrive" type="button">Subir las 60 a mi Drive</button><button class="btn pale" id="libNo" type="button">Cerrar</button></div></div><div class="paste" id="paste" hidden><b>PEGA AQUÍ TU MUSICXML</b><textarea id="pasteTxt" spellcheck="false" placeholder="&lt;?xml version=&quot;1.0&quot; ...&gt;&#10;&lt;score-partwise&gt; ..."></textarea><div class="row"><button class="btn pale" id="pasteNo" type="button">Cancelar</button><button class="btn" id="pasteOk" type="button">Usar texto</button></div></div><div class="empty" id="empty"><div><b>INSERTE PARTITURA</b>Arrastra aquí un .mxl o .musicxml, o pega el texto</div></div></div></div>
     <div class="panel">
       <div class="dpad" aria-hidden="true"><i></i><b></b><i></i></div>
       <div class="ctrl">
@@ -90,8 +100,10 @@ body{font:20px 'VT323',monospace;overflow-x:hidden}
         <button class="btn pale" id="libBtn" type="button">Biblioteca</button>
         <div class="seg" role="group" aria-label="Nombres"><button type="button" data-n="sol" class="on">Do Re Mi</button><button type="button" data-n="abc">C D E</button></div>
         <div class="seg" role="group" aria-label="Colores"><button type="button" data-c="0" class="on">Negro</button><button type="button" data-c="1">Colores</button></div>
+        <label class="solo" id="soloBox">Particella <select id="solo"></select></label>
         <button class="btn alt" id="dl" type="button">MXL</button>
         <button class="btn alt" id="dlp" type="button">PDF</button>
+        <button class="btn alt" id="dlz" type="button" hidden>Particellas .zip</button>
         <div class="player"><button class="btn red" id="play" type="button">▶ Escuchar</button>
           <label class="tempo">♩= <input id="tempo" type="number" min="30" max="240" value="100"></label><div class="parts" id="parts"></div></div>
         <div class="status" id="st">&gt; Listo.</div>
@@ -165,7 +177,7 @@ requestAnimationFrame(frame);
 /* ---------- nombres de las notas ---------- */
 const SOL = { C:'Do', D:'Re', E:'Mi', F:'Fa', G:'Sol', A:'La', B:'Si' };
 const COL = ['#1f5fd0','#2e9e3e','#e8b800','#f08a1c','#d82020','#7b3fb0','#4fc3f0','#000000'];
-let FORCE = new Set(), BRK = [];
+let FORCE = new Set(), BRK = [], solo = -1, EDITS = {}, sel = null;
 let src = null, out = null, view = null, mode = 'sol', colors = false, tidy = false, osmd = null, fname = 'partitura';
 const $ = id => document.getElementById(id), st = m => $('st').textContent = '> ' + m;
 // marca invisible para los nombres de adornos: solo en la vista, para correrlos sobre la notita
@@ -247,6 +259,15 @@ function addNames(xml){
       g.items.forEach((it, i) => { const nm = nameOf(it.p); if(it.prev && it.prev !== nm) fixed++; addLyric(it.el, (isGrace ? GRACE_MARK.repeat(g.run) : '') + nm, i + 1); n++; });
     }
   }
+  // particella: se deja solo el instrumento elegido
+  if(solo >= 0){ const keep = doc.querySelectorAll('part')[solo];
+    if(keep){ doc.querySelectorAll('part').forEach(pt => { if(pt !== keep) pt.remove(); });
+      doc.querySelectorAll('part-list > score-part').forEach(sp => { if(sp.id !== keep.id) sp.remove(); }); doc.querySelectorAll('part-list > part-group').forEach(g => g.remove()); } }
+  // saltos de línea movidos a mano con las flechas: reemplazan a los del archivo
+  const ed = EDITS[solo];
+  if(ed) for(const pt of doc.querySelectorAll('part')) [...pt.querySelectorAll(':scope > measure')].forEach((m, i) => {
+    let pr = m.querySelector(':scope > print'); if(pr){ pr.removeAttribute('new-system'); pr.removeAttribute('new-page'); }
+    if(i && ed.has(i)){ if(!pr){ pr = doc.createElement('print'); m.insertBefore(pr, m.firstChild); } pr.setAttribute('new-system', 'yes'); } });
   // ordenar: cada sección (marca de ensayo, doble barra, cambio de compás o de tonalidad) empieza en una línea nueva
   // ordenar: se ignoran los saltos de línea y de página del archivo original, para llenar mejor cada hoja
   if(tidy) doc.querySelectorAll('print').forEach(pr => { pr.removeAttribute('new-system'); pr.removeAttribute('new-page'); pr.querySelectorAll('system-layout, page-layout, staff-layout').forEach(x => x.remove()); if(!pr.attributes.length && !pr.children.length) pr.remove(); });
@@ -327,11 +348,11 @@ async function render(keepParts, pass){
   }
   // si un sistema no cupo y el programa lo cortó solo, se reparte ese grupo en partes parejas y se dibuja de nuevo
   if((pass || 0) < 6 && rebalance(osmd)) return render(keepParts, (pass || 0) + 1);
-  shiftGrace($('sheet')); fitPage();
-  if(!keepParts){ const sc = parseScore(src); parts = sc.parts; tempo = sc.tempo; $('tempo').value = tempo; partsUI(); }
+  shiftGrace($('sheet')); fitPage(); showSel();
+  if(!keepParts){ const sc = parseScore(src); parts = sc.parts; tempo = sc.tempo; $('tempo').value = tempo; partsUI(); soloUI(); }
   st(r.n + ' notas con nombre' + (r.fixed ? ' · ' + r.fixed + ' corregidas' : '') + note + '.');
 }
-async function load(text, name){ src = text; FORCE = new Set(); zoom = PAGE_ZOOM; fname = (name || 'partitura').replace(/\.(musicxml|xml|mxl)$/i, ''); try{ await render(); }catch(e){ st(e.message || 'No pude leer el archivo.'); } }
+async function load(text, name){ src = text; FORCE = new Set(); zoom = PAGE_ZOOM; solo = -1; EDITS = {}; sel = null; fname = (name || 'partitura').replace(/\.(musicxml|xml|mxl)$/i, ''); try{ await render(); }catch(e){ st(e.message || 'No pude leer el archivo.'); } }
 async function readFile(f){
   const buf = await f.arrayBuffer(), u = new Uint8Array(buf);
   const dec = x => { if(x[0] === 0xFF && x[1] === 0xFE) return new TextDecoder('utf-16le').decode(x); if(x[0] === 0xFE && x[1] === 0xFF) return new TextDecoder('utf-16be').decode(x); return new TextDecoder('utf-8').decode(x).replace(/^﻿/, ''); };
@@ -409,14 +430,14 @@ async function saveFile(name, blob){
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); return true;
 }
 $('dl').onclick = async () => { if(!out){ st('Primero sube una partitura.'); return; }
-  const z = new JSZip(), inner = fname + '-con-nombres.musicxml';
+  const z = new JSZip(), inner = outName() + '.musicxml';
   z.file('mimetype', 'application/vnd.recordare.musicxml', { compression:'STORE' });
   z.file('META-INF/container.xml', '<?xml version="1.0" encoding="UTF-8"?>\n<container><rootfiles><rootfile full-path="' + inner + '" media-type="application/vnd.recordare.musicxml+xml"/></rootfiles></container>');
   z.file(inner, out);
   const b = await z.generateAsync({ type:'blob', compression:'DEFLATE' });
   const d = await dlP;
-  if(d){ try{ await d.save({ filename:fname + '-con-nombres.mxl', data:b }); st('MXL listo.'); return; }catch(e){ if(e && e.code === 'declined') return; if(e && e.code === 'rate_limited'){ st('Espera un momento y vuelve a intentar.'); return; } if(e && e.code === 'rejected_extension'){ if(await saveFile(fname + '-con-nombres.mxl.zip', b)) st('Listo. Si termina en .zip, bórrale ".zip" y queda como .mxl.'); return; } } }
-  if(await saveFile(fname + '-con-nombres.mxl', b)) st('MXL listo.'); };
+  if(d){ try{ await d.save({ filename:outName() + '.mxl', data:b }); st('MXL listo.'); return; }catch(e){ if(e && e.code === 'declined') return; if(e && e.code === 'rate_limited'){ st('Espera un momento y vuelve a intentar.'); return; } if(e && e.code === 'rejected_extension'){ if(await saveFile(outName() + '.mxl.zip', b)) st('Listo. Si termina en .zip, bórrale ".zip" y queda como .mxl.'); return; } } }
+  if(await saveFile(outName() + '.mxl', b)) st('MXL listo.'); };
 const glass = document.querySelector('.glass');
 glass.addEventListener('dragover', e => { e.preventDefault(); }); glass.addEventListener('drop', async e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if(f) load(await readFile(f), f.name); });
 /* ---------- reproductor: lee todas las partes del MusicXML y las toca con WebAudio ---------- */
@@ -504,11 +525,15 @@ const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&':'&amp;', '<':'&lt;', 
 async function pdf(){
   if(!out){ st('Primero sube una partitura.'); return; }
   st('Armando el PDF…');
+  try{ const r = await pdfBlob(view); if(await saveFile(outName() + '.pdf', r.blob)) st('PDF listo: ' + r.pages + (r.pages === 1 ? ' página.' : ' páginas.')); }
+  catch(e){ st('No pude armar el PDF: ' + (e.message || e)); }
+}
+async function pdfBlob(v){
   const box = document.createElement('div'); box.style.cssText = 'position:fixed;left:-10000px;top:0;width:' + PAGE_W + 'px;background:#fff'; document.body.appendChild(box);
   try{
     const o = new opensheetmusicdisplay.OpenSheetMusicDisplay(box, { backend:'svg', drawTitle:true, drawComposer:true, drawPartNames:true, autoResize:false, pageFormat:'A4_P', autoGenerateMultipleRestMeasuresFromRestMeasures:tidy, newSystemFromXML:true, pageBackgroundColor:'#FFFFFF',
       coloringMode: colors ? opensheetmusicdisplay.ColoringModes.CustomColorSet : opensheetmusicdisplay.ColoringModes.XML, coloringSetCustom:COL, coloringEnabled:colors, colorStemsLikeNoteheads:colors });
-    await o.load(view); compact(o); o.render(); shiftGrace(box);
+    await o.load(v); compact(o); o.render(); shiftGrace(box);
     const { jsPDF } = window.jspdf, doc = new jsPDF({ unit:'mm', format:'a4' }), svgs = [...box.querySelectorAll('svg')];
     for(let i = 0; i < svgs.length; i++){
       const s = svgs[i], w = s.width.baseVal.value || 1100, h = s.height.baseVal.value || 1556;
@@ -518,10 +543,70 @@ async function pdf(){
       const cv = document.createElement('canvas'); const sc = Math.min(2, 2400 / w); cv.width = Math.round(w * sc); cv.height = Math.round(h * sc); const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(img, 0, 0, cv.width, cv.height);
       if(i) doc.addPage(); const pw = 210, ph = Math.min(297, pw * h / w); doc.addImage(cv.toDataURL('image/jpeg', .92), 'JPEG', 0, 0, pw, ph);
     }
-    if(await saveFile(fname + '-con-nombres.pdf', doc.output('blob'))) st('PDF listo: ' + svgs.length + (svgs.length === 1 ? ' página.' : ' páginas.'));
-  }catch(e){ st('No pude armar el PDF: ' + (e.message || e)); }
-  box.remove();
+    return { blob:doc.output('blob'), pages:svgs.length };
+  }finally{ box.remove(); }
 }
+
+/* ---------- particellas: un instrumento a la vez ---------- */
+const outName = () => fname + (solo >= 0 && parts[solo] ? '-' + parts[solo].name.replace(/[\/:*?"<>|]+/g, '').trim() : '') + '-con-nombres';
+function soloUI(){
+  const many = parts.length > 1; $('soloBox').classList.toggle('on', many); $('dlz').hidden = !many;
+  $('solo').innerHTML = '<option value="-1">Todas</option>' + parts.map((p, i) => `<option value="${i}">${esc(p.name)}</option>`).join('');
+  $('solo').value = String(solo);
+}
+$('solo').onchange = () => { solo = +$('solo').value; sel = null; zoom = PAGE_ZOOM;
+  parts.forEach((p, i) => p.on = solo < 0 || i === solo); partsUI(); render(true); };
+$('dlz').onclick = async () => { if(!src || parts.length < 2) return;
+  const keep = solo, keepZoom = zoom, z = new JSZip();
+  try{ for(let i = 0; i < parts.length; i++){ solo = i; zoom = PAGE_ZOOM; st('Armando particella ' + (i + 1) + ' de ' + parts.length + '…');
+      const r = await pdfBlob(addNames(src).view); z.file(outName() + '.pdf', r.blob); }
+    solo = keep; zoom = keepZoom;
+    const b = await z.generateAsync({ type:'blob' });
+    if(await saveFile(fname + '-particellas.zip', b)) st(parts.length + ' particellas listas.'); }
+  catch(e){ st('No pude armar las particellas: ' + (e.message || e)); }
+  finally{ solo = keep; zoom = keepZoom; } };
+
+/* ---------- mover compases de línea: tocar un compás (Shift para varios) y luego ↑ ↓ ---------- */
+// caja de cada compás (todos los pentagramas) en las coordenadas de su hoja
+function mBox(i){ const gs = osmd && osmd.GraphicSheet, row = gs && gs.MeasureList[i]; if(!row) return null;
+  const ms = row.filter(Boolean); if(!ms.length) return null;
+  const sys = ms[0].ParentMusicSystem, pg = gs.MusicPages.indexOf(sys.Parent), u = 10; // el dibujo usa 10 unidades por espacio (viewBox), sin importar el zoom
+  const a = ms[0].PositionAndShape, b = ms[ms.length - 1].PositionAndShape;
+  return { pg, x:a.AbsolutePosition.x * u, w:a.Size.width * u, y:(a.AbsolutePosition.y - 1.5) * u, h:(b.AbsolutePosition.y - a.AbsolutePosition.y + 5.5) * u }; }
+function systems(){ const res = []; try{ for(const pg of osmd.GraphicSheet.MusicPages) for(const sy of pg.MusicSystems){ const gm = sy.GraphicalMeasures[0] && sy.GraphicalMeasures[0][0]; if(gm) res.push(gm.parentSourceMeasure.measureListIndex); } }catch(e){} return res; }
+function showSel(){
+  $('sheet').querySelectorAll('.nn-sel').forEach(r => r.remove());
+  const n = osmd && osmd.GraphicSheet ? osmd.GraphicSheet.MeasureList.length : 0;
+  if(sel && (sel.a >= n)) sel = null;
+  $('moveBar').classList.toggle('on', !!sel); if(!sel) return;
+  $('moveTxt').textContent = sel.a === sel.b ? 'Compás ' + (sel.a + 1) : 'Compases ' + (sel.a + 1) + '–' + (sel.b + 1);
+  const svgs = [...$('sheet').querySelectorAll('svg')];
+  for(let i = sel.a; i <= sel.b; i++){ const bx = mBox(i), svg = bx && svgs[bx.pg]; if(!svg) continue;
+    const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect'); r.setAttribute('class', 'nn-sel');
+    Object.entries({ x:bx.x, y:bx.y, width:bx.w, height:bx.h, rx:4, fill:'rgba(58,122,224,.16)', stroke:'#3a7ae0', 'stroke-width':1.5, 'pointer-events':'none' }).forEach(([k, v]) => r.setAttribute(k, v));
+    svg.appendChild(r); }
+}
+$('sheet').addEventListener('click', e => {
+  const svg = e.target.closest('svg'); if(!svg || !osmd) return;
+  const pg = [...$('sheet').querySelectorAll('svg')].indexOf(svg), pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+  const q = pt.matrixTransform(svg.getScreenCTM().inverse()), n = osmd.GraphicSheet.MeasureList.length;
+  let hit = -1; for(let i = 0; i < n; i++){ const b = mBox(i); if(b && b.pg === pg && q.x >= b.x && q.x <= b.x + b.w && q.y >= b.y && q.y <= b.y + b.h){ hit = i; break; } }
+  if(hit < 0){ sel = null; }
+  else if(e.shiftKey && sel){ sel = { a:Math.min(sel.a, sel.b, hit), b:Math.max(sel.a, sel.b, hit) }; }
+  else sel = (sel && sel.a === hit && sel.b === hit) ? null : { a:hit, b:hit };
+  showSel(); });
+// el bloque que se mueve se junta con la línea de arriba o de abajo; las demás líneas quedan como estaban
+async function moveSel(dir){
+  if(!sel || !osmd) return; const firsts = systems(), n = osmd.GraphicSheet.MeasureList.length, br = new Set(firsts.filter(x => x > 0));
+  const start = i => firsts.filter(x => x <= i).pop() || 0, next = i => firsts.find(x => x > i);
+  if(dir < 0){ const s0 = start(sel.a); if(s0 === 0){ st('Ya está en la primera línea.'); return; }
+    br.delete(s0); const e = next(sel.b); if(sel.b + 1 < n && (e == null || sel.b + 1 < e)) br.add(sel.b + 1); }
+  else { const e = next(sel.b); if(e == null && start(sel.a) === sel.a){ st('Ya está en la última línea.'); return; }
+    if(start(sel.a) !== sel.a) br.add(sel.a); if(e != null) br.delete(e); }
+  EDITS[solo] = br; zoom = Math.max(zoom, PAGE_ZOOM); await render(true); }
+$('mvUp').onclick = () => moveSel(-1); $('mvDn').onclick = () => moveSel(1); $('mvX').onclick = () => { sel = null; showSel(); };
+addEventListener('keydown', e => { if(!sel || /INPUT|TEXTAREA|SELECT/.test((e.target.tagName || ''))) return;
+  if(e.key === 'ArrowUp'){ e.preventDefault(); moveSel(-1); } else if(e.key === 'ArrowDown'){ e.preventDefault(); moveSel(1); } else if(e.key === 'Escape'){ sel = null; showSel(); } });
 
 window.__demo = () => load(EXAMPLE, 'oda-a-la-alegria');
 </script><script>if(!window.claude){var b=document.getElementById('libDrive');if(b)b.hidden=true;}</script>
