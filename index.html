@@ -36,7 +36,9 @@ h2{font:14px/1.5 'Press Start 2P',monospace;margin:40px 0 6px}
 .card .shot img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated;display:block}
 .card .body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px;flex:1}
 .card p{font-size:20px}
-.lang{position:absolute;top:14px;right:16px;font:10px 'Press Start 2P',monospace;color:#fff8e8;text-decoration:none;border:2px solid #fff8e8;padding:6px 8px}
+.lang{position:absolute;top:14px;right:16px;display:flex;align-items:center;gap:8px;font:12px 'Press Start 2P',monospace;color:#1d2b2a;background:#fff8e8;text-decoration:none;border:3px solid #1d2b2a;box-shadow:3px 3px 0 #1d2b2a;padding:8px 12px}
+.lang:hover{transform:translate(1px,1px);box-shadow:2px 2px 0 #1d2b2a}
+.lang svg{display:block;border:2px solid #1d2b2a}
 header{position:relative}
 .soon{display:flex;gap:16px;align-items:center;background:var(--paper);border:4px dashed var(--line);padding:16px 18px}
 .soon img{width:56px;height:56px;image-rendering:pixelated;flex:none}
@@ -55,7 +57,7 @@ footer{margin:48px 0 0;padding:20px 0 32px;color:var(--muted);border-top:4px sol
 </head>
 <body>
 <header>
-  <a class="lang" href="es.html" hreflang="es">ES</a>
+  <a class="lang" href="es.html" hreflang="es" aria-label="Español"><svg viewBox="0 0 30 20" width="30" height="20" aria-hidden="true"><rect width="30" height="20" fill="#c60b1e"/><rect y="5" width="30" height="10" fill="#ffc400"/></svg>ES</a>
   <div class="wrap hero">
     <img src="img/seal.png" alt="Soundfalya wax seal">
     <div>
