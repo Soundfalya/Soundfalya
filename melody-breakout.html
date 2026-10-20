@@ -27,7 +27,7 @@ select,button{font:inherit;background:#2a2140;color:var(--ink);border:1px solid 
   <span>Move: mouse / touch / arrows · Launch: click / space</span>
 </div>
 <div id="legend">
-  <span><i style="background:#2f6fd6"></i>C bonus</span><span><i style="background:#2f9e44"></i>D wide staff</span>
+  <span><i style="background:#2f6fd6"></i>C multi-ball</span><span><i style="background:#2f9e44"></i>D wide staff</span>
   <span><i style="background:#e8c22a"></i>E double points</span><span><i style="background:#ee7a1e"></i>F fireball</span>
   <span><i style="background:#d6323a"></i>G tough (2 hits)</span><span><i style="background:#8a4fd0"></i>A slow ball</span>
   <span><i style="background:#3fb8e0"></i>B extra life</span>
@@ -64,9 +64,9 @@ const lvlSel=document.getElementById("lvl");
 SONGS.forEach((s,i)=>songSel.add(new Option(s.title,i)));
 for(let i=1;i<=11;i++)lvlSel.add(new Option(i,i));
 const ascii=s=>s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/,/g,"");
-let song,bricks,seq,ball,pad,lives,score,state,combo,particles,flash,stars,t=0,muted=false,level=1,pw={},pop=null;
+let song,bricks,seq,ball,extra=[],songOut=null,songT=[],pad,lives,score,state,combo,particles,flash,stars,t=0,muted=false,level=1,pw={},pop=null;
 // each note has its own power when it breaks
-const POWER={C:"BONUS",D:"WIDE",E:"2X",F:"FIRE",G:"TOUGH",A:"SLOW",B:"+1 LIFE"};
+const POWER={C:"MULTI",D:"WIDE",E:"2X",F:"FIRE",G:"TOUGH",A:"SLOW",B:"+1 LIFE"};
 const baseSpeed=()=>1.9+level*.2;
 
 // fixed starfield (own seeded rng, does not touch anything else)
@@ -84,19 +84,21 @@ function load(i,keep){song=SONGS[i];bricks=[];seq=[];
    x+=w;}}
  if(!keep){lives=3;score=0;}
  combo=0;particles=[];flash=0;pw={};pop=null;resetBall();state="ready";}
-function resetBall(){pad={x:W/2-22,w:44,y:222};ball={x:W/2,y:pad.y-4,vx:0,vy:0,r:3,stuck:true};pw={};}
+function resetBall(){pad={x:W/2-22,w:44,y:222};ball={x:W/2,y:pad.y-4,vx:0,vy:0,r:3,stuck:true};extra=[];pw={};}
 
 // ---- audio ----
 let ac=null;
 function audio(){if(!ac){try{ac=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(ac&&ac.state==="suspended")ac.resume();return ac;}
 function freq(st,oc){return 440*Math.pow(2,((oc+1)*12+SEMI[st[0]]+(st[1]==="#"?1:0)-69)/12);}
-function tone(f,when=0,dur=.5,vol=.25){const a=audio();if(!a||muted)return;const t0=a.currentTime+when;
+function tone(f,when=0,dur=.5,vol=.25,dest){const a=audio();if(!a||muted)return;const t0=a.currentTime+when;
  const g=a.createGain();g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(vol,t0+.008);g.gain.exponentialRampToValueAtTime(.001,t0+dur+.4);
- g.connect(a.destination);
+g.connect(dest||a.destination);
  [[1,"triangle",1],[2,"sine",.35],[3,"sine",.12]].forEach(([h,ty,v])=>{const o=a.createOscillator(),og=a.createGain();o.type=ty;o.frequency.value=f*h;og.gain.value=v;o.connect(og);og.connect(g);o.start(t0);o.stop(t0+dur+.5);});}
 function blip(f,d=.06){const a=audio();if(!a||muted)return;const o=a.createOscillator(),g=a.createGain();o.type="square";o.frequency.value=f;
  g.gain.setValueAtTime(.05,a.currentTime);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+d);o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+d);}
-function playSong(){const spb=60/song.tempo;let w=.2;seq.forEach(n=>{tone(freq(n.step,n.oct),w,n.beats*spb*.9,.22);const at=w;setTimeout(()=>{n.hit=1;},at*1000);w+=n.beats*spb;});}
+function playSong(){const a=audio();if(!a)return;stopSong();songOut=a.createGain();songOut.connect(a.destination);const spb=60/song.tempo;let w=.2;seq.forEach(n=>{tone(freq(n.step,n.oct),w,n.beats*spb*.9,.22,songOut);const at=w;songT.push(setTimeout(()=>{n.hit=1;},at*1000));w+=n.beats*spb;});}
+// tocar la pantalla mientras suena la melodía la corta (y se pasa al nivel siguiente)
+function stopSong(){songT.forEach(clearTimeout);songT=[];if(songOut){try{songOut.disconnect();}catch(e){}songOut=null;}}
 
 // ---- input ----
 const keys={};
@@ -106,11 +108,11 @@ function ptr(e){const r=cv.getBoundingClientRect();const p=e.touches?e.touches[0
 cv.addEventListener("mousemove",ptr);cv.addEventListener("touchmove",e=>{ptr(e);e.preventDefault();},{passive:false});
 cv.addEventListener("touchstart",e=>{ptr(e);launch();e.preventDefault();},{passive:false});
 cv.addEventListener("mousedown",launch);
-songSel.onchange=()=>{load(+songSel.value);songSel.blur();};
-lvlSel.onchange=()=>{level=+lvlSel.value;load(+songSel.value);lvlSel.blur();};
+songSel.onchange=()=>{stopSong();load(+songSel.value);songSel.blur();};
+lvlSel.onchange=()=>{stopSong();level=+lvlSel.value;load(+songSel.value);lvlSel.blur();};
 document.getElementById("mute").onclick=e=>{muted=!muted;e.target.textContent="Sound: "+(muted?"off":"on");e.target.blur();};
 function launch(){audio();
- if(state==="won"){if(level<11){level++;lvlSel.value=level;load(+songSel.value,true);}else{level=1;lvlSel.value=1;load(+songSel.value);}return;}
+ if(state==="won"){stopSong();if(level<11){level++;lvlSel.value=level;load(+songSel.value,true);}else{level=1;lvlSel.value=1;load(+songSel.value);}return;}
  if(state==="over"){load(+songSel.value);return;}
  if(ball.stuck){ball.stuck=false;const a=-Math.PI/2+(Math.random()-.5)*.6,sp=baseSpeed();ball.vx=Math.cos(a)*sp;ball.vy=Math.sin(a)*sp;state="play";blip(660);}}
 
@@ -121,10 +123,10 @@ function update(){t++;
  const pwW=pw.WIDE?72:44;if(pad.w!==pwW){pad.x+=(pad.w-pwW)/2;pad.w=pwW;pad.x=Math.max(4,Math.min(W-4-pad.w,pad.x));}
  if(pop&&--pop.l<=0)pop=null;
  if(ball.stuck){ball.x=pad.x+pad.w/2;ball.y=pad.y-4;}
- else if(state==="play"){const steps=4,k=pw.SLOW?.6:1;for(let s=0;s<steps;s++)stepBall(k/steps);}
+ else if(state==="play"){const steps=4,k=pw.SLOW?.6:1;for(let s=0;s<steps;s++){for(const b of [ball,...extra])stepBall(k/steps,b);extra=extra.filter(b=>!b.dead);}}
  particles=particles.filter(p=>(p.x+=p.vx,p.y+=p.vy,p.vy+=.08,--p.l>0));
  if(flash>0)flash--;}
-function stepBall(k){const b=ball;b.x+=b.vx*k;b.y+=b.vy*k;
+function stepBall(k,b){if(b.dead||state!=="play")return;b.x+=b.vx*k;b.y+=b.vy*k;
  if(b.x<b.r+4){b.x=b.r+4;b.vx=Math.abs(b.vx);blip(220,.03);}
  if(b.x>W-4-b.r){b.x=W-4-b.r;b.vx=-Math.abs(b.vx);blip(220,.03);}
  if(b.y<b.r+38){b.y=b.r+38;b.vy=Math.abs(b.vy);blip(220,.03);}
@@ -140,16 +142,18 @@ function stepBall(k){const b=ball;b.x+=b.vx*k;b.y+=b.vy*k;
    if(--br.hp>0){br.hit=1;blip(180,.05);for(let i=0;i<6;i++)particles.push({x:br.x+Math.random()*br.w,y:br.y+br.h/2,vx:(Math.random()-.5)*2,vy:-Math.random(),l:14,c:"#ff7b7b"});}
    else breakBrick(br);
    if(!pw.FIRE)break;}}
- if(b.y>H+6){lives--;blip(110,.3);if(lives<=0){state="over";}else{resetBall();state="ready";}}}
+ // con varias pelotitas, se pierde vida solo cuando cae la última
+ if(b.y>H+6){if(b!==ball){b.dead=1;return;}if(extra.length){ball=extra.shift();return;}lives--;blip(110,.3);if(lives<=0){state="over";}else{resetBall();state="ready";}}}
 function breakBrick(br){const inOrder=seq.find(n=>n.alive)===br; // broke the next note of the tune: bonus
  br.alive=false;br.hit=1;combo++;const L=br.step[0],mult=pw["2X"]?2:1;
- score+=(10*combo+(inOrder?25:0)+(L==="C"?50:0)+(L==="G"?30:0))*mult;
+ score+=(10*combo+(inOrder?25:0)+(L==="G"?30:0))*mult;
  tone(freq(br.step,br.oct),0,.45);
+ if(L==="C"&&!ball.stuck){const sp=Math.hypot(ball.vx,ball.vy)||baseSpeed();for(let i=0;i<2&&extra.length<5;i++){const a=-Math.PI/2+(i?.55:-.55)+(Math.random()-.5)*.2;extra.push({x:ball.x,y:ball.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:3,stuck:false});}}
  if(L==="D")pw.WIDE=600;if(L==="E")pw["2X"]=600;if(L==="F")pw.FIRE=300;if(L==="A")pw.SLOW=480;if(L==="B"&&lives<5)lives++;
- pop={s:L==="C"?"+50":POWER[L],x:br.x+br.w/2,y:br.y,l:40,c:NOTE_COL[L][1]};
+ pop={s:POWER[L],x:br.x+br.w/2,y:br.y,l:40,c:NOTE_COL[L][1]};
  const c=NOTE_COL[L];
  for(let i=0;i<14;i++)particles.push({x:br.x+Math.random()*br.w,y:br.y+Math.random()*br.h,vx:(Math.random()-.5)*2.4,vy:-Math.random()*2,l:24+Math.random()*16|0,c:c[i%2]});
- if(bricks.every(b=>!b.alive)){state="won";flash=20;seq.forEach(n=>n.hit=0);setTimeout(playSong,400);}}
+ if(bricks.every(b=>!b.alive)){state="won";flash=20;seq.forEach(n=>n.hit=0);songT.push(setTimeout(playSong,400));}}
 
 // ---- draw ----
 function px(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(x|0,y|0,w|0,h|0);}
@@ -181,7 +185,7 @@ function drawPad(){const x=pad.x|0,y=pad.y;
  for(let i=x+4;i<x+pad.w-4;i+=5)px(i,y+2,2,1,"#6e4422");
  px(x-1,y-1,5,7,OUT);px(x,y,3,5,"#e8b83a");px(x,y,3,1,"#fff07a");
  px(x+pad.w-4,y-1,5,7,OUT);px(x+pad.w-3,y,3,5,"#e8b83a");px(x+pad.w-3,y,3,1,"#fff07a");}
-function drawBall(){const b=ball,x=b.x|0,y=b.y|0,glow=(Math.sin(t/6)+1)/2,fire=!!pw.FIRE;
+function drawBall(b){const x=b.x|0,y=b.y|0,glow=(Math.sin(t/6)+1)/2,fire=!!pw.FIRE;
  ctx.fillStyle=fire?`rgba(255,150,60,${.2+glow*.2})`:`rgba(140,200,255,${.12+glow*.12})`;ctx.fillRect(x-3,y-5,7,11);ctx.fillRect(x-5,y-3,11,7);
  px(x-2,y-3,5,7,OUT);px(x-3,y-2,7,5,OUT);px(x-2,y-2,5,5,fire?"#ff9a3c":"#7fd0ff");px(x-1,y-2,2,1,fire?"#fff07a":"#e8f8ff");px(x-2,y-1,1,2,fire?"#fff07a":"#e8f8ff");px(x+1,y+1,2,1,fire?"#c0441a":"#3a7fc0");}
 function drawStrip(){ // the melody as colored notes, filling in as you play
@@ -201,7 +205,7 @@ function drawMsg(a,b){const w=Math.max(tw(a,2),tw(b))+20;const x=(W-w)/2|0,y=128
 function draw(){drawBg();drawStrip();
  for(const br of bricks)if(br.alive)drawBrick(br);
  for(const p of particles)px(p.x,p.y,2,2,p.c);
- drawPad();drawBall();
+ drawPad();for(const b of [ball,...extra])drawBall(b);
  if(flash>0&&flash%4<2)px(0,36,W,H-36,"rgba(255,240,200,.08)");
  if(state==="ready"&&score===0&&lives===3)drawMsg("MELODY BREAKOUT","CLICK OR PRESS SPACE TO PLAY");
  else if(state==="ready")drawMsg("READY?","CLICK OR SPACE TO LAUNCH");

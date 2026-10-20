@@ -6,6 +6,7 @@
 <title>Soundfalya · Herramientas musicales</title>
 <meta name="description" content="Herramientas para aprender piano jugando: piano roll, nombrador de notas, juegos de melodías y más.">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<script>try{var t=localStorage.getItem('sf-theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
 <style>
 :root{--ink:#1d2b2a;--paper:#fff8e8;--card:#ffffff;--muted:#5b6662;--red:#c8322b;--redD:#8e1f1a;--gold:#f5c832;--blu:#3a7ae0;--grn:#3fa45a;--line:#1d2b2a;--bg:#f3e6c8}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#1b2220;--card:#232c2a;--bg:#141917;--ink:#f3ead6;--muted:#a9b3ae;--line:#0b0f0e}}
@@ -63,37 +64,6 @@ footer{color:var(--muted);border-top:4px solid var(--line)}
 .app small{font-size:19px;color:var(--muted);line-height:1.1}
 .dls{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:16px}
 .dl{display:flex;gap:14px;align-items:center;background:var(--card);border:4px solid var(--line);box-shadow:5px 5px 0 var(--line);padding:10px}
-.dl img{width:120px;height:78px;object-fit:cover;object-position:top left;border:3px solid var(--line);flex:none}
-.dl h3{font:11px/1.4 'Press Start 2P',monospace;margin:0 0 4px}
-.dl p{margin:0 0 8px;color:var(--muted);font-size:19px;line-height:1.1}
-.dl .row{display:flex;gap:8px;flex-wrap:wrap}
-.dl .btn{font-size:9px;padding:7px 8px}
-.about1{margin:26px 0 0;color:var(--muted)}
-h2{margin:26px 0 4px}
-.sub{margin:0 0 12px}
-.detail{display:grid;grid-template-columns:1.3fr 1fr;gap:24px;align-items:start;margin-top:26px}
-.detail .pic{border:4px solid var(--line);box-shadow:6px 6px 0 var(--line);background:#222}
-.detail .pic img{width:100%;display:block}
-.detail h2{margin:0 0 4px;font-size:16px}
-.detail .s{color:var(--muted);margin:0 0 12px}
-.detail p.d{margin:0 0 14px}
-.detail .open{font-size:14px;padding:14px 18px;background:var(--gold)}
-.back{display:inline-block;margin-top:18px;font-size:22px;color:var(--muted)}
-footer{margin:28px 0 0;padding:14px 0 22px}
-@media (max-width:760px){.apps{grid-template-columns:repeat(2,1fr)}.dls{grid-template-columns:1fr}.detail{grid-template-columns:1fr}}
-.detail{margin-bottom:34px}
-@media (max-width:560px){.apps{grid-template-columns:repeat(4,1fr);gap:10px 8px}.app{padding:0;gap:5px;background:none;border:0;box-shadow:none}.app:hover{transform:none;box-shadow:none}.app .ico{width:100%;border-width:3px}.app b{font-size:7px}.app small{font-size:15px}
-.dl{padding:8px;gap:10px;align-items:flex-start}.dl img{width:78px;height:58px}.dl h3{font-size:9px}.dl p{font-size:17px}.hero img{width:56px;height:56px}.hero{padding:18px 26px 16px;gap:10px}.dl .btn{font-size:8px;padding:6px 7px}.dl .row{gap:6px}h2{font-size:12px}}
-
-.apps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-.app{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;text-decoration:none;color:var(--ink);padding:12px 8px 14px;background:var(--card);border:4px solid var(--line);box-shadow:5px 5px 0 var(--line)}
-.app:hover{transform:translate(2px,2px);box-shadow:3px 3px 0 var(--line)}
-.app .ico{width:min(112px,100%);aspect-ratio:1;border:4px solid var(--line);border-radius:22%;overflow:hidden;background:#222}
-.app .ico img{width:100%;height:100%;object-fit:cover;display:block}
-.app b{font:11px/1.4 'Press Start 2P',monospace}
-.app small{font-size:19px;color:var(--muted);line-height:1.1}
-.dls{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:16px}
-.dl{display:flex;gap:14px;align-items:center;background:var(--card);border:4px solid var(--line);box-shadow:5px 5px 0 var(--line);padding:10px}
 .dl img{width:150px;height:auto;aspect-ratio:210/297;object-fit:cover;object-position:top;border:3px solid var(--line);flex:none;box-shadow:3px 3px 0 var(--line)}
 .dl h3{font:11px/1.4 'Press Start 2P',monospace;margin:0 0 4px}
 .dl p{margin:0 0 8px;color:var(--muted);font-size:19px;line-height:1.1}
@@ -116,6 +86,11 @@ footer{margin:28px 0 0;padding:14px 0 22px}
 .detail{margin-bottom:34px}
 @media (max-width:560px){.apps{grid-template-columns:repeat(4,1fr);gap:10px 8px}.app{padding:0;gap:5px;background:none;border:0;box-shadow:none}.app:hover{transform:none;box-shadow:none}.app .ico{width:100%;border-width:3px}.app b{font-size:7px}.app small{font-size:15px}
 .dl{padding:8px;gap:10px;align-items:flex-start}.dl img{width:104px}.dl h3{font-size:9px}.dl p{font-size:17px}.hero img{width:56px;height:56px}.hero{padding:18px 26px 16px;gap:10px}.dl .btn{font-size:8px;padding:6px 7px}.dl .row{gap:6px}h2{font-size:12px}}
+
+footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.theme{font:10px 'Press Start 2P',monospace;padding:9px 12px;cursor:pointer;background:var(--card);color:var(--ink);border:3px solid var(--line);box-shadow:3px 3px 0 var(--line)}
+.theme:hover{transform:translate(1px,1px);box-shadow:2px 2px 0 var(--line)}
+:root[data-theme="dark"] .keys button,:root[data-theme="dark"] .btn,:root[data-theme="dark"] .lang{border-color:#0b0f0e}
 </style>
 </head>
 <body>
@@ -156,7 +131,15 @@ footer{margin:28px 0 0;padding:14px 0 22px}
   <p class="about1">Hecho por Soundfalya: enseñanza musical, pixel art e IA para que empezar con el piano sea más fácil.</p>
 </main>
 
-<footer class="wrap">© 2026 Soundfalya</footer>
+<footer class="wrap"><span>© 2026 Soundfalya</span><button class="theme" id="theme" type="button" data-l="☀ Claro" data-d="☾ Oscuro">☾ Oscuro</button></footer>
+<script>
+// modo claro u oscuro: se recuerda en este navegador
+(function(){ const root = document.documentElement, b = document.getElementById('theme');
+  const dark = () => root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  const show = () => { b.textContent = dark() ? b.dataset.l : b.dataset.d; };
+  b.onclick = () => { root.dataset.theme = dark() ? 'light' : 'dark'; try{ localStorage.setItem('sf-theme', root.dataset.theme); }catch(e){} show(); };
+  show(); })();
+</script>
 <script>
 // cada nota de color suena al tocarla
 let ac = null;
