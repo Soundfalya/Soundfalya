@@ -28,7 +28,7 @@ h1{font:20px/1.5 'Press Start 2P',monospace;margin:0}
 .btn{display:inline-block;font:10px 'Press Start 2P',monospace;text-decoration:none;padding:10px 12px;background:#fff8e8;color:#1d2b2a;border:3px solid #1d2b2a;box-shadow:3px 3px 0 #1d2b2a}
 .btn:hover{transform:translate(1px,1px);box-shadow:2px 2px 0 #1d2b2a}
 .btn.alt{background:var(--gold)}
-h2{font:14px/1.5 'Press Start 2P',monospace;margin:40px 0 6px}
+h2{font:14px/1.5 'Press Start 2P',monospace;margin:26px 0 4px}
 .sub{color:var(--muted);margin:0 0 18px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(225px,1fr));gap:18px}
 .card{background:var(--card);border:4px solid var(--line);box-shadow:6px 6px 0 var(--line);display:flex;flex-direction:column}
@@ -51,8 +51,39 @@ header{position:relative}
 .card .links .btn{margin-top:0}
 .about{background:var(--paper);border:4px solid var(--line);padding:18px 20px;margin-top:8px}
 .about ul{margin:8px 0 0;padding-left:22px}
-footer{margin:48px 0 0;padding:20px 0 32px;color:var(--muted);border-top:4px solid var(--line)}
+footer{color:var(--muted);border-top:4px solid var(--line)}
 @media (max-width:560px){.card .shot{aspect-ratio:auto;height:118px}.wrap{padding:0 26px}.card .body{padding:16px 20px 20px}.about{padding:18px 20px}.hero{flex-direction:column;align-items:flex-start}.hero img{width:72px;height:72px}h1{font-size:16px}}
+
+.apps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.app{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;text-decoration:none;color:var(--ink);padding:12px 8px 14px;background:var(--card);border:4px solid var(--line);box-shadow:5px 5px 0 var(--line)}
+.app:hover{transform:translate(2px,2px);box-shadow:3px 3px 0 var(--line)}
+.app .ico{width:min(112px,100%);aspect-ratio:1;border:4px solid var(--line);border-radius:22%;overflow:hidden;background:#222}
+.app .ico img{width:100%;height:100%;object-fit:cover;display:block}
+.app b{font:11px/1.4 'Press Start 2P',monospace}
+.app small{font-size:19px;color:var(--muted);line-height:1.1}
+.dls{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:16px}
+.dl{display:flex;gap:14px;align-items:center;background:var(--card);border:4px solid var(--line);box-shadow:5px 5px 0 var(--line);padding:10px}
+.dl img{width:120px;height:78px;object-fit:cover;object-position:top left;border:3px solid var(--line);flex:none}
+.dl h3{font:11px/1.4 'Press Start 2P',monospace;margin:0 0 4px}
+.dl p{margin:0 0 8px;color:var(--muted);font-size:19px;line-height:1.1}
+.dl .row{display:flex;gap:8px;flex-wrap:wrap}
+.dl .btn{font-size:9px;padding:7px 8px}
+.about1{margin:26px 0 0;color:var(--muted)}
+h2{margin:26px 0 4px}
+.sub{margin:0 0 12px}
+.detail{display:grid;grid-template-columns:1.3fr 1fr;gap:24px;align-items:start;margin-top:26px}
+.detail .pic{border:4px solid var(--line);box-shadow:6px 6px 0 var(--line);background:#222}
+.detail .pic img{width:100%;display:block}
+.detail h2{margin:0 0 4px;font-size:16px}
+.detail .s{color:var(--muted);margin:0 0 12px}
+.detail p.d{margin:0 0 14px}
+.detail .open{font-size:14px;padding:14px 18px;background:var(--gold)}
+.back{display:inline-block;margin-top:18px;font-size:22px;color:var(--muted)}
+footer{margin:28px 0 0;padding:14px 0 22px}
+@media (max-width:760px){.apps{grid-template-columns:repeat(2,1fr)}.dls{grid-template-columns:1fr}.detail{grid-template-columns:1fr}}
+.detail{margin-bottom:34px}
+@media (max-width:560px){.apps{grid-template-columns:repeat(4,1fr);gap:10px 8px}.app{padding:0;gap:5px;background:none;border:0;box-shadow:none}.app:hover{transform:none;box-shadow:none}.app .ico{width:100%;border-width:3px}.app b{font-size:7px}.app small{font-size:15px}
+.dl{padding:8px;gap:10px;align-items:flex-start}.dl img{width:78px;height:58px}.dl h3{font-size:9px}.dl p{font-size:17px}.hero img{width:56px;height:56px}.hero{padding:18px 26px 16px;gap:10px}.dl .btn{font-size:8px;padding:6px 7px}.dl .row{gap:6px}h2{font-size:12px}}
 </style>
 </head>
 <body>
@@ -75,78 +106,22 @@ footer{margin:48px 0 0;padding:20px 0 32px;color:var(--muted);border-top:4px sol
 
 <main class="wrap">
   <h2 id="tools">Herramientas</h2>
-  <p class="sub">Gratis, funcionan en el navegador, sin instalar nada.</p>
-  <div class="grid">
-    <article class="card">
-      <div class="shot"><img src="img/piano-roll.png" alt="Piano roll con notas de colores que caen"></div>
-      <div class="body">
-        <h3>Piano Roll Player</h3>
-        <p>Carga un MusicXML o MIDI y mira las notas caer sobre un teclado con los colores de Soundfalya. Elige colores o neón, escribe tu propio texto flotante y graba videos cortos.</p>
-        <div class="tags"><span class="tag">MusicXML</span><span class="tag">MIDI</span><span class="tag">Video</span></div>
-        <a class="btn" href="piano-roll.html">Abrir ▶</a>
-      </div>
-    </article>
-    <article class="card">
-      <div class="shot"><img src="img/note-namer.png" alt="Computador retro Note-Namer 3000"></div>
-      <div class="body">
-        <h3>Note-Namer 3000</h3>
-        <p>Le escribe el nombre a cada nota de cualquier partitura, con colores opcionales. Saca particellas por instrumento y exporta PDF listo para imprimir.</p>
-        <div class="tags"><span class="tag">Partituras</span><span class="tag">Principiantes</span></div>
-        <a class="btn" href="note-namer.html">Abrir ▶</a>
-      </div>
-    </article>
-    <article class="card">
-      <div class="shot"><img src="img/melody-breakout.png" alt="Juego Melody Breakout"></div>
-      <div class="body">
-        <h3>Melody Breakout</h3>
-        <p>Un breakout donde cada ladrillo es una nota con su propio poder. 10 melodías y 11 niveles, cada uno más rápido. Al pasar un nivel suena la melodía.</p>
-        <div class="tags"><span class="tag">Juego</span><span class="tag">Oído</span></div>
-        <a class="btn" href="melody-breakout.html">Jugar ▶</a>
-      </div>
-    </article>
-    <article class="card">
-      <div class="shot"><img src="img/guayaba-fm.png" alt="Sintetizador amarillo Guayaba FM" style="object-position:top"></div>
-      <div class="body">
-        <h3>Guayaba FM</h3>
-        <p>Un sintetizador FM de bolsillo con calidez de cinta, secuenciador y pads. Ajusta el sonido y tócalo con el teclado o con los dedos.</p>
-        <div class="tags"><span class="tag">Sinte</span><span class="tag">Secuenciador</span></div>
-        <a class="btn" href="guayaba-fm.html">Tocar ▶</a>
-      </div>
-    </article>
+  <p class="sub">Gratis, en el navegador, sin instalar nada.</p>
+  <div class="apps">
+    <a class="app" href="app/melody-breakout-es.html"><span class="ico"><img src="img/melody-breakout.png" alt=""></span><b>Melody Breakout</b><small>Breakout con melodías</small></a>
+    <a class="app" href="app/note-namer-es.html"><span class="ico"><img src="img/note-namer.png" alt=""></span><b>Note-Namer 3000</b><small>Nombres en cada nota</small></a>
+    <a class="app" href="app/piano-roll-es.html"><span class="ico"><img src="img/piano-roll.png" alt=""></span><b>Piano Roll</b><small>Notas que caen</small></a>
+    <a class="app" href="app/guayaba-fm-es.html"><span class="ico"><img src="img/guayaba-fm.png" alt=""></span><b>Guayaba FM</b><small>Sinte FM de bolsillo</small></a>
   </div>
 
   <h2 id="downloads">Descargas gratis</h2>
   <p class="sub">Stickers, imprimibles y otros recursos gratis.</p>
-  <div class="grid">
-    <article class="card">
-      <div class="shot"><img src="img/dl-stickers.png" alt="Stickers para teclas de piano" style="object-position:top"></div>
-      <div class="body">
-        <h3>Stickers para teclas de piano</h3>
-        <p>Stickers de colores para cada tecla, con los mismos colores de las partituras. Para 61, 76 y 88 teclas. Incluye una hoja en blanco y negro para pintar.</p>
-        <div class="tags"><span class="tag">Stickers</span><span class="tag">Imprimible</span></div>
-        <div class="links"><a class="btn" href="downloads/piano-key-stickers.pdf" download>Guía PDF</a><a class="btn alt" href="downloads/piano-key-stickers-color-sheet.pdf" download>Hoja a color</a><a class="btn" href="downloads/piano-key-stickers-black-and-white.pdf" download>Hoja B/N</a></div>
-      </div>
-    </article>
-    <article class="card">
-      <div class="shot"><img src="img/dl-twinkle.png" alt="Twinkle Twinkle Little Star · Kit de aprendizaje" style="object-position:top"></div>
-      <div class="body">
-        <h3>Twinkle Twinkle Little Star · Kit de aprendizaje</h3>
-        <p>10 páginas: guía del teclado, posiciones de mano, partituras a color, con letras y estándar, stickers y un registro de 7 días.</p>
-        <div class="tags"><span class="tag">Imprimible</span><span class="tag">Principiantes</span></div>
-        <div class="links"><a class="btn" href="downloads/twinkle-twinkle-little-star-easy-piano-learning-kit.pdf" download>Kit PDF</a></div>
-      </div>
-    </article>
+  <div class="dls">
+    <div class="dl"><img src="img/dl-stickers.png" alt="Stickers para teclas"><div><h3>Stickers para teclas</h3><p>Para 61, 76 y 88 teclas, a color y en blanco y negro.</p><div class="row"><a class="btn " href="downloads/piano-key-stickers.pdf" download>Guía PDF</a><a class="btn alt" href="downloads/piano-key-stickers-color-sheet.pdf" download>Hoja a color</a><a class="btn " href="downloads/piano-key-stickers-black-and-white.pdf" download>Hoja B/N</a></div></div></div>
+    <div class="dl"><img src="img/dl-twinkle.png" alt="Twinkle Twinkle Little Star"><div><h3>Twinkle Twinkle Little Star</h3><p>Kit de aprendizaje de 10 páginas.</p><div class="row"><a class="btn " href="downloads/twinkle-twinkle-little-star-easy-piano-learning-kit.pdf" download>Kit PDF</a></div></div></div>
   </div>
 
-  <h2>Sobre mí</h2>
-  <div class="about">
-    Músico y creador. Junto enseñanza musical, pixel art e IA para que empezar con el piano sea más fácil.
-    <ul>
-      <li>Partituras fáciles de piano a color para principiantes (clásicos de dominio público)</li>
-      <li>Herramientas hechas con HTML, JavaScript, MusicXML y Web Audio</li>
-      <li>Todo diseñado y prototipado junto con Claude</li>
-    </ul>
-  </div>
+  <p class="about1">Hecho por Soundfalya: enseñanza musical, pixel art e IA para que empezar con el piano sea más fácil.</p>
 </main>
 
 <footer class="wrap">© 2026 Soundfalya</footer>
