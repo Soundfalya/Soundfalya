@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Soundfalya · Herramientas musicales</title>
+<meta name="description" content="Herramientas para aprender piano jugando: piano roll, nombrador de notas, juegos de melodías y más.">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1d2b2a;--paper:#fff8e8;--card:#ffffff;--muted:#5b6662;--red:#c8322b;--redD:#8e1f1a;--gold:#f5c832;--blu:#3a7ae0;--grn:#3fa45a;--line:#1d2b2a;--bg:#f3e6c8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#1b2220;--card:#232c2a;--bg:#141917;--ink:#f3ead6;--muted:#a9b3ae;--line:#0b0f0e}}
+:root[data-theme="dark"]{--paper:#1b2220;--card:#232c2a;--bg:#141917;--ink:#f3ead6;--muted:#a9b3ae;--line:#0b0f0e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:22px/1.25 'VT323',monospace}
+a{color:inherit}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+header{background:var(--red);color:#fff8e8;border-bottom:6px solid var(--redD)}
+.hero{display:flex;gap:20px;align-items:center;padding:28px 0 24px}
+.hero img{width:96px;height:96px;image-rendering:pixelated;flex:none}
+h1{font:20px/1.5 'Press Start 2P',monospace;margin:0 0 10px}
+.hero p{margin:0;max-width:640px;font-size:24px}
+.hero p.by{font-size:20px;opacity:.85;margin:-6px 0 10px}
+.links{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.btn{display:inline-block;font:10px 'Press Start 2P',monospace;text-decoration:none;padding:10px 12px;background:#fff8e8;color:#1d2b2a;border:3px solid #1d2b2a;box-shadow:3px 3px 0 #1d2b2a}
+.btn:hover{transform:translate(1px,1px);box-shadow:2px 2px 0 #1d2b2a}
+.btn.alt{background:var(--gold)}
+h2{font:14px/1.5 'Press Start 2P',monospace;margin:40px 0 6px}
+.sub{color:var(--muted);margin:0 0 18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(225px,1fr));gap:18px}
+.card{background:var(--card);border:4px solid var(--line);box-shadow:6px 6px 0 var(--line);display:flex;flex-direction:column}
+.card .shot{aspect-ratio:16/9;overflow:hidden;border-bottom:4px solid var(--line);background:#222}
+.card .shot img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated;display:block}
+.card .body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px;flex:1}
+.card p{font-size:20px}
+.lang{position:absolute;top:14px;right:16px;font:10px 'Press Start 2P',monospace;color:#fff8e8;text-decoration:none;border:2px solid #fff8e8;padding:6px 8px}
+header{position:relative}
+.soon{display:flex;gap:16px;align-items:center;background:var(--paper);border:4px dashed var(--line);padding:16px 18px}
+.soon img{width:56px;height:56px;image-rendering:pixelated;flex:none}
+.card h3{font:12px/1.5 'Press Start 2P',monospace;margin:0}
+.card p{margin:0;color:var(--muted)}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:18px;padding:0 8px;border:2px solid var(--line)}
+.card .btn{align-self:flex-start;margin-top:auto}
+.about{background:var(--paper);border:4px solid var(--line);padding:18px 20px;margin-top:8px}
+.about ul{margin:8px 0 0;padding-left:22px}
+footer{margin:48px 0 0;padding:20px 0 32px;color:var(--muted);border-top:4px solid var(--line)}
+@media (max-width:560px){.card .shot{aspect-ratio:auto;height:118px}.wrap{padding:0 26px}.card .body{padding:16px 20px 20px}.about{padding:18px 20px}.hero{flex-direction:column;align-items:flex-start}.hero img{width:72px;height:72px}h1{font-size:16px}}
+</style>
+</head>
+<body>
+<header>
+  <a class="lang" href="index.html" hreflang="en">EN</a>
+  <div class="wrap hero">
+    <img src="img/seal.png" alt="Sello de lacre de Soundfalya">
+    <div>
+      <h1>Soundfalya</h1>
+      <p class="by">por José Pérez de Arce</p>
+      <p>Herramientas de piano que se juegan.</p>
+      <div class="links">
+        <a class="btn" href="#tools">Probar</a>
+        <a class="btn" href="#downloads">Descargas gratis</a>
+        <a class="btn alt" href="https://github.com/Soundfalya">GitHub</a>
+        <a class="btn" href="#">Tienda Soundfalya</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h2 id="tools">Herramientas</h2>
+  <p class="sub">Gratis, funcionan en el navegador, sin instalar nada.</p>
+  <div class="grid">
+    <article class="card">
+      <div class="shot"><img src="img/piano-roll.png" alt="Piano roll con notas de colores que caen"></div>
+      <div class="body">
+        <h3>Piano Roll Player</h3>
+        <p>Carga un MusicXML o MIDI y mira las notas caer sobre un teclado con los colores de Soundfalya. Elige colores o neón, escribe tu propio texto flotante y graba videos cortos.</p>
+        <div class="tags"><span class="tag">MusicXML</span><span class="tag">MIDI</span><span class="tag">Video</span></div>
+        <a class="btn" href="piano-roll.html">Abrir ▶</a>
+      </div>
+    </article>
+    <article class="card">
+      <div class="shot"><img src="img/note-namer.png" alt="Computador retro Note-Namer 3000"></div>
+      <div class="body">
+        <h3>Note-Namer 3000</h3>
+        <p>Le escribe el nombre a cada nota de cualquier partitura, con colores opcionales. Saca particellas por instrumento y exporta PDF listo para imprimir.</p>
+        <div class="tags"><span class="tag">Partituras</span><span class="tag">Principiantes</span></div>
+        <a class="btn" href="note-namer.html">Abrir ▶</a>
+      </div>
+    </article>
+    <article class="card">
+      <div class="shot"><img src="img/melody-breakout.png" alt="Juego Melody Breakout"></div>
+      <div class="body">
+        <h3>Melody Breakout</h3>
+        <p>Un breakout donde cada ladrillo es una nota con su propio poder. 10 melodías y 11 niveles, cada uno más rápido. Al pasar un nivel suena la melodía.</p>
+        <div class="tags"><span class="tag">Juego</span><span class="tag">Oído</span></div>
+        <a class="btn" href="melody-breakout.html">Jugar ▶</a>
+      </div>
+    </article>
+    <article class="card">
+      <div class="shot"><img src="img/guayaba-fm.png" alt="Sintetizador amarillo Guayaba FM" style="object-position:top"></div>
+      <div class="body">
+        <h3>Guayaba FM</h3>
+        <p>Un sintetizador FM de bolsillo con calidez de cinta, secuenciador y pads. Ajusta el sonido y tócalo con el teclado o con los dedos.</p>
+        <div class="tags"><span class="tag">Sinte</span><span class="tag">Secuenciador</span></div>
+        <a class="btn" href="guayaba-fm.html">Tocar ▶</a>
+      </div>
+    </article>
+  </div>
+
+  <h2 id="downloads">Descargas gratis</h2>
+  <p class="sub">Stickers, imprimibles y otros recursos gratis.</p>
+  <div class="soon">
+    <img src="img/seal.png" alt="">
+    <div>Muy pronto: stickers de Soundfalya y hojas imprimibles para descargar gratis.</div>
+  </div>
+
+  <h2>Sobre mí</h2>
+  <div class="about">
+    Músico y creador. Junto enseñanza musical, pixel art e IA para que empezar con el piano sea más fácil.
+    <ul>
+      <li>Partituras fáciles de piano a color para principiantes (clásicos de dominio público)</li>
+      <li>Herramientas hechas con HTML, JavaScript, MusicXML y Web Audio</li>
+      <li>Todo diseñado y prototipado junto con Claude</li>
+    </ul>
+  </div>
+</main>
+
+<footer class="wrap">© 2026 José Pérez de Arce · Soundfalya</footer>
+</body>
+</html>
