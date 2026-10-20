@@ -9,7 +9,7 @@
 html,body{margin:0;min-height:100%;background:var(--sky);color:var(--txt)}
 body{font:20px 'VT323',monospace;overflow-x:hidden}
 #bg{position:fixed;inset:0;width:100%;height:100%;image-rendering:pixelated;z-index:0}
-.wrap{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:90px 16px 0}
+.wrap{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 16px}
 .pc{position:relative;width:min(860px,100%);background:var(--body);border:5px solid var(--ink);border-radius:18px;padding:18px 22px 20px;
   box-shadow:inset 6px 6px 0 var(--bodyL),inset -6px -8px 0 var(--bodyD),0 12px 0 rgba(0,0,0,.22)}
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
@@ -39,7 +39,7 @@ body{font:20px 'VT323',monospace;overflow-x:hidden}
 .empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:20px;color:var(--bodyDD);font-size:24px}
 .empty[hidden]{display:none}
 .empty b{display:block;font:13px 'Press Start 2P',monospace;color:var(--ink);margin-bottom:12px}
-.panel{display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;margin-top:16px}
+.panel{display:grid;grid-template-columns:1fr;gap:18px;align-items:center;margin-top:16px}
 .dpad{position:relative;width:78px;height:78px}
 .dpad i{position:absolute;background:var(--yel);border:4px solid var(--ink);box-shadow:inset 3px 3px 0 #fff0a0,inset -3px -3px 0 #c89a10}
 .dpad i:first-child{left:25px;top:0;width:28px;height:78px} .dpad i:last-child{left:0;top:25px;width:78px;height:28px}
@@ -98,7 +98,6 @@ body{font:20px 'VT323',monospace;overflow-x:hidden}
     <div class="top"><div class="brand"><canvas class="seal" id="seal" width="24" height="24"></canvas><div><b>SOUNDFALYA</b> NOTE-NAMER 3000<small>Sube un .mxl o MusicXML y le escribo el nombre a cada nota</small></div></div><div class="slot"></div></div>
     <div class="screen"><div class="scrCtl"><button class="sBtn" id="sPlay" type="button" title="Escuchar" aria-label="Escuchar">▶</button><button class="sBtn" id="sStop" type="button" title="Parar" aria-label="Parar">■</button><button class="fsBtn" id="fsBtn" type="button" title="Pantalla completa" aria-label="Pantalla completa">⛶ <span>Pantalla completa</span></button></div><div class="moveBar" id="moveBar"><span id="moveTxt"></span><button type="button" id="mvUp" title="Subir a la línea de arriba (flecha ↑)">↑</button><button type="button" id="mvDn" title="Bajar a la línea siguiente (flecha ↓)">↓</button><button type="button" class="x" id="mvX" title="Quitar selección">✕</button></div><div class="glass"><div id="sheetBox"><div id="sheet"></div></div><div class="paste" id="lib" hidden><b>BIBLIOTECA · <span id="libN"></span> PARTITURAS</b><input id="libQ" type="search" placeholder="Buscar título o compositor…"><div class="list" id="libL"></div><div class="row"><button class="btn alt" id="libDrive" type="button">Subir las 60 a mi Drive</button><button class="btn pale" id="libNo" type="button">Cerrar</button></div></div><div class="paste" id="paste" hidden><b>PEGA AQUÍ TU MUSICXML</b><textarea id="pasteTxt" spellcheck="false" placeholder="&lt;?xml version=&quot;1.0&quot; ...&gt;&#10;&lt;score-partwise&gt; ..."></textarea><div class="row"><button class="btn pale" id="pasteNo" type="button">Cancelar</button><button class="btn" id="pasteOk" type="button">Usar texto</button></div></div><div class="empty" id="empty"><div><b>INSERTE PARTITURA</b>Arrastra aquí un .mxl o .musicxml, o pega el texto</div></div></div></div>
     <div class="panel">
-      <div class="dpad" aria-hidden="true"><i></i><b></b><i></i></div>
       <div class="ctrl">
         <button class="btn" id="up" type="button">Subir MXL</button><input type="file" id="file" hidden>
         <button class="btn pale" id="pasteBtn" type="button">Pegar texto</button>
@@ -113,10 +112,9 @@ body{font:20px 'VT323',monospace;overflow-x:hidden}
           <label class="tempo">♩= <input id="tempo" type="number" min="30" max="240" value="100"></label><div class="parts" id="parts"></div></div>
         <div class="status" id="st">&gt; Listo.</div>
       </div>
-      <div class="knobs" aria-hidden="true"><i class="tri"></i><span class="big" id="bigb"></span><i class="dot"></i></div>
+      <span id="bigb" hidden></span>
     </div>
   </div>
-  <div class="legs" aria-hidden="true"><i></i><i></i></div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.9/build/opensheetmusicdisplay.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -306,7 +304,7 @@ function addNames(xml){
         for(const el of m.children){ if(el.tagName === 'backup') t -= +el.querySelector('duration').textContent; else if(el.tagName === 'forward') t += +el.querySelector('duration').textContent;
           else if(el.tagName === 'note' && !el.querySelector(':scope > chord, :scope > grace')){ on.add(t); t += +((el.querySelector(':scope > duration') || {}).textContent || 0); } } }
       return Math.max(1, on.size); };
-    // 4 compases por sistema (como las partituras de José en Finale), contando desde el inicio de cada sección;
+    // 4 compases por sistema (como las partituras de Soundfalya en Finale), contando desde el inicio de cada sección;
     // si la música es densa el sistema lleva menos (nunca menos de 2), y FORCE guarda los cortes que hicieron falta al dibujar
     let k = 0, load = 0;
     ms.forEach((m, i) => { const w = onsets(i) + 2;

@@ -17,7 +17,11 @@ a{color:inherit}
 header{background:var(--red);color:#fff8e8;border-bottom:6px solid var(--redD)}
 .hero{display:flex;gap:20px;align-items:center;padding:28px 0 24px}
 .hero img{width:96px;height:96px;image-rendering:pixelated;flex:none}
-h1{font:20px/1.5 'Press Start 2P',monospace;margin:0 0 10px}
+h1{font:20px/1.5 'Press Start 2P',monospace;margin:0}
+.title{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin:0 0 10px}
+.keys{display:flex;gap:5px}
+.keys button{font:9px 'Press Start 2P',monospace;min-width:30px;height:30px;padding:0 5px;cursor:pointer;color:#fff;background:var(--c);border:3px solid #1d2b2a;box-shadow:2px 2px 0 #1d2b2a;text-shadow:1px 1px 0 rgba(0,0,0,.45)}
+.keys button:active,.keys button.hit{transform:translate(2px,2px);box-shadow:none;filter:brightness(1.15)}
 .hero p{margin:0;max-width:640px;font-size:24px}
 .hero p.by{font-size:20px;opacity:.85;margin:-6px 0 10px}
 .links{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
@@ -55,8 +59,7 @@ footer{margin:48px 0 0;padding:20px 0 32px;color:var(--muted);border-top:4px sol
   <div class="wrap hero">
     <img src="img/seal.png" alt="Soundfalya wax seal">
     <div>
-      <h1>Soundfalya</h1>
-      <p class="by">by José Pérez de Arce</p>
+      <div class="title"><h1>Soundfalya</h1><div class="keys" aria-label="Play the notes"><button type="button" data-f="261.63" style="--c:#1f5fd0" aria-label="C">C</button><button type="button" data-f="293.67" style="--c:#2e9e3e" aria-label="D">D</button><button type="button" data-f="329.63" style="--c:#e8b800" aria-label="E">E</button><button type="button" data-f="349.23" style="--c:#f08a1c" aria-label="F">F</button><button type="button" data-f="392.00" style="--c:#d82020" aria-label="G">G</button><button type="button" data-f="440.01" style="--c:#e8509a" aria-label="A">A</button><button type="button" data-f="493.89" style="--c:#4fc3f0" aria-label="B">B</button></div></div>
       <p>Piano tools that feel like games.</p>
       <div class="links">
         <a class="btn" href="#tools">Try the tools</a>
@@ -144,6 +147,18 @@ footer{margin:48px 0 0;padding:20px 0 32px;color:var(--muted);border-top:4px sol
   </div>
 </main>
 
-<footer class="wrap">© 2026 José Pérez de Arce · Soundfalya</footer>
+<footer class="wrap">© 2026 Soundfalya</footer>
+<script>
+// cada nota de color suena al tocarla
+let ac = null;
+document.querySelectorAll('.keys button').forEach(b => b.addEventListener('pointerdown', () => {
+  ac = ac || new (window.AudioContext || window.webkitAudioContext)(); ac.resume();
+  try{ if(navigator.audioSession) navigator.audioSession.type = 'playback'; }catch(e){}
+  const t = ac.currentTime, o = ac.createOscillator(), o2 = ac.createOscillator(), g = ac.createGain(), f = +b.dataset.f;
+  o.type = 'triangle'; o.frequency.value = f; o2.type = 'sine'; o2.frequency.value = f * 2;
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.22, t + .01); g.gain.exponentialRampToValueAtTime(.001, t + 1.1);
+  o.connect(g); o2.connect(g); g.connect(ac.destination); o.start(t); o2.start(t); o.stop(t + 1.2); o2.stop(t + 1.2);
+  b.classList.add('hit'); setTimeout(() => b.classList.remove('hit'), 140); }));
+</script>
 </body>
 </html>
