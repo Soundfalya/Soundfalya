@@ -41,6 +41,8 @@ header{position:relative}
 .tags{display:flex;gap:6px;flex-wrap:wrap}
 .tag{font-size:18px;padding:0 8px;border:2px solid var(--line)}
 .card .btn{align-self:flex-start;margin-top:auto}
+.card .links{margin-top:auto}
+.card .links .btn{margin-top:0}
 .about{background:var(--paper);border:4px solid var(--line);padding:18px 20px;margin-top:8px}
 .about ul{margin:8px 0 0;padding-left:22px}
 footer{margin:48px 0 0;padding:20px 0 32px;color:var(--muted);border-top:4px solid var(--line)}
@@ -110,9 +112,25 @@ footer{margin:48px 0 0;padding:20px 0 32px;color:var(--muted);border-top:4px sol
 
   <h2 id="downloads">Free downloads</h2>
   <p class="sub">Stickers, printables and other free resources.</p>
-  <div class="soon">
-    <img src="img/seal.png" alt="">
-    <div>Coming soon: Soundfalya stickers and printable sheets to download for free.</div>
+  <div class="grid">
+    <article class="card">
+      <div class="shot"><img src="img/dl-stickers.png" alt="Piano Key Stickers" style="object-position:top"></div>
+      <div class="body">
+        <h3>Piano Key Stickers</h3>
+        <p>Color stickers for every key, same colors as the sheet music. For 61, 76 and 88 keys. Includes a black & white sheet to paint yourself.</p>
+        <div class="tags"><span class="tag">Stickers</span><span class="tag">Printable</span></div>
+        <div class="links"><a class="btn" href="downloads/piano-key-stickers.pdf" download>Guide PDF</a><a class="btn alt" href="downloads/piano-key-stickers-color-sheet.pdf" download>Color sheet</a><a class="btn" href="downloads/piano-key-stickers-black-and-white.pdf" download>B&amp;W sheet</a></div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="shot"><img src="img/dl-twinkle.png" alt="Twinkle Twinkle Little Star · Learning kit" style="object-position:top"></div>
+      <div class="body">
+        <h3>Twinkle Twinkle Little Star · Learning kit</h3>
+        <p>10 pages: keyboard guide, hand positions, color, letter and standard scores, stickers and a 7-day tracker.</p>
+        <div class="tags"><span class="tag">Printable</span><span class="tag">Beginners</span></div>
+        <div class="links"><a class="btn" href="downloads/twinkle-twinkle-little-star-easy-piano-learning-kit.pdf" download>Kit PDF</a></div>
+      </div>
+    </article>
   </div>
 
   <h2>About</h2>
