@@ -268,6 +268,8 @@ function addNames(xml){
       doc.querySelectorAll('part-list > score-part').forEach(sp => { if(sp.id !== keep.id) sp.remove(); }); doc.querySelectorAll('part-list > part-group').forEach(g => g.remove()); } }
   // saltos de línea movidos a mano con las flechas: reemplazan a los del archivo
   const ed = EDITS[solo];
+  // en una particella no sirven los saltos de línea de la partitura completa: cortarían los silencios largos en pedacitos
+  if(solo >= 0 && !ed) doc.querySelectorAll('print').forEach(pr => { pr.removeAttribute('new-system'); pr.removeAttribute('new-page'); });
   if(ed) for(const pt of doc.querySelectorAll('part')) [...pt.querySelectorAll(':scope > measure')].forEach((m, i) => {
     let pr = m.querySelector(':scope > print'); if(pr){ pr.removeAttribute('new-system'); pr.removeAttribute('new-page'); }
     if(i && ed.has(i)){ if(!pr){ pr = doc.createElement('print'); m.insertBefore(pr, m.firstChild); } pr.setAttribute('new-system', 'yes'); } });
@@ -275,7 +277,7 @@ function addNames(xml){
   // y el bloque se corta donde empieza una sección (doble barra, marca de ensayo, cambio de compás o de tonalidad, repetición) o una línea nueva
   if(!noRests) try{ const pl = [...doc.querySelectorAll('part')].map(pt => [...pt.querySelectorAll(':scope > measure')]), ms = pl[0] || [];
     const quiet = m => !m || ([...m.querySelectorAll(':scope > note')].every(nt => nt.querySelector(':scope > rest')) && !m.querySelector(':scope > harmony, :scope > figured-bass, barline repeat, barline ending, fermata')
-      && [...m.querySelectorAll(':scope > direction direction-type > *')].every(x => /^(rehearsal|segno|coda)$/.test(x.tagName)));
+      && [...m.querySelectorAll(':scope > direction direction-type > *')].every(x => /^(rehearsal|segno|coda|dynamics|words|wedge|dashes|bracket|pedal|octave-shift|other-direction)$/.test(x.tagName)));
     const changes = m => m && m.querySelector(':scope > attributes clef, :scope > attributes key, :scope > attributes time');
     const cut = i => { if(!i) return true; const m = ms[i], prev = ms[i - 1];
       if(m.querySelector(':scope > print[new-system="yes"], :scope > print[new-page="yes"], rehearsal, segno, coda')) return true;
