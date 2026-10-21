@@ -187,7 +187,7 @@ requestAnimationFrame(frame);
 const SOL = { C:'Do', D:'Re', E:'Mi', F:'Fa', G:'Sol', A:'La', B:'Si' };
 const COL = ['#1f5fd0','#2e9e3e','#e8b800','#f08a1c','#d82020','#7b3fb0','#4fc3f0','#000000'];
 let FORCE = new Set(), BRK = [], solo = -1, EDITS = {}, sel = null, moving = false, noRests = false;
-let src = null, out = null, view = null, mode = 'sol', colors = false, tidy = false, fill = true, auto = true, osmd = null, fname = 'partitura';
+let src = null, out = null, view = null, mode = 'sol', colors = false, tidy = false, fill = true, auto = true, tight = 0, perSys = 4, osmd = null, fname = 'partitura';
 const $ = id => document.getElementById(id), st = m => $('st').textContent = '> ' + m;
 // marca invisible para los nombres de adornos: solo en la vista, para correrlos sobre la notita
 const GRACE_MARK = '\u2063';
@@ -299,9 +299,10 @@ function addNames(xml){
       const st = doc.createElement('measure-style'), mr = doc.createElement('multiple-rest'); mr.textContent = String(len); st.appendChild(mr); at.appendChild(st); } }catch(e){}
   // ordenar: cada sección (marca de ensayo, doble barra, cambio de compás o de tonalidad) empieza en una línea nueva
   // ordenar: se ignoran los saltos de línea y de página del archivo original, para llenar mejor cada hoja
-  if(tidy) doc.querySelectorAll('print').forEach(pr => { pr.removeAttribute('new-system'); pr.removeAttribute('new-page'); pr.querySelectorAll('system-layout, page-layout, staff-layout').forEach(x => x.remove()); if(!pr.attributes.length && !pr.children.length) pr.remove(); });
+  const grid = (tidy || fill) && !ed;
+  if(grid) doc.querySelectorAll('print').forEach(pr => { pr.removeAttribute('new-system'); pr.removeAttribute('new-page'); pr.querySelectorAll('system-layout, page-layout, staff-layout').forEach(x => x.remove()); if(!pr.attributes.length && !pr.children.length) pr.remove(); });
   BRK = [];
-  if(tidy){ const parts = [...doc.querySelectorAll('part')].map(pt => [...pt.querySelectorAll(':scope > measure')]), ms = parts[0] || [], starts = new Set();
+  if(grid){ const parts = [...doc.querySelectorAll('part')].map(pt => [...pt.querySelectorAll(':scope > measure')]), ms = parts[0] || [], starts = new Set();
     ms.forEach((m, i) => { if(!i) return;
       const prev = ms[i - 1], bl = prev.querySelector('barline[location="right"] bar-style');
       // una doble barra es sección nueva; una barra de repetición o una casilla de 2ª vez no lo es
@@ -314,9 +315,11 @@ function addNames(xml){
       return Math.max(1, on.size); };
     // 4 compases por sistema (como las partituras de Soundfalya en Finale), contando desde el inicio de cada sección;
     // si la música es densa el sistema lleva menos (nunca menos de 2), y FORCE guarda los cortes que hicieron falta al dibujar
+    // un bloque de silencios cuenta como un solo compás y no se corta por dentro
+    const hidden = new Set(); ms.forEach((m, i) => { const mr = m.querySelector(':scope > attributes measure-style multiple-rest'); if(mr) for(let j = 1; j < +mr.textContent; j++) hidden.add(i + j); });
     let k = 0, load = 0;
-    ms.forEach((m, i) => { const w = onsets(i) + 2;
-      if(i && (starts.has(i) || FORCE.has(i) || k >= PER_SYSTEM || (k >= MIN_SYSTEM && load + w > SYSTEM_LOAD))){ BRK.push(i); k = 0; load = 0; } k++; load += w; });
+    ms.forEach((m, i) => { if(hidden.has(i)) return; const w = onsets(i) + 2;
+      if(i && (starts.has(i) || FORCE.has(i) || k >= perSys || (k >= MIN_SYSTEM && load + w > SYSTEM_LOAD))){ BRK.push(i); k = 0; load = 0; } k++; load += w; });
     for(const pm of parts) for(const i of BRK){ const m = pm[i]; if(!m) continue; let pr = m.querySelector(':scope > print');
       if(!pr){ pr = doc.createElement('print'); m.insertBefore(pr, m.firstChild); } pr.setAttribute('new-system', 'yes'); } }
   const view = new XMLSerializer().serializeToString(doc);
@@ -350,8 +353,18 @@ function compact(o){ const r = o.EngravingRules; if(!r) return;
     StaffDistance:5, BetweenStaffDistance:4, TitleTopDistance:2.5, TitleBottomDistance:2, SheetTitleHeight:3.6, SystemComposerDistance:3 });
   // particella (un solo pentagrama): más aire bajo el título y entre líneas, para que no quede todo amontonado arriba
   if(solo >= 0) Object.assign(r, { PageTopMargin:6, TitleBottomDistance:3.5, SystemComposerDistance:5, MinimumDistanceBetweenSystems:9, MinSkyBottomDistBetweenSystems:6 });
+  // compases juntos: si una línea armada a mano no cabe, sus notas se juntan (el tamaño de las notas no cambia)
+  const sq = [[.85, 3, 2], [.65, 1.8, 1.5], [.5, 1, 1.1]][tight] || [.5, 1, 1.1];
+  Object.assign(r, { VoiceSpacingMultiplierVexflow:sq[0], VoiceSpacingAddendVexflow:sq[1], MinNoteDistance:sq[2] });
   o.zoom = zoom; }
-function rebalance(o){ if(fill && !tidy) return false; let firsts = [];
+// líneas que deberían salir: las de la regla de 4 compases, o las que se armaron moviendo compases
+function overflow(o){ const ed = EDITS[solo], want = new Set([0, ...(ed ? ed : BRK)]);
+  try{ for(const pg of o.GraphicSheet.MusicPages) for(const sy of pg.MusicSystems){ const gm = sy.GraphicalMeasures[0] && sy.GraphicalMeasures[0][0]; if(gm && !want.has(gm.parentSourceMeasure.measureListIndex)) return true; } }catch(e){} return false; }
+function rebalance(o){
+  // llenar hoja: si una línea no cupo, primero se juntan sus notas; solo como último recurso se achica todo
+  if(fill && !tidy){ if(auto && !EDITS[solo]) return false; if(!overflow(o)) return false;
+    if(tight < 2){ tight++; return true; } if(zoom > READ_MIN + 1e-9){ zoom = Math.max(READ_MIN, +(zoom - .05).toFixed(2)); return true; } return false; }
+  let firsts = [];
   try{ for(const pg of o.GraphicSheet.MusicPages) for(const sy of pg.MusicSystems){ const gm = sy.GraphicalMeasures[0] && sy.GraphicalMeasures[0][0]; if(gm) firsts.push(gm.parentSourceMeasure.measureListIndex); } }catch(e){ return false; }
   if(!tidy){ // modo original: se respetan los saltos del archivo; si el programa tuvo que cortar más líneas, se achica la hoja
     const own = new Set([0]); try{ const d = new DOMParser().parseFromString(view, 'application/xml'), pt = d.querySelector('part');
@@ -366,14 +379,27 @@ function rebalance(o){ if(fill && !tidy) return false; let firsts = [];
   return more; }
 // llenar hoja: se busca el tamaño más grande que no agrega hojas (la partitura ocupa toda la hoja en vez de quedar arriba)
 const MAX_ZOOM = 1.6, nPages = o => { try{ return o.GraphicSheet.MusicPages.length; }catch(e){ return 0; } };
-const perLine = o => { try{ let n = 0; for(const pg of o.GraphicSheet.MusicPages) n += pg.MusicSystems.length; return o.GraphicSheet.MeasureList.length / Math.max(1, n); }catch(e){ return 9; } };
-function fitZoom(o){ if(!fill || !auto) return;
-  // pieza larga con música densa: si quedan menos de 3 compases por línea se achica un poco (hasta cerca de 70%)
-  if(perLine(o) < 3 && nPages(o) > 2){ while(perLine(o) < 3 && zoom > .56 + 1e-9){ zoom = +(zoom - .05).toFixed(2); compact(o); o.render(); } return; }
-  const p0 = nPages(o); if(!p0 || p0 > 3) return;
-  let best = zoom;
-  for(const step of [.1, .05]){ for(let z = +(best + step).toFixed(2); z <= MAX_ZOOM + 1e-9; z = +(z + step).toFixed(2)){ zoom = z; compact(o); o.render(); if(nPages(o) > p0) break; best = z; } }
-  if(zoom !== best){ zoom = best; compact(o); o.render(); } }
+// tamaño más legible: lo más grande que cabe en una hoja con 4 compases por línea;
+// si para caber en una hoja quedaría muy chico (bajo READ_MIN), se usan más hojas con el tamaño más grande que las llena
+const READ_MIN = .65;
+// cuánto de la primera hoja ocupa la música (0 a 1)
+function used(o){ try{ const pg = o.GraphicSheet.MusicPages[0], sy = pg.MusicSystems[pg.MusicSystems.length - 1], ps = sy.PositionAndShape, svg = $('sheet').querySelector('svg');
+  return (ps.AbsolutePosition.y + ps.BorderBottom) * 10 * zoom / svg.height.baseVal.value; }catch(e){ return 1; } }
+function fitZoom(o){ if(!fill || !auto || EDITS[solo]) return; tight = 0;
+  const at = z => { zoom = +z.toFixed(2); compact(o); o.render(); return { p:nPages(o), ok:!overflow(o) }; };
+  let r = at(zoom);
+  if(r.p === 1 && r.ok){ // cabe en una hoja: se agranda mientras siga cabiendo
+    for(const step of [.1, .05]){ let best = zoom; for(let z = best + step; z <= MAX_ZOOM + 1e-9; z += step){ const q = at(z); if(q.p > 1 || !q.ok) break; best = zoom; } if(zoom !== best) at(best); }
+    return; }
+  if(r.p <= 3){ // se intenta que quepa en una hoja, sin bajar del mínimo legible
+    for(let z = zoom - .05; z >= READ_MIN - 1e-9; z -= .05){ r = at(z); if(r.p === 1 && r.ok) return; } }
+  // más de una hoja: nunca bajo el mínimo legible (si la música es muy densa, la línea lleva menos compases),
+  // y luego lo más grande que no agregue hojas
+  if(zoom > READ_MIN + 1e-9 && !r.ok) r = at(READ_MIN);
+  else if(zoom < READ_MIN - 1e-9) r = at(READ_MIN);
+  const P = r.p, base = r.ok; let best = zoom;
+  if(P <= 3) for(let z = best + .05; z <= PAGE_ZOOM + 1e-9; z += .05){ const q = at(z); if(q.p > P || (base && !q.ok)) break; best = zoom; }
+  if(zoom !== best) at(best); }
 function zoomUI(){ $('zLbl').textContent = Math.round(zoom / PAGE_ZOOM * 100) + '%'; $('fillB').textContent = fill ? '▣ Llenar hoja' : '▤ Original';
   $('fillB').title = fill ? 'La partitura llena la hoja. Toca para volver a la diagramación original del archivo' : 'Diagramación original del archivo. Toca para que la partitura llene la hoja'; }
 async function render(keepParts, pass){
@@ -391,12 +417,15 @@ async function render(keepParts, pass){
   }
   // si un sistema no cupo y el programa lo cortó solo, se reparte ese grupo en partes parejas y se dibuja de nuevo
   if((pass || 0) < 6 && rebalance(osmd)) return render(keepParts, (pass || 0) + 1);
-  fitZoom(osmd); zoomUI();
+  fitZoom(osmd);
+  // pieza corta que deja media hoja vacía con 4 compases por línea: se prueba con 3 por línea, que permite notas más grandes
+  if(fill && auto && !EDITS[solo] && perSys > 3 && nPages(osmd) === 1 && used(osmd) < .6){ perSys--; zoom = PAGE_ZOOM; return render(keepParts, (pass || 0) + 1); }
+  zoomUI();
   shiftGrace($('sheet')); fitPage(); showSel();
   if(!keepParts){ const sc = parseScore(src); parts = sc.parts; tempo = sc.tempo; $('tempo').value = tempo; partsUI(); soloUI(); }
   st(r.n + ' notas con nombre' + (r.fixed ? ' · ' + r.fixed + ' corregidas' : '') + note + '.');
 }
-async function load(text, name){ src = text; FORCE = new Set(); zoom = PAGE_ZOOM; fill = true; auto = true; solo = -1; EDITS = {}; sel = null; noRests = false; fname = (name || 'partitura').replace(/\.(musicxml|xml|mxl)$/i, '');
+async function load(text, name){ src = text; FORCE = new Set(); zoom = PAGE_ZOOM; fill = true; auto = true; tight = 0; perSys = 4; solo = -1; EDITS = {}; sel = null; noRests = false; fname = (name || 'partitura').replace(/\.(musicxml|xml|mxl)$/i, '');
   // los instrumentos se leen antes de dibujar, así el selector de particellas aparece aunque el dibujo falle
   try{ const sc = parseScore(src); parts = sc.parts; tempo = Math.round(sc.tempo); $('tempo').value = tempo; }catch(e){ parts = []; } partsUI(); soloUI();
   try{ await render(true); }
@@ -588,10 +617,10 @@ function play(){
 }
 $('sPlay').onclick = () => { if(!playing) play(); };
 // tamaño: − y + agrandan o achican todo y los compases se reparten de nuevo en la hoja
-function setZoom(z){ if(!src) return; zoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, +z.toFixed(2))); auto = false;
+function setZoom(z){ if(!src) return; zoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, +z.toFixed(2))); auto = false; tight = 0;
   if(!fill){ fill = true; EDITS = {}; sel = null; } st('Tamaño ' + Math.round(zoom / PAGE_ZOOM * 100) + '%…'); render(true); }
 $('zIn').onclick = () => setZoom(zoom + .1); $('zOut').onclick = () => setZoom(zoom - .1);
-$('fillB').onclick = () => { if(!src) return; fill = !fill; auto = true; zoom = PAGE_ZOOM; EDITS = {}; sel = null; FORCE = new Set(); render(true); };
+$('fillB').onclick = () => { if(!src) return; fill = !fill; auto = true; tight = 0; perSys = 4; zoom = PAGE_ZOOM; EDITS = {}; sel = null; FORCE = new Set(); render(true); };
 $('sStop').onclick = () => stop();
 function partsUI(){
   $('parts').innerHTML = parts.map((p, i) => `<label class="chip"><input type="checkbox" data-p="${i}" ${p.on ? 'checked' : ''}><span>${esc(p.name)}</span></label>`).join('');
@@ -631,17 +660,17 @@ function soloUI(){
   $('solo').innerHTML = '<option value="-1">Todas</option>' + parts.map((p, i) => `<option value="${i}">${esc(p.name)}</option>`).join('');
   $('solo').value = String(solo);
 }
-$('solo').onchange = () => { solo = +$('solo').value; sel = null; zoom = PAGE_ZOOM; auto = true;
+$('solo').onchange = () => { solo = +$('solo').value; sel = null; zoom = PAGE_ZOOM; auto = true; tight = 0; perSys = 4;
   parts.forEach((p, i) => p.on = solo < 0 || i === solo); partsUI(); render(true); };
 $('dlz').onclick = async () => { if(!src || parts.length < 2) return;
-  const keep = solo, keepZoom = zoom, keepAuto = auto, z = new JSZip();
-  try{ for(let i = 0; i < parts.length; i++){ solo = i; zoom = PAGE_ZOOM; auto = true; st('Armando particella ' + (i + 1) + ' de ' + parts.length + '…');
+  const keep = solo, keepZoom = zoom, keepAuto = auto, keepTight = tight, z = new JSZip();
+  try{ for(let i = 0; i < parts.length; i++){ solo = i; zoom = PAGE_ZOOM; auto = true; tight = 0; st('Armando particella ' + (i + 1) + ' de ' + parts.length + '…');
       const r = await pdfBlob(addNames(src).view, true); z.file(outName() + '.pdf', r.blob); }
-    solo = keep; zoom = keepZoom; auto = keepAuto;
+    solo = keep; zoom = keepZoom; auto = keepAuto; tight = keepTight;
     const b = await z.generateAsync({ type:'blob' });
     if(await saveFile(fname + '-particellas.zip', b)) st(parts.length + ' particellas listas.'); }
   catch(e){ st('No pude armar las particellas: ' + (e.message || e)); }
-  finally{ solo = keep; zoom = keepZoom; auto = keepAuto; } };
+  finally{ solo = keep; zoom = keepZoom; auto = keepAuto; tight = keepTight; } };
 
 /* ---------- mover compases de línea: tocar un compás (Shift para varios) y luego ↑ ↓ ---------- */
 // caja de cada compás (todos los pentagramas) en las coordenadas de su hoja
@@ -682,14 +711,14 @@ async function moveSel(dir){
     br.delete(s0); const e = next(sel.b); if(sel.b + 1 < n && (e == null || sel.b + 1 < e)) br.add(sel.b + 1); }
   else { const e = next(sel.b); if(e == null && start(sel.a) === sel.a){ st('Ya está en la última línea.'); return; }
     if(start(sel.a) !== sel.a) br.add(sel.a); if(e != null) br.delete(e); }
-  EDITS[solo] = br; stop();
+  EDITS[solo] = br; tight = 0; stop();
   // aviso inmediato mientras se redibuja (una pieza larga puede tardar un segundo o dos)
   moving = true; $('moveBar').classList.add('busy'); $('moveTxt').textContent = 'Moviendo…'; await new Promise(r => requestAnimationFrame(() => setTimeout(r, 0)));
   // rápido: no se vuelve a leer el archivo, solo se cambian los saltos en el dibujo ya cargado y se redibuja
   try{ const r = addNames(src); out = r.xml; view = r.view;
     osmd.Sheet.SourceMeasures.forEach((m, i) => { m.printNewSystemXml = i > 0 && br.has(i); m.printNewPageXml = false; });
-    for(let k = 0; k < 4; k++){ compact(osmd); osmd.render(); if(!rebalance(osmd)) break; }
-    shiftGrace($('sheet')); fitPage(); }
+    for(let k = 0; k < 10; k++){ compact(osmd); osmd.render(); if(!rebalance(osmd)) break; }
+    zoomUI(); shiftGrace($('sheet')); fitPage(); }
   catch(e){ await render(true); }
   moving = false; $('moveBar').classList.remove('busy'); showSel(); }
 $('mvUp').onclick = () => moveSel(-1); $('mvDn').onclick = () => moveSel(1); $('mvX').onclick = () => { sel = null; showSel(); };
