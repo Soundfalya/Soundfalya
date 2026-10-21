@@ -127,6 +127,7 @@ body{font:20px 'VT323',monospace;overflow-x:hidden}
 </div>
 <script src="https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.9/build/opensheetmusicdisplay.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/svg2pdf.js@2.2.3/dist/svg2pdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 const EXAMPLE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<score-partwise version=\"3.1\"><work><work-title>Oda a la alegr\u00eda</work-title></work>\n<identification><creator type=\"composer\">L. van Beethoven</creator><creator type=\"arranger\">Arr. Soundfalya</creator></identification>\n<part-list><score-part id=\"P1\"><part-name></part-name></score-part></part-list><part id=\"P1\"><measure number=\"1\"><attributes><divisions>4</divisions><key><fifths>0</fifths></key><time><beats>4</beats><beat-type>4</beat-type></time><clef><sign>G</sign><line>2</line></clef></attributes><note><pitch><step>E</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>quarter</type></note><note><pitch><step>E</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>quarter</type></note><note><pitch><step>F</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>quarter</type></note><note><pitch><step>G</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>quarter</type></note></measure><measure number=\"2\"><note><pitch><step>G</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>quarter</type></note><note><pitch><step>F</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>quarter</type></note><note><pitch><step>E</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>quarter</type></note><note><pitch><step>D</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>quarter</type></note></measure><measure number=\"3\"><note><pitch><step>C</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>quarter</type></note><note><pitch><step>C</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>quarter</type></note><note><pitch><step>D</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>quarter</type></note><note><pitch><step>E</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>quarter</type></note></measure><measure number=\"4\"><note><pitch><step>E</step><octave>4</octave></pitch><duration>6</duration><voice>1</voice><type>quarter</type><dot/></note><note><pitch><step>D</step><octave>4</octave></pitch><duration>2</duration><voice>1</voice><type>eighth</type></note><note><pitch><step>D</step><octave>4</octave></pitch><duration>8</duration><voice>1</voice><type>half</type></note></measure><measure number=\"5\"><print new-system=\"yes\"/><note><pitch><step>E</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>quarter</type></note><note><pitch><step>E</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>quarter</type></note><note><pitch><step>F</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>quarter</type></note><note><pitch><step>G</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>quarter</type></note></measure><measure number=\"6\"><note><pitch><step>G</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>quarter</type></note><note><pitch><step>F</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>quarter</type></note><note><pitch><step>E</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>quarter</type></note><note><pitch><step>D</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>quarter</type></note></measure><measure number=\"7\"><note><pitch><step>C</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>quarter</type></note><note><pitch><step>C</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>quarter</type></note><note><pitch><step>D</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>quarter</type></note><note><pitch><step>E</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>quarter</type></note></measure><measure number=\"8\"><note><pitch><step>D</step><octave>4</octave></pitch><duration>6</duration><voice>1</voice><type>quarter</type><dot/></note><note><pitch><step>C</step><octave>4</octave></pitch><duration>2</duration><voice>1</voice><type>eighth</type></note><note><pitch><step>C</step><octave>4</octave></pitch><duration>8</duration><voice>1</voice><type>half</type></note><barline location=\"right\"><bar-style>light-heavy</bar-style></barline></measure></part></score-partwise>";
@@ -650,29 +651,27 @@ async function pdf(){
   catch(e){ st('No pude armar el PDF: ' + (e.message || e)); }
 }
 // la impresora no imprime cerca del borde: si algo quedó a menos de 12 mm (por ejemplo los nombres bajo la última línea), la hoja se achica un poco para que todo entre
-function safeArea(cv){ const W = cv.width, H = cv.height, m = Math.round(12 / 25.4 * 300), d = cv.getContext('2d').getImageData(0, 0, W, H).data;
-  let x0 = W, y0 = H, x1 = -1, y1 = -1;
-  for(let y = 0; y < H; y += 2) for(let x = 0; x < W; x += 2){ const i = (y * W + x) * 4; if(d[i] < 200 || d[i + 1] < 200 || d[i + 2] < 200){ if(x < x0) x0 = x; if(x > x1) x1 = x; if(y < y0) y0 = y; if(y > y1) y1 = y; } }
-  if(x1 < 0 || (x0 >= m && y0 >= m && x1 <= W - m && y1 <= H - m)) return;
-  const f = Math.min(1, (W - 2 * m) / (x1 - x0 + 1), (H - 2 * m) / (y1 - y0 + 1)), ox = Math.min(Math.max(m - f * x0, (W - f * W) / 2), W - m - f * x1);
-  let oy = Math.max(0, m - f * y0); oy = Math.min(oy, H - m - f * y1);
-  const c2 = document.createElement('canvas'); c2.width = W; c2.height = H; c2.getContext('2d').drawImage(cv, 0, 0);
-  const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, W, H); cx.drawImage(c2, ox, oy, W * f, H * f); }
+function safeBox(svg, w, h, k){ const m = 12 / k; let x0 = w, y0 = h, x1 = 0, y1 = 0;
+  for(const el of svg.children){ if(el.tagName === 'rect' && +el.getAttribute('width') >= w - 1) continue; // el fondo blanco de la hoja
+    try{ const b = el.getBBox(); if(!b.width && !b.height) continue; x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y); x1 = Math.max(x1, b.x + b.width); y1 = Math.max(y1, b.y + b.height); }catch(e){} }
+  if(x1 <= x0 || (x0 >= m && y0 >= m && x1 <= w - m && y1 <= h - m)) return { x:0, y:0, f:1 };
+  const f = Math.min(1, (w - 2 * m) / (x1 - x0), (h - 2 * m) / (y1 - y0)), ox = Math.min(Math.max(m - f * x0, (w - f * w) / 2), w - m - f * x1);
+  const oy = Math.min(Math.max(0, m - f * y0), h - m - f * y1);
+  return { x:ox * k, y:oy * k, f }; }
 async function pdfBlob(v, fit){
   const box = document.createElement('div'); box.style.cssText = 'position:fixed;left:-10000px;top:0;width:' + PAGE_W + 'px;background:#fff'; document.body.appendChild(box);
   try{
     const o = new opensheetmusicdisplay.OpenSheetMusicDisplay(box, { backend:'svg', drawTitle:true, drawComposer:true, drawPartNames:true, autoResize:false, pageFormat:PAPER[paper].fmt, autoGenerateMultipleRestMeasuresFromRestMeasures:tidy, newSystemFromXML:true, pageBackgroundColor:'#FFFFFF',
       coloringMode: colors ? opensheetmusicdisplay.ColoringModes.CustomColorSet : opensheetmusicdisplay.ColoringModes.XML, coloringSetCustom:COL, coloringEnabled:colors, colorStemsLikeNoteheads:colors });
     await o.load(v); compact(o); o.render(); if(fit) fitZoom(o); shiftGrace(box);
-    const { jsPDF } = window.jspdf, doc = new jsPDF({ unit:'mm', format:PAPER[paper].pdf }), svgs = [...box.querySelectorAll('svg')];
+    const { jsPDF } = window.jspdf, doc = new jsPDF({ unit:'mm', format:PAPER[paper].pdf, compress:true }), svgs = [...box.querySelectorAll('svg')], P = PAPER[paper];
     for(let i = 0; i < svgs.length; i++){
-      const s = svgs[i], w = s.width.baseVal.value || 1100, h = s.height.baseVal.value || 1556;
-      s.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-      const img = new Image(); img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(new XMLSerializer().serializeToString(s));
-      await img.decode();
-      const cv = document.createElement('canvas'); const sc = PAPER[paper].w / 25.4 * 300 / w; /* 300 ppp */ cv.width = Math.round(w * sc); cv.height = Math.round(h * sc); const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(img, 0, 0, cv.width, cv.height);
-      safeArea(cv);
-      if(i) doc.addPage(); const pw = PAPER[paper].w, ph = Math.min(PAPER[paper].h, pw * h / w); doc.addImage(cv.toDataURL('image/png'), 'PNG', 0, 0, pw, ph, undefined, 'FAST');
+      // medidas en las unidades internas del dibujo (viewBox), que son las que devuelve getBBox
+      const s = svgs[i], vb = s.viewBox && s.viewBox.baseVal, w = (vb && vb.width) || s.width.baseVal.value, h = (vb && vb.height) || s.height.baseVal.value;
+      if(i) doc.addPage();
+      // PDF vectorial: notas, líneas y nombres como trazos y texto reales (salen negros aunque la impresora ahorre tinta)
+      const k = P.w / w, at = safeBox(s, w, h, k);
+      await doc.svg(s, { x:at.x, y:at.y, width:w * k * at.f, height:h * k * at.f });
     }
     return { blob:doc.output('blob'), pages:svgs.length };
   }finally{ box.remove(); }
