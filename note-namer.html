@@ -83,6 +83,8 @@ body{font:20px 'VT323',monospace;overflow-x:hidden}
 .chip input{accent-color:var(--red);width:16px;height:16px}
 .solo{display:none;align-items:center;gap:8px;font:11px 'Press Start 2P',monospace}
 .solo.on{display:flex}
+.paper{display:flex;align-items:center;gap:8px;font:11px 'Press Start 2P',monospace}
+.paper select{font:20px 'VT323',monospace;padding:4px 6px;border:4px solid var(--ink);border-radius:6px;background:var(--bodyL);color:var(--ink)}
 .solo select{font:20px 'VT323',monospace;padding:4px 6px;border:4px solid var(--ink);border-radius:6px;background:var(--bodyL);color:var(--ink);max-width:220px}
 .moveBar{position:absolute;top:18px;left:18px;z-index:6;display:none;align-items:center;gap:6px;padding:4px 6px;background:var(--paper);color:var(--ink);border:3px solid var(--ink);border-radius:6px;box-shadow:2px 2px 0 var(--ink);font-size:18px}
 .moveBar.on{display:flex}
@@ -112,6 +114,7 @@ body{font:20px 'VT323',monospace;overflow-x:hidden}
         <div class="seg" role="group" aria-label="Colores"><button type="button" data-c="0" class="on">Negro</button><button type="button" data-c="1">Colores</button></div>
         <label class="solo" id="soloBox">Particella <select id="solo"></select></label>
         <button class="btn alt" id="dl" type="button">MXL</button>
+        <label class="paper">Hoja <select id="paper"><option value="Letter">Carta</option><option value="A4">A4</option></select></label>
         <button class="btn alt" id="dlp" type="button">PDF</button>
         <button class="btn alt" id="dlz" type="button" hidden>Particellas .zip</button>
         <div class="player"><button class="btn red" id="play" type="button">▶ Escuchar</button>
@@ -187,7 +190,7 @@ requestAnimationFrame(frame);
 const SOL = { C:'Do', D:'Re', E:'Mi', F:'Fa', G:'Sol', A:'La', B:'Si' };
 const COL = ['#1f5fd0','#2e9e3e','#e8b800','#f08a1c','#d82020','#7b3fb0','#4fc3f0','#000000'];
 let FORCE = new Set(), BRK = [], solo = -1, EDITS = {}, sel = null, moving = false, noRests = false;
-let src = null, out = null, view = null, mode = 'sol', colors = false, tidy = false, fill = true, auto = true, tight = 0, perSys = 4, osmd = null, fname = 'partitura';
+let src = null, out = null, view = null, mode = 'sol', colors = false, tidy = false, fill = true, auto = true, tight = 0, perSys = 4, paper = 'Letter', osmd = null, fname = 'partitura';
 const $ = id => document.getElementById(id), st = m => $('st').textContent = '> ' + m;
 // marca invisible para los nombres de adornos: solo en la vista, para correrlos sobre la notita
 const GRACE_MARK = '\u2063';
@@ -238,6 +241,11 @@ function addNames(xml){
   const midiOf = p => (+p.querySelector('octave').textContent + 1) * 12 + STEPN[p.querySelector('step').textContent.trim()] + +((p.querySelector('alter') || {}).textContent || 0);
   // quita nombres que puso antes el Note-Namer (los de arriba van como texto)
   doc.querySelectorAll('direction[id^="nn-"]').forEach(d => d.remove());
+  // sin título en el archivo: se usa el título escrito en la hoja original o, si no hay, el nombre del archivo
+  const root = doc.documentElement, hasT = [...doc.querySelectorAll('work > work-title, score-partwise > movement-title')].some(t => t.textContent.trim());
+  if(!hasT){ const cw = doc.querySelector('credit credit-type') && [...doc.querySelectorAll('credit')].find(c => (c.querySelector('credit-type') || {}).textContent === 'title');
+    const t = (cw && cw.querySelector('credit-words') ? cw.querySelector('credit-words').textContent : fname.replace(/[-_]+/g, ' ')).trim();
+    let mt = doc.querySelector('score-partwise > movement-title'); if(!mt){ mt = doc.createElement('movement-title'); const w = doc.querySelector('score-partwise > work, score-partwise > movement-number'); root.insertBefore(mt, w ? w.nextSibling : root.firstChild); } mt.textContent = t; }
   const clearOld = note => { const old = note.querySelector('lyric[name="nota"]') || note.querySelector('lyric'); let t = null; if(old){ const x = old.querySelector('text'); t = x ? x.textContent.trim() : null; old.remove(); } return t; };
   const addLyric = (note, name, num) => { const ly = doc.createElement('lyric'); ly.setAttribute('number', String(num)); ly.setAttribute('name', 'nota');
     ly.innerHTML = '<syllabic>single</syllabic><text>' + name + '</text>'; const after = note.querySelector('play, listen'); after ? note.insertBefore(ly, after) : note.appendChild(ly); };
@@ -327,10 +335,13 @@ function addNames(xml){
 }
 // vista de página completa: cada hoja A4 entra entera en la pantalla
 const PAGE_W = 794;
+// tamaño de hoja: carta (por defecto) o A4; la pantalla y el PDF usan la misma
+const PAPER = { Letter:{ fmt:'Letter_P', w:215.9, h:279.4, pdf:'letter' }, A4:{ fmt:'A4_P', w:210, h:297, pdf:'a4' } };
+try{ const v = localStorage.getItem('nn-paper'); if(PAPER[v]) paper = v; }catch(e){}
 function fitPage(){
   const sh = $('sheet'), box = $('sheetBox'), gl = document.querySelector('.glass'); if(!sh.firstChild) return;
   // en pantalla completa la hoja ocupa todo el ancho y se recorre hacia abajo; si no, la hoja entera entra en la pantallita
-  const k = isFull() ? Math.min(1.5, (gl.clientWidth - 28) / PAGE_W) : Math.min(1, (gl.clientHeight - 28) / (PAGE_W * 1.4142), (gl.clientWidth - 28) / PAGE_W);
+  const k = isFull() ? Math.min(1.5, (gl.clientWidth - 28) / PAGE_W) : Math.min(1, (gl.clientHeight - 28) / (PAGE_W * PAPER[paper].h / PAPER[paper].w), (gl.clientWidth - 28) / PAGE_W);
   sh.style.transform = 'scale(' + k + ')'; box.style.width = Math.ceil(PAGE_W * k) + 'px'; box.style.height = Math.ceil(sh.scrollHeight * k) + 'px';
 }
 let fitT = 0; addEventListener('resize', () => { clearTimeout(fitT); fitT = setTimeout(fitPage, 200); });
@@ -349,10 +360,12 @@ addEventListener('keydown', e => { if(e.key === 'Escape' && scr.classList.contai
 const PAGE_ZOOM = .8, PER_SYSTEM = 4, MIN_SYSTEM = 2, SYSTEM_LOAD = 34, MIN_ZOOM = .45;
 let zoom = PAGE_ZOOM;
 function compact(o){ const r = o.EngravingRules; if(!r) return;
-  Object.assign(r, { PageTopMargin:4, PageBottomMargin:4, PageLeftMargin:4.5, PageRightMargin:4.5, MinimumDistanceBetweenSystems:3, MinSkyBottomDistBetweenSystems:2.5,
-    StaffDistance:5, BetweenStaffDistance:4, TitleTopDistance:2.5, TitleBottomDistance:2, SheetTitleHeight:3.6, SystemComposerDistance:3 });
+  // márgenes seguros para imprimir: unos 12 mm por lado, sin importar el tamaño de las notas (la impresora corta lo que queda muy al borde)
+  const mm = PAPER[paper].w / (PAGE_W / (10 * zoom)), M = 12 / mm;
+  Object.assign(r, { PageTopMargin:M, PageBottomMargin:M + 4, PageLeftMargin:M, PageRightMargin:M, MinimumDistanceBetweenSystems:1.5, MinSkyBottomDistBetweenSystems:1.5,
+    StaffDistance:5, BetweenStaffDistance:4, TitleTopDistance:M, TitleBottomDistance:2, SheetTitleHeight:3.6, SystemComposerDistance:3 });
   // particella (un solo pentagrama): más aire bajo el título y entre líneas, para que no quede todo amontonado arriba
-  if(solo >= 0) Object.assign(r, { PageTopMargin:6, TitleBottomDistance:3.5, SystemComposerDistance:5, MinimumDistanceBetweenSystems:9, MinSkyBottomDistBetweenSystems:6 });
+  if(solo >= 0) Object.assign(r, { PageTopMargin:M + 2, TitleBottomDistance:3.5, SystemComposerDistance:5, MinimumDistanceBetweenSystems:9, MinSkyBottomDistBetweenSystems:6 });
   // compases juntos: si una línea armada a mano no cabe, sus notas se juntan (el tamaño de las notas no cambia)
   const sq = [[.85, 3, 2], [.65, 1.8, 1.5], [.5, 1, 1.1]][tight] || [.5, 1, 1.1];
   Object.assign(r, { VoiceSpacingMultiplierVexflow:sq[0], VoiceSpacingAddendVexflow:sq[1], MinNoteDistance:sq[2] });
@@ -381,7 +394,7 @@ function rebalance(o){
 const MAX_ZOOM = 1.6, nPages = o => { try{ return o.GraphicSheet.MusicPages.length; }catch(e){ return 0; } };
 // tamaño más legible: lo más grande que cabe en una hoja con 4 compases por línea;
 // si para caber en una hoja quedaría muy chico (bajo READ_MIN), se usan más hojas con el tamaño más grande que las llena
-const READ_MIN = .65;
+const READ_MIN = .6;
 // cuánto de la primera hoja ocupa la música (0 a 1)
 function used(o){ try{ const pg = o.GraphicSheet.MusicPages[0], sy = pg.MusicSystems[pg.MusicSystems.length - 1], ps = sy.PositionAndShape, svg = $('sheet').querySelector('svg');
   return (ps.AbsolutePosition.y + ps.BorderBottom) * 10 * zoom / svg.height.baseVal.value; }catch(e){ return 1; } }
@@ -406,7 +419,7 @@ async function render(keepParts, pass){
   if(!src) return; stop();
   const r = addNames(src); out = r.xml; view = r.view;
   $('empty').hidden = true; $('sheet').innerHTML = ''; $('sheet').style.transform = '';
-  osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay('sheet', { backend:'svg', drawTitle:true, drawComposer:true, drawPartNames:true, autoResize:false, pageFormat:'A4_P', pageBackgroundColor:'#FFFFFF', autoGenerateMultipleRestMeasuresFromRestMeasures:tidy, newSystemFromXML:true, followCursor:false, cursorsOptions:[{ type:0, color:'#e0403a', alpha:.45, follow:false }],
+  osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay('sheet', { backend:'svg', drawTitle:true, drawComposer:true, drawPartNames:true, autoResize:false, pageFormat:PAPER[paper].fmt, pageBackgroundColor:'#FFFFFF', autoGenerateMultipleRestMeasuresFromRestMeasures:tidy, newSystemFromXML:true, followCursor:false, cursorsOptions:[{ type:0, color:'#e0403a', alpha:.45, follow:false }],
     coloringMode: colors ? opensheetmusicdisplay.ColoringModes.CustomColorSet : opensheetmusicdisplay.ColoringModes.XML, coloringSetCustom:COL, coloringEnabled:colors, colorStemsLikeNoteheads:colors });
   // si el dibujo falla por alguna marca rara del archivo, se reintenta sin marcas de sonido y luego sin indicaciones
   let note = '';
@@ -619,6 +632,8 @@ $('sPlay').onclick = () => { if(!playing) play(); };
 // tamaño: − y + agrandan o achican todo y los compases se reparten de nuevo en la hoja
 function setZoom(z){ if(!src) return; zoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, +z.toFixed(2))); auto = false; tight = 0;
   if(!fill){ fill = true; EDITS = {}; sel = null; } st('Tamaño ' + Math.round(zoom / PAGE_ZOOM * 100) + '%…'); render(true); }
+$('paper').value = paper;
+$('paper').onchange = () => { paper = $('paper').value; try{ localStorage.setItem('nn-paper', paper); }catch(e){} $('paper').blur(); if(src){ auto = true; tight = 0; zoom = PAGE_ZOOM; EDITS = {}; sel = null; render(true); } };
 $('zIn').onclick = () => setZoom(zoom + .1); $('zOut').onclick = () => setZoom(zoom - .1);
 $('fillB').onclick = () => { if(!src) return; fill = !fill; auto = true; tight = 0; perSys = 4; zoom = PAGE_ZOOM; EDITS = {}; sel = null; FORCE = new Set(); render(true); };
 $('sStop').onclick = () => stop();
@@ -634,20 +649,30 @@ async function pdf(){
   try{ const r = await pdfBlob(view); if(await saveFile(outName() + '.pdf', r.blob)) st('PDF listo: ' + r.pages + (r.pages === 1 ? ' página.' : ' páginas.')); }
   catch(e){ st('No pude armar el PDF: ' + (e.message || e)); }
 }
+// la impresora no imprime cerca del borde: si algo quedó a menos de 12 mm (por ejemplo los nombres bajo la última línea), la hoja se achica un poco para que todo entre
+function safeArea(cv){ const W = cv.width, H = cv.height, m = Math.round(12 / 25.4 * 300), d = cv.getContext('2d').getImageData(0, 0, W, H).data;
+  let x0 = W, y0 = H, x1 = -1, y1 = -1;
+  for(let y = 0; y < H; y += 2) for(let x = 0; x < W; x += 2){ const i = (y * W + x) * 4; if(d[i] < 200 || d[i + 1] < 200 || d[i + 2] < 200){ if(x < x0) x0 = x; if(x > x1) x1 = x; if(y < y0) y0 = y; if(y > y1) y1 = y; } }
+  if(x1 < 0 || (x0 >= m && y0 >= m && x1 <= W - m && y1 <= H - m)) return;
+  const f = Math.min(1, (W - 2 * m) / (x1 - x0 + 1), (H - 2 * m) / (y1 - y0 + 1)), ox = Math.min(Math.max(m - f * x0, (W - f * W) / 2), W - m - f * x1);
+  let oy = Math.max(0, m - f * y0); oy = Math.min(oy, H - m - f * y1);
+  const c2 = document.createElement('canvas'); c2.width = W; c2.height = H; c2.getContext('2d').drawImage(cv, 0, 0);
+  const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, W, H); cx.drawImage(c2, ox, oy, W * f, H * f); }
 async function pdfBlob(v, fit){
   const box = document.createElement('div'); box.style.cssText = 'position:fixed;left:-10000px;top:0;width:' + PAGE_W + 'px;background:#fff'; document.body.appendChild(box);
   try{
-    const o = new opensheetmusicdisplay.OpenSheetMusicDisplay(box, { backend:'svg', drawTitle:true, drawComposer:true, drawPartNames:true, autoResize:false, pageFormat:'A4_P', autoGenerateMultipleRestMeasuresFromRestMeasures:tidy, newSystemFromXML:true, pageBackgroundColor:'#FFFFFF',
+    const o = new opensheetmusicdisplay.OpenSheetMusicDisplay(box, { backend:'svg', drawTitle:true, drawComposer:true, drawPartNames:true, autoResize:false, pageFormat:PAPER[paper].fmt, autoGenerateMultipleRestMeasuresFromRestMeasures:tidy, newSystemFromXML:true, pageBackgroundColor:'#FFFFFF',
       coloringMode: colors ? opensheetmusicdisplay.ColoringModes.CustomColorSet : opensheetmusicdisplay.ColoringModes.XML, coloringSetCustom:COL, coloringEnabled:colors, colorStemsLikeNoteheads:colors });
     await o.load(v); compact(o); o.render(); if(fit) fitZoom(o); shiftGrace(box);
-    const { jsPDF } = window.jspdf, doc = new jsPDF({ unit:'mm', format:'a4' }), svgs = [...box.querySelectorAll('svg')];
+    const { jsPDF } = window.jspdf, doc = new jsPDF({ unit:'mm', format:PAPER[paper].pdf }), svgs = [...box.querySelectorAll('svg')];
     for(let i = 0; i < svgs.length; i++){
       const s = svgs[i], w = s.width.baseVal.value || 1100, h = s.height.baseVal.value || 1556;
       s.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
       const img = new Image(); img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(new XMLSerializer().serializeToString(s));
       await img.decode();
-      const cv = document.createElement('canvas'); const sc = Math.min(2, 2400 / w); cv.width = Math.round(w * sc); cv.height = Math.round(h * sc); const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(img, 0, 0, cv.width, cv.height);
-      if(i) doc.addPage(); const pw = 210, ph = Math.min(297, pw * h / w); doc.addImage(cv.toDataURL('image/jpeg', .92), 'JPEG', 0, 0, pw, ph);
+      const cv = document.createElement('canvas'); const sc = PAPER[paper].w / 25.4 * 300 / w; /* 300 ppp */ cv.width = Math.round(w * sc); cv.height = Math.round(h * sc); const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(img, 0, 0, cv.width, cv.height);
+      safeArea(cv);
+      if(i) doc.addPage(); const pw = PAPER[paper].w, ph = Math.min(PAPER[paper].h, pw * h / w); doc.addImage(cv.toDataURL('image/png'), 'PNG', 0, 0, pw, ph, undefined, 'FAST');
     }
     return { blob:doc.output('blob'), pages:svgs.length };
   }finally{ box.remove(); }
