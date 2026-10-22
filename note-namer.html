@@ -2,6 +2,11 @@
 <title>Nombrador de Notas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 <style>
+/* Edwin: la letra de las partituras de MuseScore (licencia SIL OFL, ver fonts/edwin/OFL.txt) */
+@font-face{font-family:Edwin;src:url(fonts/edwin/Edwin-Roman.ttf) format('truetype');font-weight:400;font-style:normal}
+@font-face{font-family:Edwin;src:url(fonts/edwin/Edwin-Bold.ttf) format('truetype');font-weight:700;font-style:normal}
+@font-face{font-family:Edwin;src:url(fonts/edwin/Edwin-Italic.ttf) format('truetype');font-weight:400;font-style:italic}
+@font-face{font-family:Edwin;src:url(fonts/edwin/Edwin-BdIta.ttf) format('truetype');font-weight:700;font-style:italic}
 :root{--ink:#1d2b2a;--body:#6cc5b0;--bodyL:#a3e6d6;--bodyD:#3f9a86;--bodyDD:#2a6e60;--paper:#fffdf5;--red:#e0403a;--yel:#f5c832;--blu:#3a7ae0;--grn:#5ad06a;--sky:#5aa8f0;--txt:#1d2b2a}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--sky:#2a4a8a}}
 :root[data-theme="dark"]{--sky:#2a4a8a}
@@ -370,7 +375,16 @@ function compact(o){ const r = o.EngravingRules; if(!r) return;
   // compases juntos: si una línea armada a mano no cabe, sus notas se juntan (el tamaño de las notas no cambia)
   const sq = [[.85, 3, 2], [.65, 1.8, 1.5], [.5, 1, 1.1]][tight] || [.5, 1, 1.1];
   Object.assign(r, { VoiceSpacingMultiplierVexflow:sq[0], VoiceSpacingAddendVexflow:sq[1], MinNoteDistance:sq[2] });
+  // letras en Edwin (como MuseScore); los nombres de nota un poco más chicos porque Edwin es más ancha
+  Object.assign(r, { DefaultFontFamily:'Edwin', LyricsHeight:1.8 });
   o.zoom = zoom; }
+// se espera a que Edwin esté cargada antes de dibujar, para que las medidas de los textos salgan bien
+const EDWIN = [['normal', 'Edwin-Roman', '400 12px Edwin'], ['bold', 'Edwin-Bold', '700 12px Edwin'], ['italic', 'Edwin-Italic', 'italic 400 12px Edwin'], ['bolditalic', 'Edwin-BdIta', 'italic 700 12px Edwin']];
+const fontsReady = Promise.race([Promise.all(EDWIN.map(f => document.fonts.load(f[2]))).catch(() => {}), new Promise(r => setTimeout(r, 4000))]);
+// para el PDF vectorial, Edwin se incrusta en el archivo (así se ve igual en cualquier computador)
+let edwinPdf = null;
+const edwinData = () => edwinPdf || (edwinPdf = Promise.all(EDWIN.map(async ([st, f]) => { const r = await fetch('fonts/edwin/' + f + '.ttf'); if(!r.ok) throw new Error(f); const b = new Uint8Array(await r.arrayBuffer());
+  let s = ''; for(let i = 0; i < b.length; i += 32768) s += String.fromCharCode.apply(null, b.subarray(i, i + 32768)); return [st, f, btoa(s)]; })).catch(() => (edwinPdf = null, [])));
 // líneas que deberían salir: las de la regla de 4 compases, o las que se armaron moviendo compases
 function overflow(o){ const ed = EDITS[solo], want = new Set([0, ...(ed ? ed : BRK)]);
   try{ for(const pg of o.GraphicSheet.MusicPages) for(const sy of pg.MusicSystems){ const gm = sy.GraphicalMeasures[0] && sy.GraphicalMeasures[0][0]; if(gm && !want.has(gm.parentSourceMeasure.measureListIndex)) return true; } }catch(e){} return false; }
@@ -417,7 +431,7 @@ function fitZoom(o){ if(!fill || !auto || EDITS[solo]) return; tight = 0;
 function zoomUI(){ $('zLbl').textContent = Math.round(zoom / PAGE_ZOOM * 100) + '%'; $('fillB').textContent = fill ? '▣ Llenar hoja' : '▤ Original';
   $('fillB').title = fill ? 'La partitura llena la hoja. Toca para volver a la diagramación original del archivo' : 'Diagramación original del archivo. Toca para que la partitura llene la hoja'; }
 async function render(keepParts, pass){
-  if(!src) return; stop();
+  if(!src) return; stop(); await fontsReady;
   const r = addNames(src); out = r.xml; view = r.view;
   $('empty').hidden = true; $('sheet').innerHTML = ''; $('sheet').style.transform = '';
   osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay('sheet', { backend:'svg', drawTitle:true, drawComposer:true, drawPartNames:true, autoResize:false, pageFormat:PAPER[paper].fmt, pageBackgroundColor:'#FFFFFF', autoGenerateMultipleRestMeasuresFromRestMeasures:tidy, newSystemFromXML:true, followCursor:false, cursorsOptions:[{ type:0, color:'#e0403a', alpha:.45, follow:false }],
@@ -665,6 +679,7 @@ async function pdfBlob(v, fit){
       coloringMode: colors ? opensheetmusicdisplay.ColoringModes.CustomColorSet : opensheetmusicdisplay.ColoringModes.XML, coloringSetCustom:COL, coloringEnabled:colors, colorStemsLikeNoteheads:colors });
     await o.load(v); compact(o); o.render(); if(fit) fitZoom(o); shiftGrace(box);
     const { jsPDF } = window.jspdf, doc = new jsPDF({ unit:'mm', format:PAPER[paper].pdf, compress:true }), svgs = [...box.querySelectorAll('svg')], P = PAPER[paper];
+    for(const [st, f, b64] of await edwinData()){ doc.addFileToVFS(f + '.ttf', b64); doc.addFont(f + '.ttf', 'Edwin', st); }
     for(let i = 0; i < svgs.length; i++){
       // medidas en las unidades internas del dibujo (viewBox), que son las que devuelve getBBox
       const s = svgs[i], vb = s.viewBox && s.viewBox.baseVal, w = (vb && vb.width) || s.width.baseVal.value, h = (vb && vb.height) || s.height.baseVal.value;
